@@ -24,18 +24,18 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-500 to-yellow-300 flex items-center justify-center animate-fadeIn">
-      <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full transform transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-        <h1 className="text-4xl font-extrabold text-center text-purple-700 mb-6 text-shadow-md animate-bounce">
-          Join The Party!
+    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex items-center justify-center">
+      <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full">
+        <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">
+          Create Your Account
         </h1>
-        <p className="text-center text-lg text-gray-600 mb-8 italic animate-pulse">
-          Sign up to start your exciting journey with us!
+        <p className="text-center text-lg text-gray-600 mb-8">
+          Join Foodie Heaven and enjoy delicious meals delivered to your door!
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-              <FaUserAlt className="inline-block mr-2 text-purple-500" />
+              <FaUserAlt className="inline-block mr-2 text-red-500" />
               Full Name
             </label>
             <input
@@ -44,14 +44,14 @@ const SignUp: React.FC = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-blue-50 transition-all"
+              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
               placeholder="Enter your full name"
               required
             />
           </div>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-              <FaEnvelope className="inline-block mr-2 text-green-500" />
+              <FaEnvelope className="inline-block mr-2 text-red-500" />
               Email Address
             </label>
             <input
@@ -60,14 +60,14 @@ const SignUp: React.FC = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-green-50 transition-all"
+              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
               placeholder="Enter your email"
               required
             />
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-              <FaLock className="inline-block mr-2 text-purple-500" />
+              <FaLock className="inline-block mr-2 text-red-500" />
               Password
             </label>
             <input
@@ -76,7 +76,7 @@ const SignUp: React.FC = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-4 border-2 border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-purple-50 transition-all"
+              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
               placeholder="Enter your password"
               required
             />
@@ -99,13 +99,13 @@ const SignUp: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white text-lg font-bold py-4 rounded-lg shadow-xl hover:from-pink-500 hover:to-purple-400 transform transition-all duration-300 hover:scale-105">
-            Create Account
+            className="w-full bg-red-500 text-white text-lg font-bold py-4 rounded-lg shadow-lg hover:bg-red-600 transition-all">
+            Sign Up
           </button>
         </form>
-        <p className="text-sm text-gray-600 text-center mt-6 animate-bounce">
+        <p className="text-sm text-gray-600 text-center mt-6">
           Already have an account?{' '}
-          <a href="/login" className="text-pink-600 font-semibold hover:underline">
+          <a href="/login" className="text-red-600 font-semibold hover:underline">
             Log In
           </a>
         </p>
