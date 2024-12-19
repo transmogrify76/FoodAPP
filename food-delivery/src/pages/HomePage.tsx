@@ -7,12 +7,29 @@ const HomePage: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Mock data for nearby restaurants
+  // Mock data for nearby Indian restaurants
   const restaurants = [
-    { id: 1, name: 'Italian Bistro', type: 'Italian', location: 'New York' },
-    { id: 2, name: 'Sushi World', type: 'Japanese', location: 'Los Angeles' },
-    { id: 3, name: 'Taco Fiesta', type: 'Mexican', location: 'Chicago' },
-    { id: 4, name: 'Burger Palace', type: 'American', location: 'Houston' },
+    { id: 1, name: 'Spice Junction', type: 'Indian', location: 'New Delhi' },
+    { id: 2, name: 'Tandoori Delights', type: 'Indian', location: 'Mumbai' },
+    { id: 3, name: 'Curry House', type: 'Indian', location: 'Kolkata' },
+    { id: 4, name: 'Masala Magic', type: 'Indian', location: 'Bangalore' },
+    { id: 5, name: 'Saffron Garden', type: 'Indian', location: 'Chennai' },
+    { id: 6, name: 'Naan Stop', type: 'Indian', location: 'Hyderabad' },
+    { id: 7, name: 'Chutney Villa', type: 'Indian', location: 'Ahmedabad' },
+    { id: 8, name: 'Biryani Bliss', type: 'Indian', location: 'Pune' },
+    { id: 9, name: 'Roti Roll', type: 'Indian', location: 'Delhi' },
+    { id: 10, name: 'Chai Shai', type: 'Indian', location: 'Mumbai' },
+    { id: 11, name: 'Kebab Kingdom', type: 'Indian', location: 'Lucknow' },
+    { id: 12, name: 'Tikka Tale', type: 'Indian', location: 'Chandigarh' },
+    { id: 13, name: 'Flavors of India', type: 'Indian', location: 'Goa' },
+    { id: 14, name: 'Mirchi Mystery', type: 'Indian', location: 'Jaipur' },
+    { id: 15, name: 'Dosa Dream', type: 'Indian', location: 'Bangalore' },
+    { id: 16, name: 'Garam Masala', type: 'Indian', location: 'Mumbai' },
+    { id: 17, name: 'Curry in a Hurry', type: 'Indian', location: 'Kochi' },
+    { id: 18, name: 'Spice by the Bay', type: 'Indian', location: 'Kochi' },
+    { id: 19, name: 'Butter Chicken Bistro', type: 'Indian', location: 'Chennai' },
+    { id: 20, name: 'Palak Palace', type: 'Indian', location: 'Delhi' },
+    { id: 21, name: 'Chai Palace', type: 'Indian', location: 'Kolkata' },
   ];
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +51,7 @@ const HomePage: React.FC = () => {
         className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between p-4 bg-red-600 text-white">
-          <h3 className="text-2xl font-bold">Menu</h3>
+          <h3 className="text-2xl font-bold">List</h3>
           <button onClick={toggleSidebar} className="text-2xl">
             <AiOutlineClose />
           </button>
@@ -74,16 +91,16 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Main content */}
-      <div className="flex-1 p-4 sm:p-6">
-        <div className="bg-white shadow-lg rounded-lg p-4">
-          <div className="flex justify-between items-center mb-6">
+      <div className="flex-1 p-1 sm:p-6">
+        <div className="bg-white shadow-lg rounded-lg p-5">
+          <div className="flex justify-between items-center mb-5">
             <button
               onClick={toggleSidebar}
               className="text-3xl text-red-600 p-2 rounded-full hover:bg-gray-200 focus:outline-none sm:hidden"
             >
               <FaBars />
             </button>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-center text-red-600">Nearby Restaurants</h1>
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-center text-red-600 sm:ml-2">Nearby Restaurants</h1>
           </div>
           <div className="flex justify-between mb-4 items-center">
             <div className="flex items-center">
@@ -104,10 +121,7 @@ const HomePage: React.FC = () => {
                 className="p-2 sm:p-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <option value="All">All</option>
-                <option value="Italian">Italian</option>
-                <option value="Japanese">Japanese</option>
-                <option value="Mexican">Mexican</option>
-                <option value="American">American</option>
+                <option value="Indian">Indian</option>
               </select>
             </div>
           </div>

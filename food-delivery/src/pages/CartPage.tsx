@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 const CartPage: React.FC = () => {
   const [address, setAddress] = useState('');
   const [cart, setCart] = useState<any[]>([
-    { id: 1, name: 'Pizza Margherita', price: 12.99 },
-    { id: 2, name: 'Sushi Rolls', price: 15.99 },
+    { id: 1, name: 'Butter Chicken', price: 299.99 },
+    { id: 2, name: 'Biryani', price: 199.99 },
+    { id: 3, name: 'Paneer Tikka', price: 249.99 },
+    { id: 4, name: 'Masala Dosa', price: 79.99 },
   ]);
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
@@ -27,13 +29,13 @@ const CartPage: React.FC = () => {
           {cart.map((item) => (
             <li key={item.id} className="flex justify-between">
               <span>{item.name}</span>
-              <span>{item.price.toFixed(2)}</span>
+              <span>₹{item.price.toFixed(2)}</span>
             </li>
           ))}
         </ul>
         <div className="mt-4 flex justify-between">
           <span className="font-bold text-lg">Total:</span>
-          <span className="text-xl text-red-600">{total.toFixed(2)}</span>
+          <span className="text-xl text-red-600">₹{total.toFixed(2)}</span>
         </div>
         <div className="mt-6">
           <label className="block text-sm font-semibold text-gray-700 mb-2">Delivery Address</label>
