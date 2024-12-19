@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUserAlt, FaLock } from 'react-icons/fa'; // Importing icons
+import { FaUserAlt, FaLock } from 'react-icons/fa'; 
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
