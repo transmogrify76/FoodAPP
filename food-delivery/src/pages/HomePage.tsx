@@ -51,7 +51,7 @@ const HomePage: React.FC = () => {
         className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between p-4 bg-red-600 text-white">
-          <h3 className="text-2xl font-bold">List</h3>
+          <h3 className="text-2xl font-bold">Chitradeep !</h3>
           <button onClick={toggleSidebar} className="text-2xl">
             <AiOutlineClose />
           </button>
