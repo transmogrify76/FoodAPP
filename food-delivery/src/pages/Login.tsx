@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { FaUserAlt, FaLock } from 'react-icons/fa'; 
+import { FaUserAlt, FaLock } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate(); // Hook for navigation
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -15,10 +18,33 @@ const Login: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add login logic here
-    console.log('Login form submitted:', formData);
+    setError(null);
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Store token in localStorage/sessionStorage
+      localStorage.setItem('token', data.token);
+
+      // Navigate to /home
+      navigate('/home');
+    } catch (error: any) {
+      setError(error.message);
+    }
   };
 
   return (
@@ -30,9 +56,15 @@ const Login: React.FC = () => {
         <p className="text-center text-lg text-gray-600 mb-8">
           Please log in to continue your journey with us!
         </p>
+        {error && (
+          <p className="text-center text-red-500 font-bold mb-4">{error}</p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
               <FaUserAlt className="inline-block mr-2 text-red-500" />
               Email Address
             </label>
@@ -48,7 +80,10 @@ const Login: React.FC = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
               <FaLock className="inline-block mr-2 text-red-500" />
               Password
             </label>
@@ -65,13 +100,17 @@ const Login: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-red-500 text-white text-lg font-bold py-4 rounded-lg shadow-lg hover:bg-red-600 transition-all">
+            className="w-full bg-red-500 text-white text-lg font-bold py-4 rounded-lg shadow-lg hover:bg-red-600 transition-all"
+          >
             Log In
           </button>
         </form>
         <p className="text-sm text-gray-600 text-center mt-6">
           Don't have an account?{' '}
-          <a href="/signup" className="text-red-600 font-semibold hover:underline">
+          <a
+            href="/signup"
+            className="text-red-600 font-semibold hover:underline"
+          >
             Sign Up
           </a>
         </p>

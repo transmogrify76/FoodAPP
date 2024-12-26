@@ -8,6 +8,7 @@ import MenuPage from '../pages/MenuPage';
 import CartPage from '../pages/CartPage';
 import OrderTrackingPage from '../pages/OrderTrackingPage';
 import OrderHistoryPage from '../pages/OrderHistoryPage';
+import UserProfile from '../pages/UserProfile';
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -20,6 +21,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/cart" element={<CartPage />} />
     <Route path="/track-order" element={<OrderTrackingPage />} />
     <Route path="/history" element={<OrderHistoryPage />} />
+    <Route path="/profile" element={<UserProfile />} />
 
   </Routes>
 );
