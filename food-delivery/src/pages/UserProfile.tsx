@@ -23,13 +23,17 @@ const UserProfile: React.FC = () => {
         
         const decoded: any = jwtDecode(token);
         const userid = decoded.userid;
-  
+
+        // Creating FormData and appending the userid
+        const formData = new FormData();
+        formData.append('userid', userid);
+
         const response = await axios.post(
-          'http://127.0.0.1:8000/users/details',
-          { userid },
-          { headers: { 'Content-Type': 'application/json' } }
+          'http://127.0.0.1:5000/users/details',
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-  
+
         setUserData(response.data.data);
       } catch (error) {
         console.error('Error fetching user details:', error);
@@ -41,7 +45,6 @@ const UserProfile: React.FC = () => {
   
     fetchUserData();
   }, []);
-  
 
   if (loading) {
     return (
