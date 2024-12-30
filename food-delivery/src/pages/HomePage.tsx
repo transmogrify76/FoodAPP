@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaSearch, FaMapMarkerAlt, FaBars, FaRegHeart, FaShoppingBag, FaHome, FaHistory, FaCog } from 'react-icons/fa';
+import { FaSearch, FaMapMarkerAlt, FaBars, FaRegHeart, FaShoppingBag, FaHome, FaHistory, FaCog ,FaFile } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 
 const HomePage: React.FC = () => {
@@ -61,6 +61,10 @@ const HomePage: React.FC = () => {
             <li className="mb-4 flex items-center">
               <FaHome className="text-red-600 mr-3 text-xl" />
               <button className="w-full text-left text-gray-600 hover:text-red-600">Home</button>
+            </li>
+            <li className="mb-4 flex items-center">
+              <FaFile className="text-red-600 mr-3 text-xl" />
+              <button className="w-full text-left text-gray-600 hover:text-red-600">Profile</button>
             </li>
             <li className="mb-4 flex items-center">
               <FaHistory className="text-red-600 mr-3 text-xl" />
