@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaMapMarkerAlt, FaBars, FaRegHeart, FaShoppingBag, FaHome, FaHistory, FaCog, FaFile } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -8,6 +9,7 @@ const HomePage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -40,6 +42,36 @@ const HomePage: React.FC = () => {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleViewMenu = async (restaurantId: number) => {
+    try {
+      // Create FormData with restaurantId
+      const formData = new FormData();
+      formData.append('restaurantId', restaurantId.toString());
+
+      // Send the request to fetch menu
+      const response = await fetch('http://127.0.0.1:5000/menu/getmenubyresturantid', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch menu.');
+      }
+
+      const data = await response.json();
+
+      // Handle successful menu fetch
+      if (data.menu) {
+        // Navigate to the restaurant menu page and pass the data (state) to the next page
+        navigate('/restaurant-menu', { state: { menu: data.menu } });
+      } else {
+        throw new Error('No menu found.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch menu');
+    }
   };
 
   return (
@@ -138,7 +170,10 @@ const HomePage: React.FC = () => {
                   <h3 className="text-xl font-semibold text-red-600">{restaurant.resturantname}</h3>
                   <p className="text-gray-600">{restaurant.cuisin_type}</p>
                   <p className="text-gray-500">{restaurant.location}</p>
-                  <button className="mt-4 w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition-all">
+                  <button
+                    className="mt-4 w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition-all"
+                    onClick={() => handleViewMenu(restaurant.resturantid)}
+                  >
                     View Menu
                   </button>
                 </div>
