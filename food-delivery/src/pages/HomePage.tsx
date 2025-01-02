@@ -1,36 +1,34 @@
-import React, { useState } from 'react';
-import { FaSearch, FaMapMarkerAlt, FaBars, FaRegHeart, FaShoppingBag, FaHome, FaHistory, FaCog ,FaFile } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaSearch, FaMapMarkerAlt, FaBars, FaRegHeart, FaShoppingBag, FaHome, FaHistory, FaCog, FaFile } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 
 const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [error, setError] = useState('');
 
-  // Mock data for nearby Indian restaurants
-  const restaurants = [
-    { id: 1, name: 'Spice Junction', type: 'Indian', location: 'New Delhi' },
-    { id: 2, name: 'Tandoori Delights', type: 'Indian', location: 'Mumbai' },
-    { id: 3, name: 'Curry House', type: 'Indian', location: 'Kolkata' },
-    { id: 4, name: 'Masala Magic', type: 'Indian', location: 'Bangalore' },
-    { id: 5, name: 'Saffron Garden', type: 'Indian', location: 'Chennai' },
-    { id: 6, name: 'Naan Stop', type: 'Indian', location: 'Hyderabad' },
-    { id: 7, name: 'Chutney Villa', type: 'Indian', location: 'Ahmedabad' },
-    { id: 8, name: 'Biryani Bliss', type: 'Indian', location: 'Pune' },
-    { id: 9, name: 'Roti Roll', type: 'Indian', location: 'Delhi' },
-    { id: 10, name: 'Chai Shai', type: 'Indian', location: 'Mumbai' },
-    { id: 11, name: 'Kebab Kingdom', type: 'Indian', location: 'Lucknow' },
-    { id: 12, name: 'Tikka Tale', type: 'Indian', location: 'Chandigarh' },
-    { id: 13, name: 'Flavors of India', type: 'Indian', location: 'Goa' },
-    { id: 14, name: 'Mirchi Mystery', type: 'Indian', location: 'Jaipur' },
-    { id: 15, name: 'Dosa Dream', type: 'Indian', location: 'Bangalore' },
-    { id: 16, name: 'Garam Masala', type: 'Indian', location: 'Mumbai' },
-    { id: 17, name: 'Curry in a Hurry', type: 'Indian', location: 'Kochi' },
-    { id: 18, name: 'Spice by the Bay', type: 'Indian', location: 'Kochi' },
-    { id: 19, name: 'Butter Chicken Bistro', type: 'Indian', location: 'Chennai' },
-    { id: 20, name: 'Palak Palace', type: 'Indian', location: 'Delhi' },
-    { id: 21, name: 'Chai Palace', type: 'Indian', location: 'Kolkata' },
-  ];
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/resown/listofresturants');
+        if (!response.ok) {
+          throw new Error('Failed to fetch restaurants.');
+        }
+        const data = await response.json();
+        if (data.restaurants && Array.isArray(data.restaurants)) {
+          setRestaurants(data.restaurants);
+        } else {
+          throw new Error('Unexpected API response format.');
+        }
+      } catch (err: any) {
+        setError(err.message || 'Something went wrong!');
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -51,7 +49,7 @@ const HomePage: React.FC = () => {
         className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between p-4 bg-red-600 text-white">
-          <h3 className="text-2xl font-bold">Chitradeep !</h3>
+          <h3 className="text-2xl font-bold">Chitradeep!</h3>
           <button onClick={toggleSidebar} className="text-2xl">
             <AiOutlineClose />
           </button>
@@ -86,7 +84,6 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Overlay when sidebar is open */}
       {isSidebarOpen && (
         <div
           onClick={toggleSidebar}
@@ -94,7 +91,6 @@ const HomePage: React.FC = () => {
         ></div>
       )}
 
-      {/* Main content */}
       <div className="flex-1 p-1 sm:p-6">
         <div className="bg-white shadow-lg rounded-lg p-5">
           <div className="flex justify-between items-center mb-5">
@@ -125,21 +121,22 @@ const HomePage: React.FC = () => {
                 className="p-2 sm:p-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <option value="All">All</option>
-                <option value="Indian">Indian</option>
+                <option value="finnish">Finnish</option>
               </select>
             </div>
           </div>
+          {error && <p className="text-red-500">{error}</p>}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {restaurants
               .filter(
                 (restaurant) =>
-                  restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                  (selectedFilter === 'All' || restaurant.type === selectedFilter)
+                  restaurant.resturantname.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                  (selectedFilter === 'All' || restaurant.cuisin_type.toLowerCase() === selectedFilter.toLowerCase())
               )
               .map((restaurant) => (
-                <div key={restaurant.id} className="bg-white shadow-md rounded-lg p-4">
-                  <h3 className="text-xl font-semibold text-red-600">{restaurant.name}</h3>
-                  <p className="text-gray-600">{restaurant.type}</p>
+                <div key={restaurant.resturantid} className="bg-white shadow-md rounded-lg p-4">
+                  <h3 className="text-xl font-semibold text-red-600">{restaurant.resturantname}</h3>
+                  <p className="text-gray-600">{restaurant.cuisin_type}</p>
                   <p className="text-gray-500">{restaurant.location}</p>
                   <button className="mt-4 w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition-all">
                     View Menu
