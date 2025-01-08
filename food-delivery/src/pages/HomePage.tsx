@@ -46,26 +46,22 @@ const HomePage: React.FC = () => {
 
   const handleViewMenu = async (restaurantId: number) => {
     try {
-      // Create FormData with restaurantId
       const formData = new FormData();
-      formData.append('restaurantId', restaurantId.toString());
-
-      // Send the request to fetch menu
+      formData.append('resturnatid', restaurantId.toString());
+  
       const response = await fetch('http://127.0.0.1:5000/menu/getmenubyresturantid', {
         method: 'POST',
         body: formData,
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch menu.');
       }
-
+  
       const data = await response.json();
-
-      // Handle successful menu fetch
-      if (data.menu) {
-        // Navigate to the restaurant menu page and pass the data (state) to the next page
-        navigate('/restaurant-menu', { state: { menu: data.menu } });
+  
+      if (data.menus) {
+        navigate('/restaurant-menu', { state: { menu: data.menus } });
       } else {
         throw new Error('No menu found.');
       }
