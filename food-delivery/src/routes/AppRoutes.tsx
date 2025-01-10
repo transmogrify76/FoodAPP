@@ -13,6 +13,9 @@ import RestaurantMenu from '../pages/RestaurantMenuPage';
 import RestaurantSignup from '../pages/RestaurantSignup';
 import RestaurantLogin from '../pages/RestaurantLogin';
 import RestaurantDashboard from '../pages/RestaurantDashboard';
+import CreateRestaurant from '../pages/CreateRestaurantDetails';
+import ListOfRestaurants from '../pages/ListOfRestaurants';
+import CreateMenu from '../pages/CreateMenu';
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -30,6 +33,9 @@ const AppRoutes: React.FC = () => (
     <Route path="/restaurant-signup" element={<RestaurantSignup />} />
     <Route path="/restaurant-login" element={<RestaurantLogin />} />
     <Route path="/restaurant-dashboard" element={<RestaurantDashboard />} />
+    <Route path="/restaurant-create" element={<CreateRestaurant />} />
+    <Route path="/restaurant-list" element={<ListOfRestaurants />} />
+    <Route path="/create-menu" element={<CreateMenu />} />
 
   </Routes>
 );
