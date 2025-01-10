@@ -72,7 +72,7 @@ const CreateMenu: React.FC = () => {
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">
-        Create Menu for Restaurant {restaurantId}
+        Create Menu 
       </h1>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit}>
