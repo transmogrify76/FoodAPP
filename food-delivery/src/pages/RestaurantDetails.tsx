@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 
 interface RestaurantDetailsProps {
   resturantid: string;
@@ -63,45 +64,58 @@ const RestaurantDetails: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6">
-      <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">Restaurant Details</h1>
-      {loading ? (
-        <div>Loading...</div>
-      ) : error ? (
-        <div className="text-red-600">Error: {error}</div>
-      ) : (
-        restaurant && (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            {restaurant.thumbnail ? (
-              <img
-                src={`data:image/png;base64,${restaurant.thumbnail}`}
-                alt={`${restaurant.resturantname} Thumbnail`}
-                className="w-full h-64 object-cover rounded-lg shadow-md mb-4"
-              />
-            ) : (
-              <div className="w-full h-64 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
-                <span className="text-gray-400 text-sm">No Thumbnail</span>
-              </div>
-            )}
-            <h2 className="text-3xl font-bold mb-4">{restaurant.resturantname}</h2>
-            <p className="text-gray-600 mb-2">Location: {restaurant.location}</p>
-            <p className="text-gray-600 mb-2">Cuisine: {restaurant.cuisin_type}</p>
-            <p className="text-sm text-gray-500 mb-4">
-              Created on: {new Date(restaurant.created_at).toLocaleDateString()}
-            </p>
-            
-                
-              
-            
+    <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
+      {/* Main Content */}
+      <div className="flex-1 p-6">
+        <div className="bg-white shadow-md rounded-xl p-6">
+          <div className="flex justify-between items-center mb-5">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-3xl text-red-500 p-2 rounded-full hover:bg-gray-200 focus:outline-none"
+            >
+              <FaArrowLeft />
+            </button>
+            <h1 className="text-3xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-pink-500">
+              Restaurant Details
+            </h1>
           </div>
-        )
-      )}
-      <button
-        onClick={() => navigate(-1)}
-        className="mt-6 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
-      >
-        Go Back
-      </button>
+
+          {loading ? (
+            <div className="text-center text-lg text-red-500">Loading...</div>
+          ) : error ? (
+            <div className="text-center text-lg text-red-500">Error: {error}</div>
+          ) : (
+            restaurant && (
+              <div className="space-y-6">
+                {restaurant.thumbnail ? (
+                  <img
+                    src={`data:image/png;base64,${restaurant.thumbnail}`}
+                    alt={`${restaurant.resturantname} Thumbnail`}
+                    className="w-full h-64 object-cover rounded-lg shadow-md mb-4"
+                  />
+                ) : (
+                  <div className="w-full h-64 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">No Thumbnail</span>
+                  </div>
+                )}
+
+                <h2 className="text-2xl font-bold text-red-500">{restaurant.resturantname}</h2>
+                <p className="text-gray-600 text-lg">{restaurant.location}</p>
+                <p className="text-gray-600 text-lg">Cuisine: {restaurant.cuisin_type}</p>
+                <p className="text-sm text-gray-500">
+                  Created on: {new Date(restaurant.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            )
+          )}
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-6 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
