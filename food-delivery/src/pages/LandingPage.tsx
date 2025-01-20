@@ -1,9 +1,16 @@
 import React from 'react';
 import { FaPizzaSlice, FaHamburger } from 'react-icons/fa';
 import { GiHotMeal } from 'react-icons/gi';
+import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
 import logo from '../assets/Red Illustrated Mascot Chef Free Logo.png'; // Import the logo from assets folder
 
 const LandingPage: React.FC = () => {
+  const navigate = useNavigate(); // Initialize the navigate function
+
+  const handleRestaurantOwnerClick = () => {
+    navigate('/restaurant-login'); // Navigate to the restaurant login page
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex flex-col items-center justify-between">
       <header className="w-full p-6 bg-white shadow-md flex justify-between items-center mb-6">
@@ -45,6 +52,14 @@ const LandingPage: React.FC = () => {
           >
             Login
           </a>
+          
+          {/* Add Restaurant Owner button below Login */}
+          <button
+            onClick={handleRestaurantOwnerClick}
+            className="w-4/5 px-8 py-4 bg-red-500 text-white font-bold rounded-xl shadow-lg text-center hover:bg-red-600 text-lg"
+          >
+            Restaurant Owner?
+          </button>
         </div>
       </main>
 
@@ -53,7 +68,6 @@ const LandingPage: React.FC = () => {
       </footer>
     </div>
   );
-}; 
+};
+
 export default LandingPage;
-
-

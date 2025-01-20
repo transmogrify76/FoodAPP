@@ -43,7 +43,7 @@ const RestaurantMenu: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/cart/assigntocart', 
+        'http://127.0.0.1:5000/cart/assigntocart',
         {
           menuid,
           quantity,
@@ -58,17 +58,49 @@ const RestaurantMenu: React.FC = () => {
       );
 
       if (response.status === 200) {
-        setCartMessage('Product added to cart successful.');
-        setTimeout(() => setCartMessage(''), 3000); 
+        setCartMessage('Product added to cart successfully.');
+        setTimeout(() => setCartMessage(''), 3000);
       } else {
         setError('Failed to add product to cart.');
-        setTimeout(() => setError(''), 3000); 
+        setTimeout(() => setError(''), 3000);
       }
     } catch (error) {
       console.error('Error adding product to cart:', error);
       setError('An error occurred while adding the product to the cart.');
-      setTimeout(() => setError(''), 3000); 
+      setTimeout(() => setError(''), 3000);
     }
+  };
+
+  // Handle Razorpay Order Now
+  const handleOrderNow = async (amount: number) => {
+    const options = {
+      key: 'rzp_test_ySKlMUoDlIHU1z', // Replace with your Razorpay Key ID
+      amount: amount * 100, // Amount in the smallest unit (paise)
+      currency: 'INR',
+      name: 'Food Delivery App',
+      description: 'Order Payment',
+      image: 'https://example.com/logo.png', // Replace with your logo URL
+      handler: (response: any) => {
+        console.log('Payment successful:', response);
+        alert('Payment successful! Order placed.');
+      },
+      prefill: {
+        name: 'Customer Name', // Replace with dynamic user name
+        email: 'customer@example.com', // Replace with dynamic user email
+        contact: '9999999999', // Replace with dynamic user contact
+      },
+      theme: {
+        color: '#3399cc',
+      },
+    };
+
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+
+    razorpay.on('payment.failed', (response: any) => {
+      console.error('Payment failed:', response.error);
+      alert('Payment failed. Please try again.');
+    });
   };
 
   if (!menu || menu.length === 0) {
@@ -78,7 +110,7 @@ const RestaurantMenu: React.FC = () => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-4 text-red-600">Menu</h1>
-      
+
       {cartMessage && <p className="text-green-500 text-center mb-4">{cartMessage}</p>}
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
@@ -103,7 +135,7 @@ const RestaurantMenu: React.FC = () => {
             </button>
             <button
               className="mt-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-              onClick={() => alert('Order Now functionality to be implemented!')}
+              onClick={() => handleOrderNow(item.menuprice)}
             >
               Order Now
             </button>

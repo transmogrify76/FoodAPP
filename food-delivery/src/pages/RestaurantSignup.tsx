@@ -1,41 +1,52 @@
 import React, { useState } from 'react';
-import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaUserAlt, FaEnvelope, FaLock } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const RestaurantSignup: React.FC = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [otp, setOtp] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    otp: ''
+  });
   const [message, setMessage] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false); // Track if OTP is sent
+  const [isOtpSent, setIsOtpSent] = useState(false); // Track OTP state
   const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('confirm_password', confirmPassword);
+    const { name, email, password, confirmPassword, otp } = formData;
+    const formDataToSend = new FormData();
+    formDataToSend.append('name', name);
+    formDataToSend.append('email', email);
+    formDataToSend.append('password', password);
+    formDataToSend.append('confirm_password', confirmPassword);
 
     try {
       if (!otp && !isOtpSent) {
-        // Send OTP when OTP has not been sent
-        const response = await axios.post('http://127.0.0.1:5000/users/resauth_signup', formData);
+        // Send OTP if not already sent
+        const response = await axios.post('http://127.0.0.1:5000/users/resauth_signup', formDataToSend);
         setMessage(response.data.message);
-        setIsOtpSent(true); // Set OTP as sent
+        setIsOtpSent(true); // Mark OTP as sent
       } else if (otp) {
-        // Verify OTP if it's provided
-        formData.append('otp', otp);
-        const response = await axios.post('http://127.0.0.1:5000/users/resauth_signup', formData);
+        // Verify OTP if entered
+        formDataToSend.append('otp', otp);
+        const response = await axios.post('http://127.0.0.1:5000/users/resauth_signup', formDataToSend);
         setMessage(response.data.message);
 
         if (response.data.message === 'Signup successful!') {
-          navigate('/restaurant-login'); // Redirect to login if signup is successful
+          navigate('/restaurant-login'); // Redirect to login on success
         }
       }
     } catch (error: unknown) {
@@ -48,63 +59,92 @@ const RestaurantSignup: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex justify-center items-center">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full h-screen">
-      <h2 className="text-2xl font-extrabold text-red-600 text-center mb-6">Restaurant Signup</h2>
+    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex justify-center items-center">
+      <div className="bg-white shadow-xl rounded-lg p-10 w-full max-w-md">
+        <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">Restaurant Signup</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex items-center border-2 border-red-300 rounded-lg p-2">
-            <FaUser className="text-red-600 text-xl mr-3" />
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaUserAlt className="inline-block mr-2 text-red-500" />
+              Restaurant Name
+            </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Restaurant Name"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
+              placeholder="Enter your restaurant name"
               required
-              className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
-          <div className="flex items-center border-2 border-red-300 rounded-lg p-2">
-            <FaEnvelope className="text-red-600 text-xl mr-3" />
+
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaEnvelope className="inline-block mr-2 text-red-500" />
+              Email Address
+            </label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
+              placeholder="Enter your email"
               required
-              className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
-          <div className="flex items-center border-2 border-red-300 rounded-lg p-2">
-            <FaLock className="text-red-600 text-xl mr-3" />
+
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaLock className="inline-block mr-2 text-red-500" />
+              Password
+            </label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
+              placeholder="Enter your password"
               required
-              className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
-          <div className="flex items-center border-2 border-red-300 rounded-lg p-2">
-            <FaLock className="text-red-600 text-xl mr-3" />
+
+          <div className="mb-4">
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
+              <FaLock className="inline-block mr-2 text-red-500" />
+              Confirm Password
+            </label>
             <input
               type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm Password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
+              placeholder="Confirm your password"
               required
-              className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
-          {isOtpSent && !otp ? (
-            <div className="flex items-center border-2 border-red-300 rounded-lg p-2">
+
+          {isOtpSent && !formData.otp ? (
+            <div className="mb-4">
+              <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 mb-2">
+                OTP
+              </label>
               <input
                 type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="Enter OTP"
+                id="otp"
+                name="otp"
+                value={formData.otp}
+                onChange={handleChange}
+                className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
+                placeholder="Enter OTP sent to your email"
                 required
-                className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             </div>
           ) : (
@@ -115,14 +155,23 @@ const RestaurantSignup: React.FC = () => {
               Send OTP
             </button>
           )}
+
           <button
             type="submit"
             className="w-full bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700 transition-all"
           >
-            {otp ? 'Verify OTP' : 'Sign Up'}
+            {formData.otp ? 'Verify OTP' : 'Sign Up'}
           </button>
         </form>
+
         {message && <p className="text-red-500 text-center mt-4">{message}</p>}
+
+        <p className="text-sm text-center text-gray-600 mt-6">
+          Already have an account?{' '}
+          <a href="/restaurant-login" className="text-red-600 font-semibold hover:underline">
+            Log in
+          </a>
+        </p>
       </div>
     </div>
   );
