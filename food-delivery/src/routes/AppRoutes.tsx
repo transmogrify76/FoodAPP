@@ -9,7 +9,7 @@ import CartPage from '../pages/CartPage';
 import OrderTrackingPage from '../pages/OrderTrackingPage';
 import OrderHistoryPage from '../pages/OrderHistoryPage';
 import UserProfile from '../pages/UserProfile';
-import RestaurantMenu from '../pages/RestaurantMenuPage';
+import RestaurantMenuPage from '../pages/RestaurantMenuPage';
 import RestaurantSignup from '../pages/RestaurantSignup';
 import RestaurantLogin from '../pages/RestaurantLogin';
 import RestaurantDashboard from '../pages/RestaurantDashboard';
@@ -30,7 +30,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/track-order" element={<OrderTrackingPage />} />
     <Route path="/history" element={<OrderHistoryPage />} />
     <Route path="/profile" element={<UserProfile />} />
-    <Route path="/restaurant-menu" element={<RestaurantMenu />} />
+    <Route path="/restaurant-menu" element={<RestaurantMenuPage />} />
     <Route path="/restaurant-signup" element={<RestaurantSignup />} />
     <Route path="/restaurant-login" element={<RestaurantLogin />} />
     <Route path="/restaurant-dashboard" element={<RestaurantDashboard />} />
