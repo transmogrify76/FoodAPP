@@ -9,6 +9,7 @@ import {
   FaHistory,
   FaCog,
   FaFile,
+  FaShoppingCart, // Added for View Cart
 } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
@@ -98,27 +99,52 @@ const HomePage: React.FC = () => {
           <ul className="space-y-6">
             <li className="flex items-center">
               <FaHome className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">Home</button>
+              <button
+                onClick={() => navigate('/')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+              >
+                Home
+              </button>
             </li>
             <li className="flex items-center">
               <FaFile className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">Profile</button>
+              <button
+                onClick={() => navigate('/profile')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+              >
+                Profile
+              </button>
             </li>
             <li className="flex items-center">
               <FaHistory className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">Order History</button>
+              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+                Order History
+              </button>
             </li>
             <li className="flex items-center">
               <FaShoppingBag className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">Order Tracking</button>
+              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+                Order Tracking
+              </button>
             </li>
             <li className="flex items-center">
               <FaCog className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">Settings</button>
+              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+                Settings
+              </button>
             </li>
             <li className="flex items-center">
               <FaRegHeart className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">Favorites</button>
+              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+                Favorites
+              </button>
+            </li>
+            {/* View Cart Added */}
+            <li className="flex items-center">
+              <FaShoppingCart className="text-red-500 mr-3 text-lg" />
+              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+                View Cart
+              </button>
             </li>
           </ul>
         </div>
