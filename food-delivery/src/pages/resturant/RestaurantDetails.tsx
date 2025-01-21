@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
+import { FaArrowLeft } from "react-icons/fa";
 
 interface RestaurantDetailsProps {
-  resturantid: string;
+  restaurantid: string;
   ownerid: string;
-  resturantname: string;
+  restaurantname: string;
   location: string;
-  cuisin_type: string;
+  cuisine_type: string;
   images: string[];
   thumbnail: string | null;
   created_at: string;
@@ -15,7 +16,9 @@ interface RestaurantDetailsProps {
 
 const RestaurantDetails: React.FC = () => {
   const navigate = useNavigate();
-  const [restaurant, setRestaurant] = useState<RestaurantDetailsProps | null>(null);
+  const [restaurant, setRestaurant] = useState<RestaurantDetailsProps | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,34 +27,40 @@ const RestaurantDetails: React.FC = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('restaurant_token');
+      const token = localStorage.getItem("restaurant_token");
       if (!token) {
-        throw new Error('User is not authenticated');
+        throw new Error("User is not authenticated");
       }
 
-      const restaurantId = localStorage.getItem('restaurantId');
-      if (!restaurantId) {
-        throw new Error('Restaurant ID not found');
+      // Decode the JWT to extract the owner ID
+      const decodedToken: { owenerid: string } = jwtDecode(token);
+      const ownerid = decodedToken.owenerid;
+
+      if (!ownerid) {
+        throw new Error("Owner ID not found in token");
       }
 
       const formData = new FormData();
-      formData.append('resturantid', restaurantId);
+      formData.append("ownerid", ownerid);
 
-      const response = await fetch('http://localhost:5000/resown/getresturant', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer {token}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        "http://localhost:5000/owenerresturentfetch",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch restaurant details');
+        throw new Error(errorData.error || "Failed to fetch restaurant details");
       }
 
       const data = await response.json();
-      setRestaurant(data.data);
+      setRestaurant(data.data[0]); // Assuming we fetch one restaurant
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -89,8 +98,8 @@ const RestaurantDetails: React.FC = () => {
               <div className="space-y-6">
                 {restaurant.thumbnail ? (
                   <img
-                    src={`data:image/png;base64,{restaurant.thumbnail}`}
-                    alt={`{restaurant.resturantname} Thumbnail`}
+                    src={`data:image/png;base64,${restaurant.thumbnail}`}
+                    alt={`${restaurant.restaurantname} Thumbnail`}
                     className="w-full h-64 object-cover rounded-lg shadow-md mb-4"
                   />
                 ) : (
@@ -99,11 +108,16 @@ const RestaurantDetails: React.FC = () => {
                   </div>
                 )}
 
-                <h2 className="text-2xl font-bold text-red-500">{restaurant.resturantname}</h2>
+                <h2 className="text-2xl font-bold text-red-500">
+                  {restaurant.restaurantname}
+                </h2>
                 <p className="text-gray-600 text-lg">{restaurant.location}</p>
-                <p className="text-gray-600 text-lg">Cuisine: {restaurant.cuisin_type}</p>
+                <p className="text-gray-600 text-lg">
+                  Cuisine: {restaurant.cuisine_type}
+                </p>
                 <p className="text-sm text-gray-500">
-                  Created on: {new Date(restaurant.created_at).toLocaleDateString()}
+                  Created on:{" "}
+                  {new Date(restaurant.created_at).toLocaleDateString()}
                 </p>
               </div>
             )

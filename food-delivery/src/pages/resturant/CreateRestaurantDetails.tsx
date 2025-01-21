@@ -16,11 +16,11 @@ const CreateRestaurant: React.FC = () => {
 
   useEffect(() => {
     // Retrieve the owner ID from the token in localStorage
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("restaurant_token"); // Ensure you're using the correct key
     if (token) {
       try {
-        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decoding JWT payload
-        setOwenerId(decodedToken.owenerid);
+        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
+        setOwenerId(decodedToken.owenerid); // Set the owner ID from the token
       } catch (error) {
         console.error("Error decoding token:", error);
       }
@@ -52,7 +52,7 @@ const CreateRestaurant: React.FC = () => {
     }
 
     const data = new FormData();
-    data.append("owenerid", owenerid); // Add owner ID automatically
+    data.append("owenerid", owenerid); // Add owner ID from token
     data.append("resturantname", formData.resturantname);
     data.append("location", formData.location);
     data.append("cuisintype", formData.cuisin_type);
