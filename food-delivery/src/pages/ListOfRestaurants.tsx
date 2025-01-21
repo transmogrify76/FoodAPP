@@ -37,7 +37,7 @@ const ListOfRestaurants: React.FC = () => {
       const response = await fetch('http://localhost:5000/owenerresturentfetch', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer {token}`,
         },
         body: formData,
       });
@@ -91,8 +91,8 @@ const ListOfRestaurants: React.FC = () => {
               >
                 {restaurant.thumbnail ? (
                   <img
-                    src={`data:image/png;base64,${restaurant.thumbnail}`}
-                    alt={`${restaurant.restaurantname} Thumbnail`}
+                    src={`data:image/png;base64,{restaurant.thumbnail}`}
+                    alt={`{restaurant.restaurantname} Thumbnail`}
                     className="w-32 h-32 object-cover rounded-full mb-4"
                   />
                 ) : (

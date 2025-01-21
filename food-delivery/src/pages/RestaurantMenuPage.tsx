@@ -96,11 +96,11 @@ const RestaurantMenuPage: React.FC = () => {
             >
               <h3 className="text-lg font-bold text-red-500">{item.menuname}</h3>
               <p className="text-gray-600 mt-2">{item.menudescription}</p>
-              <p className="text-gray-500 mt-1">Price: ${item.menuprice}</p>
+              <p className="text-gray-500 mt-1">Price: {item.menuprice}</p>
               <div className="mt-4">
                 {item.images && item.images.length > 0 ? (
                   <img
-                    src={`data:image/jpeg;base64,${item.images[0].image_data}`}
+                    src={`data:image/jpeg;base64,{item.images[0].image_data}`}
                     alt={item.menuname}
                     className="w-full h-48 object-cover rounded-lg"
                   />

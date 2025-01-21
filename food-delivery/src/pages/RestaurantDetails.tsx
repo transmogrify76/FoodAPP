@@ -40,7 +40,7 @@ const RestaurantDetails: React.FC = () => {
       const response = await fetch('http://localhost:5000/resown/getresturant', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer {token}`,
         },
         body: formData,
       });
@@ -89,8 +89,8 @@ const RestaurantDetails: React.FC = () => {
               <div className="space-y-6">
                 {restaurant.thumbnail ? (
                   <img
-                    src={`data:image/png;base64,${restaurant.thumbnail}`}
-                    alt={`${restaurant.resturantname} Thumbnail`}
+                    src={`data:image/png;base64,{restaurant.thumbnail}`}
+                    alt={`{restaurant.resturantname} Thumbnail`}
                     className="w-full h-64 object-cover rounded-lg shadow-md mb-4"
                   />
                 ) : (

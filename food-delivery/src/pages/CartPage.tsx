@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
 
 // Define the type for the cart item
 interface CartItem {
@@ -14,6 +15,99 @@ interface CartItem {
 const CartPage: React.FC = () => {
   const { state } = useLocation();
   const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+
+  // Function to calculate the total price of the cart
+  const calculateTotalPrice = () => {
+    let total = 0;
+    cart.forEach(item => {
+      total += item.menuprice * item.quantity;
+    });
+    setTotalPrice(total);
+  };
+
+  // Function to decode the user ID from the JWT token stored in localStorage
+  const getUserIdFromToken = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded: any = jwtDecode (token);
+      return decoded?.userid; // Assuming the user ID is stored as 'userid' in the token
+    }
+    return null; // If no token is found, return null
+  };
+
+  // Function to handle order creation API call
+  const createOrder = async () => {
+    try {
+      const userId = getUserIdFromToken();
+      if (!userId) {
+        alert('User is not logged in.');
+        return;
+      }
+
+      // Prepare the data for creating the order
+      const orderData = {
+        productid: cart.map(item => item.menuid).join(','), // Combine all product IDs
+        quantity: cart.map(item => item.quantity).join(','), // Combine all quantities
+        userid: userId,  // Use the decoded user ID
+        restaurantid: 'restaurant123',  // Assuming restaurant ID is available
+        totalprice: totalPrice.toString(),
+      };
+
+      const response = await axios.post('http://localhost:5000/order/createorder', new URLSearchParams(orderData));
+
+      if (response.status === 200) {
+        // If order created successfully, proceed with Razorpay payment
+        initiatePayment(userId);
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      alert('Failed to create order.');
+    }
+  };
+
+  // Function to handle Razorpay payment API call
+  const initiatePayment = async (userId: string) => {
+    try {
+      const paymentData = {
+        userid: userId,  // Pass the decoded user ID
+        restaurantid: 'restaurant123',  // Assuming restaurant ID is available
+        menuid: cart.map(item => item.menuid).join(','),  // Combine all product IDs
+        totalprice: totalPrice.toString(),
+      };
+
+      const response = await axios.post('http://localhost:5000/createpayment/razorpay', new URLSearchParams(paymentData));
+
+      if (response.status === 200) {
+        const paymentDetails = response.data;
+        // You can use Razorpay's SDK to redirect to the Razorpay payment page
+        const options = {
+          key: 'rzp_test_ySKlMUoDlIHU1z', // Replace with your Razorpay key
+          amount: paymentDetails.amount,
+          currency: paymentDetails.currency,
+          order_id: paymentDetails.id,
+          name: 'Restaurant Name',
+          description: 'Complete your payment',
+          image: 'https://your-logo-url.com',
+          handler: function (response: any) {
+            alert('Payment successful!');
+            // You can also handle the success and call an API to confirm the payment
+          },
+          prefill: {
+            name: 'User Name',
+            email: 'user@example.com',
+            contact: '1234567890',
+          },
+        };
+
+        const rzp1 = new window.Razorpay(options);
+        rzp1.open();
+      }
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      alert('Failed to initiate payment.');
+    }
+  };
 
   // Function to update the cart item quantity (increment)
   const handleIncreaseQuantity = async (item: CartItem) => {
@@ -32,6 +126,7 @@ const CartPage: React.FC = () => {
               : cartItem
           )
         );
+        calculateTotalPrice();
       }
     } catch (error) {
       console.error('Error increasing quantity:', error);
@@ -48,7 +143,6 @@ const CartPage: React.FC = () => {
       }));
 
       if (response.status === 200) {
-        // Decrement the quantity only if greater than 1, otherwise remove from cart
         if (item.quantity > 1) {
           setCart(prevCart =>
             prevCart.map(cartItem =>
@@ -60,12 +154,17 @@ const CartPage: React.FC = () => {
         } else {
           setCart(prevCart => prevCart.filter(cartItem => cartItem.menuid !== item.menuid));
         }
+        calculateTotalPrice();
       }
     } catch (error) {
       console.error('Error decreasing quantity:', error);
       alert('Failed to decrease quantity.');
     }
   };
+
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [cart]);
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
@@ -75,7 +174,7 @@ const CartPage: React.FC = () => {
       </div>
 
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto p-6 pt-24 pb-16"> {/* Added padding-top and bottom */}
+      <div className="flex-1 overflow-y-auto p-6 pt-24 pb-16">
         {cart.length === 0 ? (
           <p className="text-center text-lg">Your cart is empty.</p>
         ) : (
@@ -84,7 +183,7 @@ const CartPage: React.FC = () => {
               <div key={index} className="bg-gradient-to-r from-white via-gray-50 to-gray-100 shadow-lg rounded-lg p-4">
                 <h3 className="text-lg font-bold text-red-500">{item.menuname}</h3>
                 <p className="text-gray-600 mt-2">{item.menudescription}</p>
-                <p className="text-gray-500 mt-1">Price: ${item.menuprice}</p>
+                <p className="text-gray-500 mt-1">Price: {item.menuprice}</p>
                 <p className="text-gray-500 mt-1">Quantity: {item.quantity}</p>
                 
                 <div className="mt-4 flex justify-between">
@@ -116,14 +215,18 @@ const CartPage: React.FC = () => {
               </li>
             ))}
           </ul>
-        </div>
-      </div>
 
-      {/* Fixed "Complete Purchase" button */}
-      <div className="fixed bottom-0 left-0 w-full p-2 bg-white shadow-lg z-10">
-        <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gradient-to-l transition-all">
-          Complete Purchase
-        </button>
+          <div className="mt-4 text-xl font-bold">
+            <p>Total Price: {totalPrice}/-</p>
+          </div>
+          
+          <button
+            onClick={createOrder}
+            className="mt-6 w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-2 px-4 rounded-lg"
+          >
+            Proceed to Payment
+          </button>
+        </div>
       </div>
     </div>
   );

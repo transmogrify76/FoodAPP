@@ -128,7 +128,7 @@ const UserProfile: React.FC = () => {
           <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden shadow-md border-4 border-red-300 hover:border-red-500 transition-all">
             {userData.profilepicture ? (
               <img
-                src={`data:image/jpeg;base64,${userData.profilepicture}`}
+                src={`data:image/jpeg;base64,{userData.profilepicture}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
