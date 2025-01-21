@@ -9,7 +9,7 @@ import {
   FaHistory,
   FaCog,
   FaFile,
-  FaShoppingCart, // Added for View Cart
+  FaShoppingCart,
 } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
@@ -85,7 +85,7 @@ const HomePage: React.FC = () => {
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform {
+        className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } transition-transform duration-300 ease-in-out`}
       >

@@ -77,12 +77,7 @@ const RestaurantMenuPage: React.FC = () => {
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
       <div className="flex justify-between items-center p-6 bg-gradient-to-r from-red-500 to-pink-500 text-white">
         <h1 className="text-2xl font-bold">Restaurant Menu</h1>
-        <button
-          onClick={() => navigate('/')}
-          className="text-white text-lg font-medium hover:underline"
-        >
-          Back to Home
-        </button>
+
       </div>
 
       {error && <p className="text-red-500 text-center font-semibold mt-4">{error}</p>}

@@ -28,7 +28,7 @@ const RestaurantDashboard: React.FC = () => {
           <span className="text-sm mt-1">Orders</span>
         </div>
         <div
-          onClick={() => navigateTo('/restaurant-menu')}
+          onClick={() => navigateTo('/menu')}
           className="flex flex-col items-center cursor-pointer"
         >
           <FaUtensils size={24} />
@@ -55,23 +55,38 @@ const RestaurantDashboard: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-800 mb-4">Welcome to your Dashboard</h2>
         <div className="grid grid-cols-1 gap-4">
           {/* Dashboard Cards */}
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div
+            onClick={() => navigateTo('/restaurant-profile')}
+            className="bg-white p-4 rounded-lg shadow cursor-pointer"
+          >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Restaurant Profile</h3>
             <p className="text-sm text-gray-600">View and update your restaurant details</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div
+            onClick={() => navigateTo('/restaurant-orders')}
+            className="bg-white p-4 rounded-lg shadow cursor-pointer"
+          >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Orders</h3>
             <p className="text-sm text-gray-600">View and manage incoming orders</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div
+            onClick={() => navigateTo('/create-menu')}
+            className="bg-white p-4 rounded-lg shadow cursor-pointer"
+          >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Menu Management</h3>
             <p className="text-sm text-gray-600">Add, update, or remove menu items</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div
+            onClick={() => navigateTo('/restaurant-reports')}
+            className="bg-white p-4 rounded-lg shadow cursor-pointer"
+          >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Reports</h3>
             <p className="text-sm text-gray-600">View your sales and order reports</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div
+            onClick={() => navigateTo('/restaurant-settings')}
+            className="bg-white p-4 rounded-lg shadow cursor-pointer"
+          >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Settings</h3>
             <p className="text-sm text-gray-600">Manage your account and preferences</p>
           </div>

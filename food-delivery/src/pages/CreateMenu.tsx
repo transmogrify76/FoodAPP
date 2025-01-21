@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {jwtDecode} from 'jwt-decode';
 
 const CreateMenu: React.FC = () => {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -12,9 +13,14 @@ const CreateMenu: React.FC = () => {
   });
 
   useEffect(() => {
-    const storedRestaurantId = localStorage.getItem('restaurantId');
-    if (storedRestaurantId) {
-      setRestaurantId(storedRestaurantId);
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      try {
+        const decodedToken: any = jwtDecode(token); // Decode the token
+        setRestaurantId(decodedToken.restaurantId); // Extract restaurantId from the decoded token
+      } catch (error) {
+        console.error('Invalid token', error);
+      }
     }
   }, []);
 
@@ -44,7 +50,7 @@ const CreateMenu: React.FC = () => {
     formData.append('menuprice', menuData.menuprice || '');
     formData.append('menutype', menuData.menutype || '');
     formData.append('foodtype', menuData.foodtype || '');
-    formData.append('restaurantid', restaurantId || '');
+    formData.append('ownerid', restaurantId || ''); // Add ownerId here
   
     menuData.images.forEach((image) => {
       formData.append('images', image);
@@ -68,7 +74,7 @@ const CreateMenu: React.FC = () => {
       alert('Error creating menu');
     }
   };
-
+  
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">

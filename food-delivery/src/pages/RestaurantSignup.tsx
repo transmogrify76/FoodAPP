@@ -9,7 +9,7 @@ const RestaurantSignup: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    otp: ''
+    otp: '',
   });
   const [message, setMessage] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false); // Track OTP state

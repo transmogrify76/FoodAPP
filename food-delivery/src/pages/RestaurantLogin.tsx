@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FaUserAlt, FaLock } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const RestaurantLogin: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +10,7 @@ const RestaurantLogin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate(); // Hook for navigation
 
+  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -19,24 +19,35 @@ const RestaurantLogin: React.FC = () => {
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/users/resauthlogin_login', formData);
+      // Make POST request using fetch with form data encoded as URL parameters
+      const response = await fetch('http://127.0.0.1:5000/users/resauthlogin_login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(formData).toString(), // Convert formData to URLSearchParams
+      });
 
-      if (response.data.token) {
-        // Store token in localStorage
-        localStorage.setItem('restaurant_token', response.data.token);
+      // Parse the response as JSON
+      const data = await response.json();
 
-        // Navigate to restaurant dashboard
-        navigate('/restaurant-dashboard');
-      } else {
-        throw new Error('Login failed');
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
       }
+
+      // If login is successful, store the token and navigate to dashboard
+      localStorage.setItem('restaurant_token', data.token);
+
+      // Navigate to restaurant dashboard
+      navigate('/restaurant-dashboard');
     } catch (error: any) {
-      setError(error.message || 'Error occurred!');
+      setError(error.message || 'An error occurred while logging in');
     }
   };
 
@@ -50,10 +61,12 @@ const RestaurantLogin: React.FC = () => {
           Please log in to manage your restaurant.
         </p>
         
+        {/* Display error message */}
         {error && (
           <p className="text-center text-red-500 font-bold mb-4">{error}</p>
         )}
 
+        {/* Login form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="mb-4">
             <label
