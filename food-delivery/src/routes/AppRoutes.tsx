@@ -1,23 +1,23 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import SignUp from '../pages/SignUp';
-import Login from '../pages/Login';
+import SignUp from '../pages/user/SignUp';
+import Login from '../pages/user/Login';
 import LandingPage from '../pages/LandingPage';
-import HomePage from '../pages/HomePage';
+import HomePage from '../pages/user/HomePage';
 import MenuPage from '../pages/MenuPage';
-import CartPage from '../pages/CartPage';
-import OrderTrackingPage from '../pages/OrderTrackingPage';
-import OrderHistoryPage from '../pages/OrderHistoryPage';
-import UserProfile from '../pages/UserProfile';
-import RestaurantMenuPage from '../pages/RestaurantMenuPage';
-import RestaurantSignup from '../pages/RestaurantSignup';
-import RestaurantLogin from '../pages/RestaurantLogin';
-import RestaurantDashboard from '../pages/RestaurantDashboard';
-import CreateRestaurant from '../pages/CreateRestaurantDetails';
-import ListOfRestaurants from '../pages/ListOfRestaurants';
-import CreateMenu from '../pages/CreateMenu';
-import RestaurantDetails from '../pages/RestaurantDetails';
-import RestaurantOrders from '../pages/RestaurantOrders';
+import CartPage from '../pages/user/CartPage';
+import OrderTrackingPage from '../pages/user/OrderTrackingPage';
+import OrderHistoryPage from '../pages/user/OrderHistoryPage';
+import UserProfile from '../pages/user/UserProfile';
+import RestaurantMenuPage from '../pages/user/RestaurantMenuPage';
+import RestaurantSignup from '../pages/resturant/RestaurantSignup';
+import RestaurantLogin from '../pages/resturant/RestaurantLogin';
+import RestaurantDashboard from '../pages/resturant/RestaurantDashboard';
+import CreateRestaurant from '../pages/resturant/CreateRestaurantDetails';
+import ListOfRestaurants from '../pages/user/ListOfRestaurants';
+import CreateMenu from '../pages/resturant/CreateMenu';
+import RestaurantDetails from '../pages/resturant/RestaurantDetails';
+import RestaurantOrders from '../pages/resturant/RestaurantOrders';
 
 
 const AppRoutes: React.FC = () => (

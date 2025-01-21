@@ -95,13 +95,14 @@ const RestaurantMenuPage: React.FC = () => {
               <div className="mt-4">
                 {item.images && item.images.length > 0 ? (
                   <img
-                    src={`data:image/jpeg;base64,{item.images[0].image_data}`}
+                    src={`data:image/jpeg;base64,${item.images[0].image_data}`}
                     alt={item.menuname}
                     className="w-full h-48 object-cover rounded-lg"
                   />
                 ) : (
                   <p>No image available</p>
                 )}
+
               </div>
               <button
                 className="mt-4 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
