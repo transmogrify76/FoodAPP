@@ -8,37 +8,58 @@ const RestaurantMenuPage: React.FC = () => {
   const navigate = useNavigate();
   const [menu, setMenu] = useState<any[]>([]);
   const [error, setError] = useState('');
-  const [cart, setCart] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [cart, setCart] = useState<any[]>(() => {
+    // Retrieve cart from localStorage if available
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
 
-  // Assuming you have a userId and restaurantId available
-  const userid = 'user123'; // This should come from your authentication state
-  const restaurantid = 'restaurant123'; // You should get this from your app context or API
+  const userid = 'user123'; // Replace with actual user ID
+  const restaurantid = 'restaurant123'; // Replace with actual restaurant ID
 
   // Handle adding item to cart
   const handleAddToCart = async (item: any) => {
-    setLoading(true);
+    setLoadingItemId(item.menuid); // Set loading for the specific item
     try {
-      // Call the backend API to add item to the cart
       const response = await axios.post('http://localhost:5000/cart/assigntocart', new URLSearchParams({
         menuid: item.menuid,
-        quantity: '1', // Assuming you are adding one item at a time
+        quantity: '1',
         userid: userid,
         restaurantid: restaurantid,
       }));
 
-      // If the request is successful, update the frontend cart state
       if (response.status === 200) {
-        setCart((prevCart) => [...prevCart, item]);
+        setCart((prevCart) => {
+          const existingItem = prevCart.find((cartItem) => cartItem.menuid === item.menuid);
+
+          if (existingItem) {
+            // Update the quantity of the existing item
+            return prevCart.map((cartItem) =>
+              cartItem.menuid === item.menuid
+                ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                : cartItem
+            );
+          } else {
+            // Add the new item to the cart
+            return [...prevCart, { ...item, quantity: 1 }];
+          }
+        });
+
         alert('Item added to cart!');
       }
     } catch (error) {
       console.error('Error adding item to cart', error);
       alert('Failed to add item to cart.');
     } finally {
-      setLoading(false);
+      setLoadingItemId(null); // Reset loading state
     }
   };
+
+  useEffect(() => {
+    // Save cart to localStorage whenever it changes
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
 
   useEffect(() => {
     if (state && state.menu) {
@@ -49,7 +70,6 @@ const RestaurantMenuPage: React.FC = () => {
   }, [state]);
 
   const handleCheckout = () => {
-    // Navigate to cart page for checkout
     navigate('/cart', { state: { cart } });
   };
 
@@ -91,9 +111,9 @@ const RestaurantMenuPage: React.FC = () => {
               <button
                 className="mt-4 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
                 onClick={() => handleAddToCart(item)}
-                disabled={loading}
+                disabled={loadingItemId === item.menuid}
               >
-                {loading ? 'Adding...' : 'Add to Cart'} <FaShoppingCart className="inline ml-2" />
+                {loadingItemId === item.menuid ? 'Adding...' : 'Add to Cart'} <FaShoppingCart className="inline ml-2" />
               </button>
             </div>
           ))}
