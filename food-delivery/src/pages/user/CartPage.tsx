@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 // Define the type for the cart item
 interface CartItem {
   menuname: string;
   menudescription: string;
   menuprice: number;
-  quantity: number; // Include the quantity field
-  menuid: string; // Adding menuid for API calls
+  quantity: number; 
+  menuid: string; 
+  restaurantid: string; // Assuming restaurantId is part of CartItem
 }
 
 const CartPage: React.FC = () => {
@@ -30,7 +31,7 @@ const CartPage: React.FC = () => {
   const getUserIdFromToken = () => {
     const token = localStorage.getItem('token');
     if (token) {
-      const decoded: any = jwtDecode (token);
+      const decoded: any = jwtDecode(token);
       return decoded?.userid; // Assuming the user ID is stored as 'userid' in the token
     }
     return null; // If no token is found, return null
@@ -50,7 +51,7 @@ const CartPage: React.FC = () => {
         productid: cart.map(item => item.menuid).join(','), // Combine all product IDs
         quantity: cart.map(item => item.quantity).join(','), // Combine all quantities
         userid: userId,  // Use the decoded user ID
-        restaurantid: 'restaurant123',  // Assuming restaurant ID is available
+        restaurantid: cart[0]?.restaurantid,  // Assuming all items in the cart are from the same restaurant
         totalprice: totalPrice.toString(),
       };
 
@@ -68,54 +69,66 @@ const CartPage: React.FC = () => {
 
   // Function to handle Razorpay payment API call
   const initiatePayment = async (userId: string) => {
-    try {
-      const paymentData = {
-        userid: userId,  // Pass the decoded user ID
-        restaurantid: 'restaurant123',  // Assuming restaurant ID is available
-        menuid: cart.map(item => item.menuid).join(','),  // Combine all product IDs
-        totalprice: totalPrice.toString(),
+  if (typeof window !== "undefined" && !window.Razorpay) {
+    alert('Razorpay is not loaded.');
+    return;
+  }
+
+  try {
+    const paymentData = {
+      userid: userId,
+      restaurantid: cart[0]?.restaurantid,
+      menuid: cart.map(item => item.menuid).join(','),
+      totalprice: totalPrice.toString(),
+    };
+
+    const response = await axios.post('http://localhost:5000/createpayment/razorpay', new URLSearchParams(paymentData));
+
+    if (response.status === 200) {
+      const paymentDetails = response.data;
+      const options = {
+        key: 'rzp_test_nzmqxQYhvCH9rD',
+        amount: paymentDetails.amount,
+        currency: paymentDetails.currency,
+        order_id: paymentDetails.id,
+        name: 'Restaurant Name',
+        description: 'Complete your payment',
+        image: 'https://your-logo-url.com',
+        handler: function (response: any) {
+          alert('Payment successful!');
+        },
+        prefill: {
+          name: 'User Name',
+          email: 'user@example.com',
+          contact: '1234567890',
+        },
       };
 
-      const response = await axios.post('http://localhost:5000/createpayment/razorpay', new URLSearchParams(paymentData));
-
-      if (response.status === 200) {
-        const paymentDetails = response.data;
-        // You can use Razorpay's SDK to redirect to the Razorpay payment page
-        const options = {
-          key: 'rzp_test_ySKlMUoDlIHU1z', // Replace with your Razorpay key
-          amount: paymentDetails.amount,
-          currency: paymentDetails.currency,
-          order_id: paymentDetails.id,
-          name: 'Restaurant Name',
-          description: 'Complete your payment',
-          image: 'https://your-logo-url.com',
-          handler: function (response: any) {
-            alert('Payment successful!');
-            // You can also handle the success and call an API to confirm the payment
-          },
-          prefill: {
-            name: 'User Name',
-            email: 'user@example.com',
-            contact: '1234567890',
-          },
-        };
-
-        const rzp1 = new window.Razorpay(options);
-        rzp1.open();
-      }
-    } catch (error) {
-      console.error('Error initiating payment:', error);
-      alert('Failed to initiate payment.');
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
     }
-  };
+  } catch (error) {
+    console.error('Error initiating payment:', error);
+    alert('Failed to initiate payment.');
+  }
+};
 
   // Function to update the cart item quantity (increment)
   const handleIncreaseQuantity = async (item: CartItem) => {
     try {
+      const userId = getUserIdFromToken();
+      if (!userId) {
+        alert('User is not logged in.');
+        return;
+      }
+
+      // Get the restaurantId from the item
+      const restaurantId = item.restaurantid;
+
       const response = await axios.post('http://localhost:5000/cart/incquantity', new URLSearchParams({
         menuid: item.menuid,
-        userid: 'user123',  // Assuming you have the user ID from context or authentication
-        restaurantid: 'restaurant123', // Similarly, assuming restaurant ID is available
+        userid: userId,  // Use the decoded user ID
+        restaurantid: restaurantId, // Use the restaurantId from the item
       }));
 
       if (response.status === 200) {
@@ -137,9 +150,16 @@ const CartPage: React.FC = () => {
   // Function to update the cart item quantity (decrement)
   const handleDecreaseQuantity = async (item: CartItem) => {
     try {
+      const userId = getUserIdFromToken();
+      if (!userId) {
+        alert('User is not logged in.');
+        return;
+      }
+
       const response = await axios.post('http://localhost:5000/cart/decquantity', new URLSearchParams({
         menuid: item.menuid,
-        userid: 'user123',  // Assuming user ID is available
+        userid: userId,  // Use the decoded user ID
+        restaurantid: item.restaurantid, // Use the restaurantId from the item
       }));
 
       if (response.status === 200) {
@@ -209,20 +229,23 @@ const CartPage: React.FC = () => {
           <h2 className="text-xl font-bold mb-4">Cart Items:</h2>
           <ul>
             {cart.map((cartItem, index) => (
-              <li key={index} className="flex justify-between mb-2">
+              <li key={index} className="flex justify-between mb-4">
                 <span>{cartItem.menuname}</span>
-                <span>Quantity: {cartItem.quantity}</span>
+                <span>{cartItem.menuprice * cartItem.quantity}</span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-4 text-xl font-bold">
-            <p>Total Price: {totalPrice}/-</p>
+          <div className="mt-6 flex justify-between">
+            <h2 className="font-bold text-lg">Total: </h2>
+            <h2 className="font-bold text-lg">{totalPrice}</h2>
           </div>
-          
+        </div>
+
+        <div className="mt-6 flex justify-center">
           <button
             onClick={createOrder}
-            className="mt-6 w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-2 px-4 rounded-lg"
+            className="bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 px-6 rounded-lg w-full md:w-1/3 hover:bg-gradient-to-l transition-all"
           >
             Proceed to Payment
           </button>
