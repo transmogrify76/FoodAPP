@@ -23,20 +23,20 @@ const CreateMenu: React.FC = () => {
     if (token) {
       try {
         const decodedToken: any = jwtDecode(token);
-        setOwnerId(decodedToken.ownerid || "");
-        fetchRestaurants(decodedToken.ownerid); // Fetch restaurants when owner ID is available
+        setOwnerId(decodedToken.owenerid || "");
+        fetchRestaurants(decodedToken.owenerid); // Fetch restaurants when owner ID is available
       } catch (err) {
         console.error("Failed to decode token", err);
       }
     }
   }, []);
 
-  const fetchRestaurants = async (ownerId: string) => {
+  const fetchRestaurants = async (owenerid: string) => {
     setLoading(true);
     setError(null);
 
     const formData = new FormData();
-    formData.append("ownerid", ownerId);
+    formData.append("ownerid", owenerid);
 
     try {
       const response = await fetch("http://localhost:5000/owenerresturentfetch", {

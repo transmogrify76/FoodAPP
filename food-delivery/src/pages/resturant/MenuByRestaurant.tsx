@@ -15,20 +15,20 @@ const GetMenuByOwnerId: React.FC = () => {
     if (token) {
       try {
         const decodedToken: any = jwtDecode(token);
-        setOwnerId(decodedToken.ownerid || "");
-        fetchRestaurants(decodedToken.ownerid); // Fetch restaurants when owner ID is available
+        setOwnerId(decodedToken.owenerid || "");
+        fetchRestaurants(decodedToken.owenerid); // Fetch restaurants when owner ID is available
       } catch (err) {
         console.error("Failed to decode token", err);
       }
     }
   }, []);
 
-  const fetchRestaurants = async (ownerId: string) => {
+  const fetchRestaurants = async (owenerid: string) => {
     setLoading(true);
     setError(null);
 
     const formData = new FormData();
-    formData.append("ownerid", ownerId);
+    formData.append("ownerid", owenerid);
 
     try {
       const response = await fetch("http://localhost:5000/owenerresturentfetch", {
@@ -138,8 +138,8 @@ const GetMenuByOwnerId: React.FC = () => {
                 <p className="text-gray-700">Price: {menu.menuprice}</p>
                 <p className="text-gray-700">Type: {menu.menutype}</p>
                 <p className="text-gray-700">Food Type: {menu.foodtype}</p>
-                <p className="text-gray-700">Category ID: {menu.categoryid}</p>
-                <p className="text-gray-700">Subcategory ID: {menu.subcategoryid}</p>
+                {/* <p className="text-gray-700">Category ID: {menu.categoryid}</p>
+                <p className="text-gray-700">Subcategory ID: {menu.subcategoryid}</p> */}
                 <p className="text-gray-700">Created At: {menu.created_at}</p>
               </div>
             ))}
