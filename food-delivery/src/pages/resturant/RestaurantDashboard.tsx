@@ -35,7 +35,7 @@ const RestaurantDashboard: React.FC = () => {
           <span className="text-sm mt-1">Orders</span>
         </div>
         <div
-          onClick={() => navigateTo("/menu")}
+          onClick={() => navigateTo("/create-menu")}
           className="flex flex-col items-center cursor-pointer"
         >
           <FaUtensils size={24} />

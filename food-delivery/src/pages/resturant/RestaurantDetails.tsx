@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { FaArrowLeft } from "react-icons/fa";
 
 interface RestaurantDetailsProps {
@@ -72,6 +72,15 @@ const RestaurantDetails: React.FC = () => {
     fetchRestaurantDetails();
   }, []);
 
+  const handleAddMenu = () => {
+    if (restaurant && restaurant.restaurantid) {
+      navigate(`/create-menu?restaurantid=${restaurant.restaurantid}`); // Pass restaurantid as a query parameter
+    } else {
+      alert("Restaurant ID not found!");
+    }
+  };
+  
+
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
       {/* Main Content */}
@@ -123,8 +132,14 @@ const RestaurantDetails: React.FC = () => {
             )
           )}
           <button
+            onClick={handleAddMenu}
+            className="mt-6 w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
+          >
+            Add Menu
+          </button>
+          <button
             onClick={() => navigate(-1)}
-            className="mt-6 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
+            className="mt-4 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
           >
             Go Back
           </button>
