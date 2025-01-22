@@ -8,8 +8,8 @@ interface CartItem {
   menuname: string;
   menudescription: string;
   menuprice: number;
-  quantity: number; 
-  menuid: string; 
+  quantity: number;
+  menuid: string;
   restaurantid: string; // Assuming restaurantId is part of CartItem
 }
 
@@ -69,49 +69,56 @@ const CartPage: React.FC = () => {
 
   // Function to handle Razorpay payment API call
   const initiatePayment = async (userId: string) => {
-  if (typeof window !== "undefined" && !window.Razorpay) {
-    alert('Razorpay is not loaded.');
-    return;
-  }
+    if (typeof window !== "undefined" && !window.Razorpay) {
+      alert('Razorpay is not loaded.');
+      return;
+    }
 
-  try {
-    const paymentData = {
-      userid: userId,
-      restaurantid: cart[0]?.restaurantid,
-      menuid: cart.map(item => item.menuid).join(','),
-      totalprice: totalPrice.toString(),
-    };
-
-    const response = await axios.post('http://localhost:5000/createpayment/razorpay', new URLSearchParams(paymentData));
-
-    if (response.status === 200) {
-      const paymentDetails = response.data;
-      const options = {
-        key: 'rzp_test_nzmqxQYhvCH9rD',
-        amount: paymentDetails.amount,
-        currency: paymentDetails.currency,
-        order_id: paymentDetails.id,
-        name: 'Restaurant Name',
-        description: 'Complete your payment',
-        image: 'https://your-logo-url.com',
-        handler: function (response: any) {
-          alert('Payment successful!');
-        },
-        prefill: {
-          name: 'User Name',
-          email: 'user@example.com',
-          contact: '1234567890',
-        },
+    try {
+      const paymentData = {
+        userid: userId,
+        restaurantid: cart[0]?.restaurantid,
+        menuid: cart.map(item => item.menuid).join(','),
+        totalprice: totalPrice.toString(),
       };
 
-      const rzp1 = new window.Razorpay(options);
-      rzp1.open();
+      // Call your backend Razorpay API to create the order
+      const response = await axios.post('http://localhost:5000/createpayment/razorpay', new URLSearchParams(paymentData));
+
+      if (response.status === 200) {
+        const paymentDetails = response.data;
+        
+        const options = {
+          key: 'rzp_test_nzmqxQYhvCH9rD',  // Your Razorpay key
+          amount: paymentDetails.amount,  // Amount in paise (this should be passed as is)
+          currency: paymentDetails.currency,
+          order_id: paymentDetails.id,
+          name: 'Restaurant Name',  // Customize with restaurant details
+          description: 'Complete your payment',
+          image: 'https://your-logo-url.com',  // Logo URL
+          handler: function (response: any) {
+            // On successful payment, handle here
+            alert('Payment successful!');
+            // You can add code to update order status here (e.g., update the database or show a success page)
+          },
+          prefill: {
+            name: 'User Name',  // Fetch this from the logged-in user's details
+            email: 'user@example.com',
+            contact: '1234567890',
+          },
+          theme: {
+            color: '#F37254',  // Customize theme color as needed
+          },
+        };
+
+        const rzp1 = new window.Razorpay(options);
+        rzp1.open();
+      }
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      alert('Failed to initiate payment.');
     }
-  } catch (error) {
-    console.error('Error initiating payment:', error);
-    alert('Failed to initiate payment.');
-  }
-};
+  };
 
   // Function to update the cart item quantity (increment)
   const handleIncreaseQuantity = async (item: CartItem) => {
@@ -122,13 +129,12 @@ const CartPage: React.FC = () => {
         return;
       }
 
-      // Get the restaurantId from the item
       const restaurantId = item.restaurantid;
 
       const response = await axios.post('http://localhost:5000/cart/incquantity', new URLSearchParams({
         menuid: item.menuid,
-        userid: userId,  // Use the decoded user ID
-        restaurantid: restaurantId, // Use the restaurantId from the item
+        userid: userId,
+        restaurantid: restaurantId,
       }));
 
       if (response.status === 200) {
@@ -158,8 +164,8 @@ const CartPage: React.FC = () => {
 
       const response = await axios.post('http://localhost:5000/cart/decquantity', new URLSearchParams({
         menuid: item.menuid,
-        userid: userId,  // Use the decoded user ID
-        restaurantid: item.restaurantid, // Use the restaurantId from the item
+        userid: userId,
+        restaurantid: item.restaurantid,
       }));
 
       if (response.status === 200) {
@@ -235,17 +241,13 @@ const CartPage: React.FC = () => {
               </li>
             ))}
           </ul>
-
-          <div className="mt-6 flex justify-between">
-            <h2 className="font-bold text-lg">Total: </h2>
-            <h2 className="font-bold text-lg">{totalPrice}</h2>
+          <div className="mt-4 flex justify-between font-bold text-xl">
+            <span>Total:</span>
+            <span>{totalPrice}</span>
           </div>
-        </div>
-
-        <div className="mt-6 flex justify-center">
           <button
             onClick={createOrder}
-            className="bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 px-6 rounded-lg w-full md:w-1/3 hover:bg-gradient-to-l transition-all"
+            className="w-full mt-6 bg-gradient-to-r from-pink-500 to-red-500 text-white py-3 rounded-lg hover:bg-gradient-to-l transition-all"
           >
             Proceed to Payment
           </button>
