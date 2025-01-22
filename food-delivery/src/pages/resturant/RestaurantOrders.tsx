@@ -83,6 +83,29 @@ const RestaurantOrders: React.FC = () => {
     fetchOrders();
   }, [restaurantId]);
 
+  const handleOrderAction = async (orderId: string, action: 'accept' | 'reject') => {
+    try {
+      const formData = new FormData();
+      formData.append('orderid', orderId);
+      formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected'); // Update status based on action
+
+      // Make the API call to update the order status
+      const response = await axios.post('http://localhost:5000/ops/updateorder', formData);
+      
+      if (response.data.message === 'Data update success') {
+        setMessage(`Order #${orderId} has been ${action}ed.`);
+        setOrders(orders.map((order) =>
+          order.uid === orderId ? { ...order, status: action === 'accept' ? 'accepted' : 'rejected' } : order
+        )); // Update the status locally without refetching
+      } else {
+        setMessage('Failed to update order status.');
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      setMessage('Error updating order status.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex justify-center items-center py-12">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl">
@@ -113,6 +136,29 @@ const RestaurantOrders: React.FC = () => {
                   <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.quantity}</p>
                   <p className="text-sm text-gray-600"><strong>Total Price:</strong> ${order.totalprice}</p>
                   <p className="text-sm text-gray-600"><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
+                </div>
+
+                {/* Show status of the order */}
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600"><strong>Status:</strong> {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}</p>
+                </div>
+
+                {/* Accept and Reject Buttons */}
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => handleOrderAction(order.uid, 'accept')}
+                    className={`bg-green-500 text-white py-2 px-4 rounded-lg mr-2 hover:bg-green-600 ${order.status === 'accepted' || order.status === 'rejected' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={order.status === 'accepted' || order.status === 'rejected'}
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleOrderAction(order.uid, 'reject')}
+                    className={`bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 ${order.status === 'accepted' || order.status === 'rejected' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={order.status === 'accepted' || order.status === 'rejected'}
+                  >
+                    Reject
+                  </button>
                 </div>
               </div>
             ))
