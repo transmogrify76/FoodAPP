@@ -65,7 +65,7 @@ const RestaurantDashboard: React.FC = () => {
         <div className="grid grid-cols-1 gap-4">
           {/* Dashboard Cards */}
           <div
-            onClick={() => navigateTo("/restaurant-profile")}
+            onClick={() => navigateTo("/restaurant-details")}
             className="bg-white p-4 rounded-lg shadow cursor-pointer"
           >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -96,12 +96,12 @@ const RestaurantDashboard: React.FC = () => {
             </p>
           </div>
           <div
-            onClick={() => navigateTo("/restaurant-reports")}
+            onClick={() => navigateTo("/existingmenu")}
             className="bg-white p-4 rounded-lg shadow cursor-pointer"
           >
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Reports</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Existing Menus</h3>
             <p className="text-sm text-gray-600">
-              View your sales and order reports
+              View your exising menus here to modify them 
             </p>
           </div>
           <div
@@ -109,7 +109,7 @@ const RestaurantDashboard: React.FC = () => {
             className="bg-white p-4 rounded-lg shadow cursor-pointer"
           >
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Settings
+              Settings 
             </h3>
             <p className="text-sm text-gray-600">
               Manage your account and preferences

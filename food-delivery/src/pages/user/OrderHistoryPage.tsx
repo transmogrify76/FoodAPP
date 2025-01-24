@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import {jwtDecode} from 'jwt-decode'; // Install this library using `npm install jwt-decode` or `yarn add jwt-decode`
 
 interface Order {
   uid: string;
@@ -10,22 +11,35 @@ interface Order {
   created_at: string;
 }
 
+interface DecodedToken {
+  userid: string; // Update the key based on your token structure
+}
+
 const OrderHistoryPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const restaurantId = 'your_restaurant_id_here'; // Replace with actual restaurant ID
-
     const fetchOrders = async () => {
       try {
-        const response = await fetch('http://localhost:5000/order/resorderhistory', {
+        // Retrieve the token from local storage
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('User is not authenticated');
+        }
+
+        // Decode the token to extract the user ID
+        const decoded: DecodedToken = jwtDecode(token);
+        const userId = decoded.userid;
+
+        // Make the API request
+        const response = await fetch('http://localhost:5000/order/userbasedhistory', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ resturentid: restaurantId }),
+          body: JSON.stringify({ userid: userId }),
         });
 
         if (!response.ok) {
@@ -65,7 +79,7 @@ const OrderHistoryPage: React.FC = () => {
                   Product ID: {order.productid}, Quantity: {order.quantity}
                 </p>
               </div>
-              <span className="text-xl text-red-600">₹{order.totalprice.toFixed(2)}</span>
+              <span className="text-xl text-red-600">₹{Number(order.totalprice).toFixed(2)}</span>
             </li>
           ))}
         </ul>

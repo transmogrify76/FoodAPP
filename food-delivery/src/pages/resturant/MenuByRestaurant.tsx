@@ -8,15 +8,15 @@ const GetMenuByOwnerId: React.FC = () => {
   const [menuList, setMenuList] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    // Decode the JWT to get the owner ID
     const token = localStorage.getItem("restaurant_token");
     if (token) {
       try {
         const decodedToken: any = jwtDecode(token);
         setOwnerId(decodedToken.owenerid || "");
-        fetchRestaurants(decodedToken.owenerid); // Fetch restaurants when owner ID is available
+        fetchRestaurants(decodedToken.owenerid);
       } catch (err) {
         console.error("Failed to decode token", err);
       }
@@ -26,7 +26,6 @@ const GetMenuByOwnerId: React.FC = () => {
   const fetchRestaurants = async (owenerid: string) => {
     setLoading(true);
     setError(null);
-
     const formData = new FormData();
     formData.append("ownerid", owenerid);
 
@@ -83,6 +82,37 @@ const GetMenuByOwnerId: React.FC = () => {
     }
   };
 
+  const deleteMenu = async (menuid: string) => {
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    const formData = new FormData();
+    formData.append("menuid", menuid);
+
+    try {
+      const response = await fetch("http://localhost:5000/resops/deletemenu", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to delete menu");
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+      setSuccessMessage(data.message || "Menu deleted successfully");
+      setMenuList(menuList.filter((menu) => menu.menuid !== menuid)); // Update state after deletion
+    } catch (err) {
+      setError("Something went wrong while deleting the menu. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">
@@ -91,6 +121,11 @@ const GetMenuByOwnerId: React.FC = () => {
       {error && (
         <div className="bg-red-100 text-red-800 p-4 rounded-lg mb-4">
           {error}
+        </div>
+      )}
+      {successMessage && (
+        <div className="bg-green-100 text-green-800 p-4 rounded-lg mb-4">
+          {successMessage}
         </div>
       )}
 
@@ -132,15 +167,21 @@ const GetMenuByOwnerId: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Menu List</h2>
           <div className="space-y-4">
             {menuList.map((menu) => (
-              <div key={menu.menuid} className="p-4 border rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900">{menu.menuname}</h3>
-                <p className="text-gray-700">Description: {menu.menudescription}</p>
-                <p className="text-gray-700">Price: {menu.menuprice}</p>
-                <p className="text-gray-700">Type: {menu.menutype}</p>
-                <p className="text-gray-700">Food Type: {menu.foodtype}</p>
-                {/* <p className="text-gray-700">Category ID: {menu.categoryid}</p>
-                <p className="text-gray-700">Subcategory ID: {menu.subcategoryid}</p> */}
-                <p className="text-gray-700">Created At: {menu.created_at}</p>
+              <div key={menu.menuid} className="p-4 border rounded-lg flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{menu.menuname}</h3>
+                  <p className="text-gray-700">Description: {menu.menudescription}</p>
+                  <p className="text-gray-700">Price: {menu.menuprice}</p>
+                  <p className="text-gray-700">Type: {menu.menutype}</p>
+                  <p className="text-gray-700">Food Type: {menu.foodtype}</p>
+                  <p className="text-gray-700">Created At: {menu.created_at}</p>
+                </div>
+                <button
+                  onClick={() => deleteMenu(menu.menuid)}
+                  className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700"
+                >
+                  Delete
+                </button>
               </div>
             ))}
           </div>
