@@ -64,7 +64,7 @@ const RestaurantOrders: React.FC = () => {
     const fetchOrders = async () => {
       try {
         const formData = new FormData();
-        formData.append('resturentid', restaurantId); // Send restaurant ID as FormData
+        formData.append('restaurantid', restaurantId); // Send restaurant ID as FormData
 
         const response = await axios.post('http://localhost:5000/order/resorderhistory', formData);
         console.log('Orders fetched:', response.data);

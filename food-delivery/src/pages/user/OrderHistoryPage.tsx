@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {jwtDecode} from 'jwt-decode'; // Install this library using `npm install jwt-decode` or `yarn add jwt-decode`
+import { jwtDecode } from 'jwt-decode'; // Install this library using `npm install jwt-decode` or `yarn add jwt-decode`
 
 interface Order {
   uid: string;
@@ -33,13 +33,14 @@ const OrderHistoryPage: React.FC = () => {
         const decoded: DecodedToken = jwtDecode(token);
         const userId = decoded.userid;
 
-        // Make the API request
+        // Create FormData and append the user ID
+        const formData = new FormData();
+        formData.append('userid', userId);
+
+        // Make the API request with FormData
         const response = await fetch('http://localhost:5000/order/userbasedhistory', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userid: userId }),
+          body: formData,
         });
 
         if (!response.ok) {
