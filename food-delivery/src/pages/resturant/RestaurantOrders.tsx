@@ -107,8 +107,8 @@ const RestaurantOrders: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex justify-center items-center py-12">
-      <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex justify-center items-center py-14">
+      <div className="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl">
         <h1 className="text-4xl font-bold text-center text-red-600 mb-6">Restaurant Orders</h1>
 
         {message && <p className="text-red-500 text-center mb-4">{message}</p>}
