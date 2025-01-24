@@ -55,10 +55,10 @@ const HomePage: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleViewMenu = async (restaurantId: number) => {
+  const handleViewMenu = async (restaurantId: string) => {
     try {
       const formData = new FormData();
-      formData.append('resturnatid', restaurantId.toString());
+      formData.append('resturnatid', restaurantId);
 
       const response = await fetch('http://127.0.0.1:5000/menu/getmenubyresturantid', {
         method: 'POST',
@@ -81,6 +81,18 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    // Apply search filter
+    const matchesSearchQuery =
+      restaurant.resturantname.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Apply filter for selected cuisine type
+    const matchesCuisineFilter =
+      selectedFilter === 'All' || restaurant.cuisin_type.toLowerCase() === selectedFilter.toLowerCase();
+
+    return matchesSearchQuery && matchesCuisineFilter;
+  });
+
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
       {/* Sidebar */}
@@ -100,7 +112,7 @@ const HomePage: React.FC = () => {
             <li className="flex items-center">
               <FaHome className="text-red-500 mr-3 text-lg" />
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/home')}
                 className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
               >
                 Home
@@ -117,19 +129,28 @@ const HomePage: React.FC = () => {
             </li>
             <li className="flex items-center">
               <FaHistory className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+              <button
+                onClick={() => navigate('/history')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+              >
                 Order History
               </button>
             </li>
             <li className="flex items-center">
               <FaShoppingBag className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+              <button
+                onClick={() => navigate('/track-order')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+              >
                 Order Tracking
               </button>
             </li>
             <li className="flex items-center">
               <FaCog className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+              <button
+                onClick={() => navigate('/settings')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+              >
                 Settings
               </button>
             </li>
@@ -139,10 +160,12 @@ const HomePage: React.FC = () => {
                 Favorites
               </button>
             </li>
-            {/* View Cart Added */}
             <li className="flex items-center">
               <FaShoppingCart className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+              <button
+                onClick={() => navigate('/cart')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+              >
                 View Cart
               </button>
             </li>
@@ -191,28 +214,31 @@ const HomePage: React.FC = () => {
           </div>
           {error && <p className="text-red-500 text-center font-semibold">{error}</p>}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {restaurants
-              .filter(
-                (restaurant) =>
-                  restaurant.resturantname.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                  (selectedFilter === 'All' || restaurant.cuisin_type.toLowerCase() === selectedFilter.toLowerCase())
-              )
-              .map((restaurant) => (
-                <div
-                  key={restaurant.resturantid}
-                  className="bg-gradient-to-r from-white via-gray-50 to-gray-100 shadow-lg hover:shadow-xl rounded-lg p-6 transition-all"
-                >
-                  <h3 className="text-lg font-bold text-red-500 truncate">{restaurant.resturantname}</h3>
-                  <p className="text-gray-600 mt-2">{restaurant.cuisin_type}</p>
-                  <p className="text-gray-500 mt-1">{restaurant.location}</p>
+            {filteredRestaurants.map((restaurant) => (
+              <div
+                key={restaurant.resturantid}
+                className="bg-gradient-to-r from-white via-gray-50 to-gray-100 shadow-lg hover:shadow-xl rounded-lg p-6 transition-all"
+              >
+                {/* Restaurant Image */}
+                {restaurant.thumbnail && (
+                  <img
+                    src={`data:image/jpeg;base64,${restaurant.thumbnail}`}
+                    alt={restaurant.resturantname}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
+                )}
+                <h2 className="text-xl font-semibold text-center">{restaurant.resturantname}</h2>
+                <p className="text-gray-600 text-center">{restaurant.description}</p>
+                <div className="flex justify-center items-center mt-4">
                   <button
-                    className="mt-4 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
                     onClick={() => handleViewMenu(restaurant.resturantid)}
+                    className="px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
                   >
                     View Menu
                   </button>
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -221,3 +247,4 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+
