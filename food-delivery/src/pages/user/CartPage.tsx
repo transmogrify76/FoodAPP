@@ -18,6 +18,20 @@ const CartPage: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
+  // Load Razorpay script dynamically
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => {
+      console.log("Razorpay script loaded successfully");
+    };
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   // Function to calculate the total price of the cart
   const calculateTotalPrice = () => {
     let total = 0;
@@ -230,28 +244,17 @@ const CartPage: React.FC = () => {
             ))}
           </div>
         )}
+      </div>
 
-        <div className="mt-6">
-          <h2 className="text-xl font-bold mb-4">Cart Items:</h2>
-          <ul>
-            {cart.map((cartItem, index) => (
-              <li key={index} className="flex justify-between mb-4">
-                <span>{cartItem.menuname}</span>
-                <span>{cartItem.menuprice * cartItem.quantity}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 flex justify-between font-bold text-xl">
-            <span>Total:</span>
-            <span>{totalPrice}</span>
-          </div>
-          <button
-            onClick={createOrder}
-            className="w-full mt-6 bg-gradient-to-r from-pink-500 to-red-500 text-white py-3 rounded-lg hover:bg-gradient-to-l transition-all"
-          >
-            Proceed to Payment
-          </button>
-        </div>
+      {/* Total Price */}
+      <div className="flex justify-between p-6 bg-gradient-to-r from-red-500 to-pink-500 text-white fixed bottom-0 left-0 w-full">
+        <h2 className="font-semibold">Total: ₹{totalPrice}</h2>
+        <button
+          onClick={createOrder}
+          className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-2 px-6 rounded-full shadow-lg hover:bg-gradient-to-l transition-all"
+        >
+          Checkout
+        </button>
       </div>
     </div>
   );
