@@ -121,21 +121,21 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-500 via-white to-gray-100 flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-b from-red-500 via-white to-gray-100 flex flex-col items-center justify-center py-12">
       {/* Main profile container */}
-      <div className="bg-transparent rounded-xl shadow-lg p-8 w-full max-w-lg">
-        <div className="text-center mb-6">
-          <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden shadow-md border-4 border-red-300 hover:border-red-500 transition-all">
+      <div className="bg-transparent rounded-xl shadow-xl p-14 w-full max-w-5xl min-h-[600px]">
+        <div className="text-center mb-8">
+          <div className="relative w-40 h-40 mx-auto rounded-full overflow-hidden shadow-lg border-4 border-red-300 hover:border-red-500 transition-all">
             {userData.profilepicture ? (
               <img
-                src={`data:image/jpeg;base64,{userData.profilepicture}`}
+                src={`data:image/jpeg;base64,${userData.profilepicture}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
             ) : (
               <FaUserAlt className="text-gray-400 w-full h-full" />
             )}
-            <label className="absolute bottom-1 right-1 cursor-pointer bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition">
+            <label className="absolute bottom-2 right-2 cursor-pointer bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition">
               <input
                 type="file"
                 accept="image/*"
@@ -145,20 +145,21 @@ const UserProfile: React.FC = () => {
               <FaEdit />
             </label>
           </div>
-          <h1 className="text-3xl font-extrabold text-red-600 mt-4">{userData.name}</h1>
-          <p className="text-gray-600 text-lg">Account Details</p>
+
+          <h1 className="text-3xl font-extrabold text-red-600 mt-6">{userData.name}</h1>
+          <p className="text-gray-600 text-xl">Account Details</p>
         </div>
 
         {editing ? (
           <form onSubmit={handleUpdateProfile}>
-            <div className="space-y-4">
+            <div className="space-y-8">
               <div>
                 <label className="block text-lg text-gray-700">Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
               <div>
@@ -167,7 +168,7 @@ const UserProfile: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
               <div>
@@ -176,7 +177,7 @@ const UserProfile: React.FC = () => {
                   type="text"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
               <div>
@@ -185,11 +186,11 @@ const UserProfile: React.FC = () => {
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
             </div>
-            <div className="mt-8 text-center">
+            <div className="mt-10 text-center">
               <button
                 type="submit"
                 className="bg-red-500 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-red-600 transition-all"
@@ -199,7 +200,7 @@ const UserProfile: React.FC = () => {
             </div>
           </form>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center space-x-4">
               <FaEnvelope className="text-red-500 text-lg" />
               <p className="text-gray-700 text-lg">{userData.email}</p>
@@ -216,10 +217,10 @@ const UserProfile: React.FC = () => {
         )}
 
         {!editing && (
-          <div className="mt-8 text-center">
+          <div className="mt-10 text-center">
             <button
               onClick={handleEditClick}
-              className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-gradient-to-l transition-all"
+              className="bg-red-500 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-red-600 transition-all"
             >
               Edit Profile
             </button>
