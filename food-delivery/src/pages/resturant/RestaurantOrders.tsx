@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaShoppingCart, FaUsers, FaMapMarkerAlt } from 'react-icons/fa';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 const RestaurantOrders: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -95,7 +95,7 @@ const RestaurantOrders: React.FC = () => {
       if (response.data.message === 'Data update success') {
         setMessage(`Order #${orderId} has been ${action}ed.`);
         setOrders(orders.map((order) =>
-          order.uid === orderId ? { ...order, status: action === 'accept' ? 'accepted' : 'rejected' } : order
+          order.uid === orderId ? { ...order, orderstatus: action === 'accept' ? 'accepted' : 'rejected' } : order
         )); // Update the status locally without refetching
       } else {
         setMessage('Failed to update order status.');
@@ -120,42 +120,33 @@ const RestaurantOrders: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <FaShoppingCart className="text-red-600 mr-2" />
-                    <h2 className="text-xl font-semibold text-gray-700">Order #{order.uid}</h2>
-                  </div>
-                  <div className="flex items-center">
-                    <FaUsers className="text-red-600 mr-2" />
-                    <p className="text-sm text-gray-600">{order.userid}</p>
+                    <h2 className="text-xl font-semibold text-gray-700">{order.menuname}</h2>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <FaMapMarkerAlt className="text-red-600 mr-2" />
-                    <p>Address: {order.restaurantid}</p>
-                  </div>
-                  <p className="text-sm text-gray-600"><strong>Items:</strong> {order.productid}</p>
+                  <p className="text-sm text-gray-600"><strong>Description:</strong> {order.menudescription}</p>
                   <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.quantity}</p>
-                  <p className="text-sm text-gray-600"><strong>Total Price:</strong> ${order.totalprice}</p>
+                  <p className="text-sm text-gray-600"><strong>Total Price:</strong> ₹{order.totalprice}</p>
+                  <p className="text-sm text-gray-600"><strong>Order Status:</strong> {order.orderstatus}</p>
+                  <p className="text-sm text-gray-600"><strong>Customer:</strong> {order.username}</p>
+                  <p className="text-sm text-gray-600"><strong>Contact:</strong> {order.user_phone_no}</p>
+                  <p className="text-sm text-gray-600"><strong>Address:</strong> {order.useraddress}</p>
                   <p className="text-sm text-gray-600"><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
-                </div>
-
-                {/* Show status of the order */}
-                <div className="mt-4">
-                  <p className="text-sm text-gray-600"><strong>Status:</strong> {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}</p>
                 </div>
 
                 {/* Accept and Reject Buttons */}
                 <div className="flex justify-end mt-4">
                   <button
                     onClick={() => handleOrderAction(order.uid, 'accept')}
-                    className={`bg-green-500 text-white py-2 px-4 rounded-lg mr-2 hover:bg-green-600 ${order.status === 'accepted' || order.status === 'rejected' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={order.status === 'accepted' || order.status === 'rejected'}
+                    className={`bg-green-500 text-white py-2 px-4 rounded-lg mr-2 hover:bg-green-600 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={order.orderstatus !== 'pending'}
                   >
                     Accept
                   </button>
                   <button
                     onClick={() => handleOrderAction(order.uid, 'reject')}
-                    className={`bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 ${order.status === 'accepted' || order.status === 'rejected' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={order.status === 'accepted' || order.status === 'rejected'}
+                    className={`bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={order.orderstatus !== 'pending'}
                   >
                     Reject
                   </button>
