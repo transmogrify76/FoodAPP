@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 interface Order {
   uid: string;
@@ -10,13 +10,17 @@ interface Order {
   restaurantid: string;
   totalprice: number;
   orderstatus: string;
-  tempstatus: string;  // To track the order's progress
-  created_at: string;
+  tempstatus: string; // To track the order's progress
+  created_at: string; // Order placed time
   restaurant?: {
     resturantname: string;
     location: string;
     cuisin_type: string;
     address: string;
+  };
+  menu?: {
+    menuname: string;
+    menuprice: string;
   };
 }
 
@@ -75,6 +79,12 @@ const OrderTrackingPage: React.FC = () => {
     }
   };
 
+  // Function to format the order placed time
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString(); // This will format the date in a readable format (like "1/29/2025, 11:15:34 AM")
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">Order Tracking</h1>
@@ -85,8 +95,10 @@ const OrderTrackingPage: React.FC = () => {
             <li key={order.uid} className="flex justify-between items-center mb-4 p-4 bg-gray-100 rounded-md shadow">
               <div>
                 <h4 className="font-semibold text-lg">{order.restaurant?.resturantname || 'Unknown Restaurant'}</h4>
-                <p className="text-gray-600">Order ID: {order.uid}</p>
+                {/* <p className="text-gray-600">Order ID: {order.uid}</p> */}
+                <p className="text-gray-600">Menu: {order.menu?.menuname || 'Unknown Dish'}</p>
                 <p className="text-gray-600">Total Price: ₹{order.totalprice}</p>
+                <p className="text-gray-600">Order Placed: {formatDate(order.created_at)}</p> {/* Order placed time */}
               </div>
               <span className={`text-sm font-bold p-2 rounded ${getStatusColor(order.tempstatus || order.orderstatus)}`}>
                 {order.tempstatus || order.orderstatus}

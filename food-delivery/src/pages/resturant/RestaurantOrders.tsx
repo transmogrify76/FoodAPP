@@ -119,9 +119,10 @@ const RestaurantOrders: React.FC = () => {
 
       if (response.status === 200) {
         setMessage(`Order #${orderId} status updated to '${tempStatus}'.`);
+        // Update the status in the local state
         setOrders(orders.map((order) =>
           order.uid === orderId ? { ...order, status: tempStatus } : order
-        )); // Update the status locally without refetching
+        ));
       } else {
         setMessage('Failed to update temporary order status.');
       }
