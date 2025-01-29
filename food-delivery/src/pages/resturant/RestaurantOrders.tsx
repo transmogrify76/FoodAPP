@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaShoppingCart, FaUsers, FaMapMarkerAlt } from 'react-icons/fa';
-import {jwtDecode} from 'jwt-decode';
+import { FaShoppingCart } from 'react-icons/fa';
+import { jwtDecode } from 'jwt-decode';
 
 const RestaurantOrders: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -91,7 +91,7 @@ const RestaurantOrders: React.FC = () => {
 
       // Make the API call to update the order status
       const response = await axios.post('http://localhost:5000/ops/updateorder', formData);
-      
+
       if (response.data.message === 'Data update success') {
         setMessage(`Order #${orderId} has been ${action}ed.`);
         setOrders(orders.map((order) =>
@@ -106,24 +106,49 @@ const RestaurantOrders: React.FC = () => {
     }
   };
 
+  const handleTempStatusChange = async (orderId: string, tempStatus: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('orderid', orderId);
+      formData.append('tempstatus', tempStatus);
+      formData.append('restaurantid', restaurantId);
+      formData.append('userid', ownerId);
+
+      // Make the API call to update the temporary order status
+      const response = await axios.post('http://localhost:5000/tmporderstatus', formData);
+
+      if (response.status === 200) {
+        setMessage(`Order #${orderId} status updated to '${tempStatus}'.`);
+        setOrders(orders.map((order) =>
+          order.uid === orderId ? { ...order, status: tempStatus } : order
+        )); // Update the status locally without refetching
+      } else {
+        setMessage('Failed to update temporary order status.');
+      }
+    } catch (error) {
+      console.error('Error updating temporary order status:', error);
+      setMessage('Error updating temporary order status.');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex justify-center items-center py-14">
-      <div className="bg-white shadow-lg rounded-lg p-10 w-full max-w-4xl">
-        <h1 className="text-4xl font-bold text-center text-red-600 mb-6">Restaurant Orders</h1>
+    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4">
+      <div className="bg-white shadow-lg rounded-lg p-6">
+        <h1 className="text-2xl font-bold text-center text-red-600 mb-4">Restaurant Orders</h1>
 
         {message && <p className="text-red-500 text-center mb-4">{message}</p>}
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {orders.length > 0 ? (
             orders.map((order) => (
-              <div key={order.uid} className="bg-white shadow-md rounded-lg p-6 mb-4 border-l-4 border-red-600">
+              <div key={order.uid} className="bg-white shadow-md rounded-lg p-4 border-l-4 border-red-600">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <FaShoppingCart className="text-red-600 mr-2" />
-                    <h2 className="text-xl font-semibold text-gray-700">{order.menuname}</h2>
+                    <h2 className="text-lg font-semibold text-gray-700">{order.menuname}</h2>
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="mt-2">
                   <p className="text-sm text-gray-600"><strong>Description:</strong> {order.menudescription}</p>
                   <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.quantity}</p>
                   <p className="text-sm text-gray-600"><strong>Total Price:</strong> ₹{order.totalprice}</p>
@@ -135,22 +160,46 @@ const RestaurantOrders: React.FC = () => {
                 </div>
 
                 {/* Accept and Reject Buttons */}
-                <div className="flex justify-end mt-4">
+                <div className="flex justify-end mt-4 space-x-2">
                   <button
                     onClick={() => handleOrderAction(order.uid, 'accept')}
-                    className={`bg-green-500 text-white py-2 px-4 rounded-lg mr-2 hover:bg-green-600 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`bg-green-500 text-white py-1 px-3 rounded-lg text-sm ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={order.orderstatus !== 'pending'}
                   >
                     Accept
                   </button>
                   <button
                     onClick={() => handleOrderAction(order.uid, 'reject')}
-                    className={`bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`bg-red-500 text-white py-1 px-3 rounded-lg text-sm ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={order.orderstatus !== 'pending'}
                   >
                     Reject
                   </button>
                 </div>
+
+                {/* Temporary Status Change Buttons */}
+                {order.orderstatus === 'accepted' && (
+                  <div className="flex justify-end mt-4 space-x-2">
+                    <button
+                      onClick={() => handleTempStatusChange(order.uid, 'started preparing')}
+                      className="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600"
+                    >
+                      Started Preparing
+                    </button>
+                    <button
+                      onClick={() => handleTempStatusChange(order.uid, 'in progress')}
+                      className="bg-yellow-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-yellow-600"
+                    >
+                      In Progress
+                    </button>
+                    <button
+                      onClick={() => handleTempStatusChange(order.uid, 'dispatch')}
+                      className="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600"
+                    >
+                      Dispatch
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           ) : (
