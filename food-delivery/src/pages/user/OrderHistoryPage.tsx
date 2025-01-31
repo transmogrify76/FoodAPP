@@ -66,7 +66,7 @@ const OrderHistoryPage: React.FC = () => {
 
         const data = await response.json();
         setOrders(data.order_list);
-        setFilteredOrders(data.order_list); // Initialize filtered orders with all data
+        setFilteredOrders(data.order_list); 
       } catch (err) {
         setError((err as Error).message);
       } finally {

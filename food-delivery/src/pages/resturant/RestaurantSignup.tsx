@@ -12,7 +12,7 @@ const RestaurantSignup: React.FC = () => {
     otp: '',
   });
   const [message, setMessage] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false); // Track OTP state
+  const [isOtpSent, setIsOtpSent] = useState(false); 
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,18 +35,18 @@ const RestaurantSignup: React.FC = () => {
 
     try {
       if (!otp && !isOtpSent) {
-        // Send OTP if not already sent
+        
         const response = await axios.post('http://127.0.0.1:5000/users/resauth_signup', formDataToSend);
         setMessage(response.data.message);
         setIsOtpSent(true); // Mark OTP as sent
       } else if (otp) {
-        // Verify OTP if entered
+        
         formDataToSend.append('otp', otp);
         const response = await axios.post('http://127.0.0.1:5000/users/resauth_signup', formDataToSend);
         setMessage(response.data.message);
 
         if (response.data.message === 'Signup successful!') {
-          navigate('/restaurant-login'); // Redirect to login on success
+          navigate('/restaurant-login'); 
         }
       }
     } catch (error: unknown) {

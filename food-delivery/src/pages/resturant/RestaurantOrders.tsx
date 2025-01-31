@@ -6,18 +6,18 @@ import { jwtDecode } from 'jwt-decode';
 const RestaurantOrders: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [message, setMessage] = useState<string>('');
-  const [restaurantId, setRestaurantId] = useState<string>(''); // To store restaurant ID
-  const [ownerId, setOwnerId] = useState<string>(''); // To store owner ID
+  const [restaurantId, setRestaurantId] = useState<string>(''); 
+  const [ownerId, setOwnerId] = useState<string>(''); 
 
   useEffect(() => {
-    // Fetch the restaurant token from local storage and decode it
+    
     const storedRestaurantToken = localStorage.getItem('restaurant_token');
     if (storedRestaurantToken) {
       try {
-        // Decode the JWT token to extract the owner ID
+        
         const decodedToken: any = jwtDecode(storedRestaurantToken);
-        setOwnerId(decodedToken.owenerid); // Assuming the ownerId exists in the token
-        fetchRestaurantId(decodedToken.owenerid); // Fetch restaurant ID based on the owner ID
+        setOwnerId(decodedToken.owenerid); 
+        fetchRestaurantId(decodedToken.owenerid); 
       } catch (error) {
         console.error('Error decoding token:', error);
         setMessage('Invalid token.');
@@ -27,11 +27,11 @@ const RestaurantOrders: React.FC = () => {
     }
   }, []);
 
-  // Fetch the restaurant ID using the owner ID
+  
   const fetchRestaurantId = async (ownerId: string) => {
     try {
       const formData = new FormData();
-      formData.append('ownerid', ownerId); // Send ownerid as FormData
+      formData.append('ownerid', ownerId); 
 
       const response = await fetch('http://localhost:5000/owenerresturentfetch', {
         method: 'POST',
@@ -45,9 +45,9 @@ const RestaurantOrders: React.FC = () => {
       }
 
       const data = await response.json();
-      const restaurantIdFromResponse = data.data[0]?.restaurantid; // Assuming first restaurant in the list
+      const restaurantIdFromResponse = data.data[0]?.restaurantid; 
       if (restaurantIdFromResponse) {
-        setRestaurantId(restaurantIdFromResponse); // Set the restaurant ID
+        setRestaurantId(restaurantIdFromResponse); 
       } else {
         setMessage('No restaurant found for this owner.');
       }
@@ -58,16 +58,15 @@ const RestaurantOrders: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!restaurantId) return; // Don't fetch orders if restaurantId is empty
-
-    // Fetch the orders once the restaurant ID is available
+    if (!restaurantId) return; 
+    
     const fetchOrders = async () => {
       try {
         const formData = new FormData();
-        formData.append('restaurantid', restaurantId); // Send restaurant ID as FormData
+        formData.append('restaurantid', restaurantId); 
 
         const response = await axios.post('http://localhost:5000/order/resorderhistory', formData);
-        console.log('Orders fetched:', response.data);
+        console.log('Orders fetched:', response.data)
         setOrders(response.data.order_list);
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -87,16 +86,16 @@ const RestaurantOrders: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('orderid', orderId);
-      formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected'); // Update status based on action
+      formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected');
 
-      // Make the API call to update the order status
+     
       const response = await axios.post('http://localhost:5000/ops/updateorder', formData);
 
       if (response.data.message === 'Data update success') {
         setMessage(`Order #${orderId} has been ${action}ed.`);
         setOrders(orders.map((order) =>
           order.uid === orderId ? { ...order, orderstatus: action === 'accept' ? 'accepted' : 'rejected' } : order
-        )); // Update the status locally without refetching
+        )); 
       } else {
         setMessage('Failed to update order status.');
       }
@@ -114,12 +113,11 @@ const RestaurantOrders: React.FC = () => {
       formData.append('restaurantid', restaurantId);
       formData.append('userid', ownerId);
 
-      // Make the API call to update the temporary order status
+      
       const response = await axios.post('http://localhost:5000/tmporderstatus', formData);
 
       if (response.status === 200) {
         setMessage(`Order #${orderId} status updated to '${tempStatus}'.`);
-        // Update the status in the local state
         setOrders(orders.map((order) =>
           order.uid === orderId ? { ...order, status: tempStatus } : order
         ));

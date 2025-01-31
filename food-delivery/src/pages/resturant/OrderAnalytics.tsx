@@ -5,12 +5,11 @@ const AnalyticsByOwnerId: React.FC = () => {
   const [ownerId, setOwnerId] = useState<string>("");
   const [restaurantList, setRestaurantList] = useState<any[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
-  const [analyticsData, setAnalyticsData] = useState<any>(null); // Analytics data state
+  const [analyticsData, setAnalyticsData] = useState<any>(null); 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Fetch owner's ID from localStorage and restaurants list
   useEffect(() => {
     const token = localStorage.getItem("restaurant_token");
     if (token) {
@@ -24,7 +23,7 @@ const AnalyticsByOwnerId: React.FC = () => {
     }
   }, []);
 
-  // Fetch restaurants based on owner ID
+  
   const fetchRestaurants = async (owenerid: string) => {
     setLoading(true);
     setError(null);
@@ -53,7 +52,7 @@ const AnalyticsByOwnerId: React.FC = () => {
     }
   };
 
-  // Fetch analytics data for the selected restaurant
+
   const fetchAnalytics = async () => {
     if (!selectedRestaurantId) return;
 
@@ -77,7 +76,7 @@ const AnalyticsByOwnerId: React.FC = () => {
       }
 
       const data = await response.json();
-      setAnalyticsData(data); // Map the entire response to the analytics state
+      setAnalyticsData(data); 
     } catch (err) {
       setError("Something went wrong while fetching analytics. Please try again later.");
     } finally {

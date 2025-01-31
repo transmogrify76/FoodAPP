@@ -9,19 +9,19 @@ const RestaurantMenuPage: React.FC = () => {
   const [menu, setMenu] = useState<any[]>([]);
   const [error, setError] = useState('');
   const [cart, setCart] = useState<any[]>(() => {
-    // Retrieve cart from localStorage if available
+    
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
 
-  const userid = 'user123'; // Replace with actual user ID
-  const restaurantid = 'restaurant123'; // Replace with actual restaurant ID
+  const userid = 'user123'; 
+  const restaurantid = 'restaurant123'; 
 
-  // Handle adding item to cart
+ 
   const handleAddToCart = async (item: any) => {
-    setLoadingItemId(item.menuid); // Set loading for the specific item
+    setLoadingItemId(item.menuid); 
     try {
       const response = await axios.post('http://localhost:5000/cart/assigntocart', new URLSearchParams({
         menuid: item.menuid,
@@ -35,14 +35,14 @@ const RestaurantMenuPage: React.FC = () => {
           const existingItem = prevCart.find((cartItem) => cartItem.menuid === item.menuid);
 
           if (existingItem) {
-            // Update the quantity of the existing item
+            
             return prevCart.map((cartItem) =>
               cartItem.menuid === item.menuid
                 ? { ...cartItem, quantity: cartItem.quantity + 1 }
                 : cartItem
             );
           } else {
-            // Add the new item to the cart
+            
             return [...prevCart, { ...item, quantity: 1 }];
           }
         });
@@ -53,11 +53,11 @@ const RestaurantMenuPage: React.FC = () => {
       console.error('Error adding item to cart', error);
       alert('Failed to add item to cart.');
     } finally {
-      setLoadingItemId(null); // Reset loading state
+      setLoadingItemId(null); 
     }
   };
 
-  // Handle toggling favorite status
+  
   const handleToggleFavorite = async (item: any) => {
     try {
       const response = await axios.post('http://localhost:5000/ops/makemenufav', new URLSearchParams({
@@ -80,16 +80,16 @@ const RestaurantMenuPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Save cart to localStorage whenever it changes
+    
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
   useEffect(() => {
     if (state && state.menu) {
       setMenu(state.menu);
-      // Initialize favorites state
+      
       const initialFavorites = state.menu.reduce((acc: any, item: any) => {
-        acc[item.menuid] = false; // Assuming initially no item is favorited
+        acc[item.menuid] = false; 
         return acc;
       }, {});
       setFavorites(initialFavorites);

@@ -105,7 +105,7 @@ const GetMenuByOwnerId: React.FC = () => {
 
       const data = await response.json();
       setSuccessMessage(data.message || "Menu deleted successfully");
-      setMenuList(menuList.filter((menu) => menu.menuid !== menuid)); // Update state after deletion
+      setMenuList(menuList.filter((menu) => menu.menuid !== menuid)); 
     } catch (err) {
       setError("Something went wrong while deleting the menu. Please try again later.");
     } finally {

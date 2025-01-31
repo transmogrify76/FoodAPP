@@ -1,14 +1,12 @@
 import React from 'react';
 import { FaPizzaSlice, FaHamburger } from 'react-icons/fa';
 import { GiHotMeal } from 'react-icons/gi';
-import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
-import logo from '../assets/Red Illustrated Mascot Chef Free Logo.png'; // Import the logo from assets folder
-
+import { useNavigate } from 'react-router-dom'; 
+import logo from '../assets/Red Illustrated Mascot Chef Free Logo.png'; 
 const LandingPage: React.FC = () => {
-  const navigate = useNavigate(); // Initialize the navigate function
-
+  const navigate = useNavigate(); 
   const handleRestaurantOwnerClick = () => {
-    navigate('/restaurant-login'); // Navigate to the restaurant login page
+    navigate('/restaurant-login'); 
   };
 
   return (
@@ -20,7 +18,7 @@ const LandingPage: React.FC = () => {
       <main className="flex flex-col items-center justify-center flex-1 px-6">
         <div className="mb-5"> {/* Added extra margin between header and logo */}
           <img
-            src={logo} // Use the logo from the assets folder
+            src={logo} 
             alt="Foodie Heaven Logo"
             className="w-36 h-36 rounded-full shadow-lg"
           />

@@ -37,10 +37,10 @@ const Login: React.FC = () => {
         throw new Error(data.error || 'Login failed');
       }
 
-      // Store token in localStorage/sessionStorage
+      
       localStorage.setItem('token', data.token);
 
-      // Navigate to /home
+      
       navigate('/home');
     } catch (error: any) {
       setError(error.message);

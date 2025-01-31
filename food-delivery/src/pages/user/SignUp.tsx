@@ -7,9 +7,9 @@ const SignUp: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    otp: '', // New field for OTP
+    otp: '', 
   });
-  const [step, setStep] = useState(1); // Step 1: Form, Step 2: OTP Verification
+  const [step, setStep] = useState(1); 
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -25,7 +25,7 @@ const SignUp: React.FC = () => {
     e.preventDefault();
 
     if (step === 1) {
-      // Send signup request to the backend
+      
       const { name, email, password, confirmPassword } = formData;
 
       try {
@@ -43,7 +43,7 @@ const SignUp: React.FC = () => {
         const data = await response.json();
 
         if (response.ok) {
-          setStep(2); // Move to OTP verification step
+          setStep(2); 
           setSuccessMessage(data.message);
         } else {
           setError(data.error || 'An error occurred. Please try again.');
@@ -52,7 +52,7 @@ const SignUp: React.FC = () => {
         setError('Failed to connect to the server. Please try again.');
       }
     } else if (step === 2) {
-      // Verify OTP
+     
       const { email, otp } = formData;
 
       try {

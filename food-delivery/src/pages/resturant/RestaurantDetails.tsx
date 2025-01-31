@@ -32,7 +32,7 @@ const RestaurantDetails: React.FC = () => {
         throw new Error("User is not authenticated");
       }
 
-      // Decode the JWT to extract the owner ID
+      
       const decodedToken: { owenerid: string } = jwtDecode(token);
       const ownerid = decodedToken.owenerid;
 
@@ -60,7 +60,7 @@ const RestaurantDetails: React.FC = () => {
       }
 
       const data = await response.json();
-      setRestaurant(data.data[0]); // Assuming we fetch one restaurant
+      setRestaurant(data.data[0]); 
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -74,7 +74,7 @@ const RestaurantDetails: React.FC = () => {
 
   const handleAddMenu = () => {
     if (restaurant && restaurant.restaurantid) {
-      navigate(`/create-menu?restaurantid=${restaurant.restaurantid}`); // Pass restaurantid as a query parameter
+      navigate(`/create-menu?restaurantid=${restaurant.restaurantid}`); 
     } else {
       alert("Restaurant ID not found!");
     }

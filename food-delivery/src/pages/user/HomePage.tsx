@@ -82,11 +82,11 @@ const HomePage: React.FC = () => {
   };
 
   const filteredRestaurants = restaurants.filter((restaurant) => {
-    // Apply search filter
+    
     const matchesSearchQuery =
       restaurant.resturantname.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Apply filter for selected cuisine type
+    
     const matchesCuisineFilter =
       selectedFilter === 'All' || restaurant.cuisin_type.toLowerCase() === selectedFilter.toLowerCase();
 

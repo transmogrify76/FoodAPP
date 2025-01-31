@@ -8,9 +8,9 @@ const RestaurantLogin: React.FC = () => {
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate(); 
 
-  // Handle input changes
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -19,32 +19,32 @@ const RestaurantLogin: React.FC = () => {
     });
   };
 
-  // Handle form submission
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      // Make POST request using fetch with form data encoded as URL parameters
+      
       const response = await fetch('http://127.0.0.1:5000/users/resauthlogin_login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams(formData).toString(), // Convert formData to URLSearchParams
+        body: new URLSearchParams(formData).toString(), 
       });
 
-      // Parse the response as JSON
+      
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
 
-      // If login is successful, store the token and navigate to dashboard
+    
       localStorage.setItem('restaurant_token', data.token);
 
-      // Navigate to restaurant dashboard
+      
       navigate('/restaurant-dashboard');
     } catch (error: any) {
       setError(error.message || 'An error occurred while logging in');

@@ -10,8 +10,8 @@ interface Order {
   restaurantid: string;
   totalprice: number;
   orderstatus: string;
-  tempstatus: string; // To track the order's progress
-  created_at: string; // Order placed time
+  tempstatus: string; 
+  created_at: string; 
   restaurant?: {
     resturantname: string;
     location: string;
@@ -33,8 +33,8 @@ const OrderTrackingPage: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Extract token from local storage
-    const token = localStorage.getItem('token'); // Adjust if you store it differently
+    
+    const token = localStorage.getItem('token'); 
     if (token) {
       try {
         const decoded: DecodedToken = jwtDecode(token);
@@ -64,7 +64,6 @@ const OrderTrackingPage: React.FC = () => {
     }
   }, [userId]);
 
-  // Function to determine order status color
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -79,10 +78,10 @@ const OrderTrackingPage: React.FC = () => {
     }
   };
 
-  // Function to format the order placed time
+ 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString(); // This will format the date in a readable format (like "1/29/2025, 11:15:34 AM")
+    return date.toLocaleString(); 
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode'; // Import the jwt-decode library
+import {jwtDecode} from 'jwt-decode'; 
 
 const FavoriteRestaurantsPage: React.FC = () => {
   const [favorites, setFavorites] = useState<any[]>([]);
@@ -10,13 +10,13 @@ const FavoriteRestaurantsPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Function to decode the JWT and get the userid
+  
   const getUserIdFromToken = (): string | null => {
-    const token = localStorage.getItem('token'); // Token from localStorage
+    const token = localStorage.getItem('token'); 
     if (token) {
       try {
-        const decoded: any = jwtDecode(token); // Decode the JWT token
-        return decoded.userid; // Assuming 'userid' is part of the decoded token
+        const decoded: any = jwtDecode(token); 
+        return decoded.userid; 
       } catch (error) {
         console.error('Failed to decode token', error);
         return null;
@@ -25,9 +25,9 @@ const FavoriteRestaurantsPage: React.FC = () => {
     return null;
   };
 
-  // Fetch the user's favorite restaurants
+  
   const fetchFavorites = async () => {
-    const userid = getUserIdFromToken(); // Get the user ID from token
+    const userid = getUserIdFromToken(); 
 
     if (!userid) {
       setError('User is not authenticated.');
@@ -39,7 +39,7 @@ const FavoriteRestaurantsPage: React.FC = () => {
       const response = await axios.post(
         'http://localhost:5000/ops/fetchfavoritebyuserid',
         {
-          userid: userid, // Send the decoded user ID in the request payload as a key-value pair
+          userid: userid, 
         }
       );
 

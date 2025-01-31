@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const MenuPage: React.FC = () => {
-  const [menuItems, setMenuItems] = useState<any[]>([]); // State to hold menu items from API
-  const [cart, setCart] = useState<any[]>([]); // State to hold cart items
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+  const [menuItems, setMenuItems] = useState<any[]>([]); 
+  const [cart, setCart] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null); 
 
-  // Fetch menu items from API
+ 
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/resown/getallmenus'); // Replace with your API endpoint
-        console.log('API Response:', response.data); // Debugging API response
-        setMenuItems(response.data.menus); // Assuming the API returns a 'menus' array
+        const response = await axios.get('http://localhost:5000/resown/getallmenus'); 
+        console.log('API Response:', response.data); 
+        setMenuItems(response.data.menus); 
       } catch (err) {
         console.error('Error fetching menu:', err);
         setError('Failed to fetch menu items');
@@ -29,7 +29,7 @@ const MenuPage: React.FC = () => {
     setCart([...cart, item]);
   };
 
-  // Loading and Error handling
+  
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 

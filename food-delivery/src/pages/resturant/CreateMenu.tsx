@@ -18,13 +18,13 @@ const CreateMenu: React.FC = () => {
   const [createMenuLoading, setCreateMenuLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Decode the JWT to get the owner ID
+   
     const token = localStorage.getItem("restaurant_token");
     if (token) {
       try {
         const decodedToken: any = jwtDecode(token);
         setOwnerId(decodedToken.owenerid || "");
-        fetchRestaurants(decodedToken.owenerid); // Fetch restaurants when owner ID is available
+        fetchRestaurants(decodedToken.owenerid); 
       } catch (err) {
         console.error("Failed to decode token", err);
       }
@@ -89,7 +89,7 @@ const CreateMenu: React.FC = () => {
     formData.append("menuprice", menuData.menuprice || "");
     formData.append("menutype", menuData.menutype || "");
     formData.append("foodtype", menuData.foodtype || "");
-    formData.append("restaurantid", selectedRestaurantId); // Use the selected restaurant ID
+    formData.append("restaurantid", selectedRestaurantId); 
 
     menuData.images.forEach((image) => {
       formData.append("images", image);
