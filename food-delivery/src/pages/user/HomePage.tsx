@@ -156,7 +156,8 @@ const HomePage: React.FC = () => {
             </li>
             <li className="flex items-center">
               <FaRegHeart className="text-red-500 mr-3 text-lg" />
-              <button className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+              <button onClick={() => navigate('/favourites')}
+               className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
                 Favorites
               </button>
             </li>

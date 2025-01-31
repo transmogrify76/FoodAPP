@@ -182,13 +182,13 @@ const RestaurantOrders: React.FC = () => {
                 {order.orderstatus === 'accepted' && (
                   <div className="flex justify-end mt-4 space-x-2">
                     <button
-                      onClick={() => handleTempStatusChange(order.uid, 'started preparing')}
+                      onClick={() => handleTempStatusChange(order.uid, 'startedpreparing')}
                       className="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600"
                     >
                       Started Preparing
                     </button>
                     <button
-                      onClick={() => handleTempStatusChange(order.uid, 'in progress')}
+                      onClick={() => handleTempStatusChange(order.uid, 'inprogress')}
                       className="bg-yellow-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-yellow-600"
                     >
                       In Progress

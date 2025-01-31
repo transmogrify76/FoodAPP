@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
 
 const RestaurantMenuPage: React.FC = () => {
@@ -14,6 +14,7 @@ const RestaurantMenuPage: React.FC = () => {
     return savedCart ? JSON.parse(savedCart) : [];
   });
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
 
   const userid = 'user123'; // Replace with actual user ID
   const restaurantid = 'restaurant123'; // Replace with actual restaurant ID
@@ -56,6 +57,28 @@ const RestaurantMenuPage: React.FC = () => {
     }
   };
 
+  // Handle toggling favorite status
+  const handleToggleFavorite = async (item: any) => {
+    try {
+      const response = await axios.post('http://localhost:5000/ops/makemenufav', new URLSearchParams({
+        menuid: item.menuid,
+        userid: userid,
+        restaurantid: restaurantid,
+      }));
+
+      if (response.status === 200) {
+        setFavorites((prevFavorites) => ({
+          ...prevFavorites,
+          [item.menuid]: !prevFavorites[item.menuid],
+        }));
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite', error);
+      alert('Failed to toggle favorite.');
+    }
+  };
+
   useEffect(() => {
     // Save cart to localStorage whenever it changes
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -64,6 +87,12 @@ const RestaurantMenuPage: React.FC = () => {
   useEffect(() => {
     if (state && state.menu) {
       setMenu(state.menu);
+      // Initialize favorites state
+      const initialFavorites = state.menu.reduce((acc: any, item: any) => {
+        acc[item.menuid] = false; // Assuming initially no item is favorited
+        return acc;
+      }, {});
+      setFavorites(initialFavorites);
     } else {
       setError('Failed to load menu.');
     }
@@ -77,7 +106,6 @@ const RestaurantMenuPage: React.FC = () => {
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
       <div className="flex justify-between items-center p-6 bg-gradient-to-r from-red-500 to-pink-500 text-white">
         <h1 className="text-2xl font-bold">Restaurant Menu</h1>
-
       </div>
 
       {error && <p className="text-red-500 text-center font-semibold mt-4">{error}</p>}
@@ -102,15 +130,22 @@ const RestaurantMenuPage: React.FC = () => {
                 ) : (
                   <p>No image available</p>
                 )}
-
               </div>
-              <button
-                className="mt-4 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
-                onClick={() => handleAddToCart(item)}
-                disabled={loadingItemId === item.menuid}
-              >
-                {loadingItemId === item.menuid ? 'Adding...' : 'Add to Cart'} <FaShoppingCart className="inline ml-2" />
-              </button>
+              <div className="flex justify-between items-center mt-4">
+                <button
+                  className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
+                  onClick={() => handleAddToCart(item)}
+                  disabled={loadingItemId === item.menuid}
+                >
+                  {loadingItemId === item.menuid ? 'Adding...' : 'Add to Cart'} <FaShoppingCart className="inline ml-2" />
+                </button>
+                <button
+                  className="ml-4 p-3 bg-white text-red-500 rounded-full shadow-lg hover:shadow-xl transition-all"
+                  onClick={() => handleToggleFavorite(item)}
+                >
+                  <FaHeart className={favorites[item.menuid] ? 'text-red-500' : 'text-gray-300'} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
