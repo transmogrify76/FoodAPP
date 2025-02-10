@@ -21,6 +21,7 @@ import RestaurantOrders from '../pages/resturant/RestaurantOrders';
 import GetMenuByOwnerId from '../pages/resturant/MenuByRestaurant';
 import OrderAnalytics from '../pages/resturant/OrderAnalytics';
 import FavoriteRestaurantsPage from '../pages/user/FavoriteRestaurantsPage';
+import UserTransactionHistory from '../pages/user/UserTransactionHistory';
 
 
 const AppRoutes: React.FC = () => (
@@ -47,6 +48,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/existingmenu" element={<GetMenuByOwnerId />} />
     <Route path="/report" element={<OrderAnalytics />} />
     <Route path="/favourites" element={<FavoriteRestaurantsPage />} />
+    <Route path="/user-transaction" element={<UserTransactionHistory />} />
 
 
 
