@@ -3,14 +3,13 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
-// Define the type for the cart item
 interface CartItem {
   menuname: string;
   menudescription: string;
   menuprice: number;
   quantity: number;
   menuid: string;
-  restaurantid: string; // Assuming restaurantId is part of CartItem
+  restaurantid: string; 
 }
 
 const CartPage: React.FC = () => {
@@ -18,7 +17,6 @@ const CartPage: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
-  // Load Razorpay script dynamically
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -32,7 +30,6 @@ const CartPage: React.FC = () => {
     };
   }, []);
 
-  // Function to calculate the total price of the cart
   const calculateTotalPrice = () => {
     let total = 0;
     cart.forEach(item => {
@@ -41,17 +38,15 @@ const CartPage: React.FC = () => {
     setTotalPrice(total);
   };
 
-  // Function to decode the user ID from the JWT token stored in localStorage
   const getUserIdFromToken = () => {
     const token = localStorage.getItem('token');
     if (token) {
       const decoded: any = jwtDecode(token);
-      return decoded?.userid; // Assuming the user ID is stored as 'userid' in the token
+      return decoded?.userid; 
     }
-    return null; // If no token is found, return null
+    return null; 
   };
 
-  // Function to handle order creation API call
   const createOrder = async () => {
     try {
       const userId = getUserIdFromToken();
@@ -60,19 +55,18 @@ const CartPage: React.FC = () => {
         return;
       }
 
-      // Prepare the data for creating the order
+      
       const orderData = {
-        productid: cart.map(item => item.menuid).join(','), // Combine all product IDs
-        quantity: cart.map(item => item.quantity).join(','), // Combine all quantities
-        userid: userId,  // Use the decoded user ID
-        restaurantid: cart[0]?.restaurantid,  // Assuming all items in the cart are from the same restaurant
+        productid: cart.map(item => item.menuid).join(','), 
+        quantity: cart.map(item => item.quantity).join(','), 
+        userid: userId,
+        restaurantid: cart[0]?.restaurantid, 
         totalprice: totalPrice.toString(),
       };
 
       const response = await axios.post('http://localhost:5000/order/createorder', new URLSearchParams(orderData));
 
       if (response.status === 200) {
-        // If order created successfully, proceed with Razorpay payment
         initiatePayment(userId);
       }
     } catch (error) {
@@ -81,7 +75,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // Function to handle Razorpay payment API call
   const initiatePayment = async (userId: string) => {
     if (typeof window !== "undefined" && !window.Razorpay) {
       alert('Razorpay is not loaded.');
@@ -96,32 +89,29 @@ const CartPage: React.FC = () => {
         totalprice: totalPrice.toString(),
       };
 
-      // Call your backend Razorpay API to create the order
       const response = await axios.post('http://localhost:5000/createpayment/razorpay', new URLSearchParams(paymentData));
 
       if (response.status === 200) {
         const paymentDetails = response.data;
         
         const options = {
-          key: 'rzp_test_nzmqxQYhvCH9rD',  // Your Razorpay key
-          amount: paymentDetails.amount,  // Amount in paise (this should be passed as is)
+          key: 'rzp_test_nzmqxQYhvCH9rD',  
+          amount: paymentDetails.amount,  
           currency: paymentDetails.currency,
           order_id: paymentDetails.id,
-          name: 'Restaurant Name',  // Customize with restaurant details
+          name: 'Restaurant Name',  
           description: 'Complete your payment',
-          image: 'https://your-logo-url.com',  // Logo URL
+          image: 'https://your-logo-url.com', 
           handler: function (response: any) {
-            // On successful payment, handle here
             alert('Payment successful!');
-            // You can add code to update order status here (e.g., update the database or show a success page)
           },
           prefill: {
-            name: 'User Name',  // Fetch this from the logged-in user's details
+            name: 'User Name',  
             email: 'user@example.com',
             contact: '1234567890',
           },
           theme: {
-            color: '#F37254',  // Customize theme color as needed
+            color: '#F37254', 
           },
         };
 
@@ -134,7 +124,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // Function to update the cart item quantity (increment)
   const handleIncreaseQuantity = async (item: CartItem) => {
     try {
       const userId = getUserIdFromToken();
@@ -167,7 +156,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // Function to update the cart item quantity (decrement)
   const handleDecreaseQuantity = async (item: CartItem) => {
     try {
       const userId = getUserIdFromToken();
