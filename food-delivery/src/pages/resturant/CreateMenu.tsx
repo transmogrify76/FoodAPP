@@ -11,6 +11,11 @@ const CreateMenu: React.FC = () => {
     menuprice: "",
     menutype: "",
     foodtype: "",
+    menuitemtype: "",
+    servingtype: "",
+    menudiscountpercent: "",
+    foodweight: "",
+    vegornonveg: "",
     images: [] as File[],
   });
   const [loading, setLoading] = useState<boolean>(false);
@@ -18,13 +23,12 @@ const CreateMenu: React.FC = () => {
   const [createMenuLoading, setCreateMenuLoading] = useState<boolean>(false);
 
   useEffect(() => {
-   
     const token = localStorage.getItem("restaurant_token");
     if (token) {
       try {
         const decodedToken: any = jwtDecode(token);
         setOwnerId(decodedToken.owenerid || "");
-        fetchRestaurants(decodedToken.owenerid); 
+        fetchRestaurants(decodedToken.owenerid);
       } catch (err) {
         console.error("Failed to decode token", err);
       }
@@ -60,7 +64,7 @@ const CreateMenu: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setMenuData((prevData) => ({ ...prevData, [name]: value }));
   };
@@ -89,7 +93,12 @@ const CreateMenu: React.FC = () => {
     formData.append("menuprice", menuData.menuprice || "");
     formData.append("menutype", menuData.menutype || "");
     formData.append("foodtype", menuData.foodtype || "");
-    formData.append("restaurantid", selectedRestaurantId); 
+    formData.append("menuitemtype", menuData.menuitemtype || "");
+    formData.append("servingtype", menuData.servingtype || "");
+    formData.append("menudiscountpercent", menuData.menudiscountpercent || "");
+    formData.append("foodweight", menuData.foodweight || "");
+    formData.append("vegornonveg", menuData.vegornonveg || "");
+    formData.append("restaurantid", selectedRestaurantId);
 
     menuData.images.forEach((image) => {
       formData.append("images", image);
@@ -115,6 +124,11 @@ const CreateMenu: React.FC = () => {
         menuprice: "",
         menutype: "",
         foodtype: "",
+        menuitemtype: "",
+        servingtype: "",
+        menudiscountpercent: "",
+        foodweight: "",
+        vegornonveg: "",
         images: [],
       });
     } catch (error) {
@@ -235,15 +249,83 @@ const CreateMenu: React.FC = () => {
               />
             </div>
 
+            {/* Menu Item Type */}
+            <div className="mb-4">
+              <label className="block font-semibold text-gray-700">Menu Item Type</label>
+              <input
+                type="text"
+                name="menuitemtype"
+                value={menuData.menuitemtype}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Serving Type */}
+            <div className="mb-4">
+              <label className="block font-semibold text-gray-700">For how many people ?</label>
+              <input
+                type="text"
+                name="servingtype"
+                value={menuData.servingtype}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Discount Percentage */}
+            <div className="mb-4">
+              <label className="block font-semibold text-gray-700">Discount Percentage</label>
+              <input
+                type="text"
+                name="menudiscountpercent"
+                value={menuData.menudiscountpercent}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Food Weight */}
+            <div className="mb-4">
+              <label className="block font-semibold text-gray-700">Food Weight (for rice items)</label>
+              <input
+                type="text"
+                name="foodweight"
+                value={menuData.foodweight}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            {/* Veg or Non-Veg */}
+            <div className="mb-4">
+              <label className="block font-semibold text-gray-700">Veg or Non-Veg</label>
+              <select
+                name="vegornonveg"
+                value={menuData.vegornonveg}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
+              >
+                <option value="">Select</option>
+                <option value="veg">Veg</option>
+                <option value="nonveg">Non-Veg</option>
+              </select>
+            </div>
+
             {/* Image Upload */}
             <div className="mb-4">
-              <label className="block font-semibold text-gray-700">Images</label>
+              <label className="block font-semibold text-gray-700">Images (Minimum 3)</label>
               <input
                 type="file"
                 name="images"
                 multiple
                 onChange={handleFileChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
               />
             </div>
 
