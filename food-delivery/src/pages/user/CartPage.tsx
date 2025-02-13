@@ -14,8 +14,12 @@ interface CartItem {
 
 const CartPage: React.FC = () => {
   const { state } = useLocation();
+  // Expecting the location state to include both the cart items and a cartid
   const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
   const [totalPrice, setTotalPrice] = useState<number>(0);
+
+  // Retrieve cartid from location state
+  const cartId: string | undefined = state?.cartid;
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -54,20 +58,25 @@ const CartPage: React.FC = () => {
         alert('User is not logged in.');
         return;
       }
+      if (!cartId) {
+        alert('Cart ID not found.');
+        return;
+      }
 
-      
-      const orderData = {
-        productid: cart.map(item => item.menuid).join(','), 
-        quantity: cart.map(item => item.quantity).join(','), 
-        userid: userId,
-        restaurantid: cart[0]?.restaurantid, 
-        totalprice: totalPrice.toString(),
-      };
+      // Capture necessary details for payment before calling the order API
+      const restaurantid = cart[0]?.restaurantid || '';
+      const menuid = cart.map(item => item.menuid).join(',');
+      const totalPriceForPayment = totalPrice.toString();
 
-      const response = await axios.post('http://localhost:5000/order/createorder', new URLSearchParams(orderData));
+      // Send only the cartid as required by the new API endpoint
+      const orderData = new URLSearchParams();
+      orderData.append('cartid', cartId);
+
+      const response = await axios.post('http://localhost:5000/order/createorder', orderData);
 
       if (response.status === 200) {
-        initiatePayment(userId);
+        // Order created successfully; now proceed with payment
+        initiatePayment(userId, restaurantid, menuid, totalPriceForPayment);
       }
     } catch (error) {
       console.error('Error creating order:', error);
@@ -75,25 +84,29 @@ const CartPage: React.FC = () => {
     }
   };
 
-  const initiatePayment = async (userId: string) => {
+  // Modified to accept payment details as parameters rather than reading from cart state
+  const initiatePayment = async (
+    userId: string,
+    restaurantid: string,
+    menuid: string,
+    totalPrice: string
+  ) => {
     if (typeof window !== "undefined" && !window.Razorpay) {
       alert('Razorpay is not loaded.');
       return;
     }
 
     try {
-      const paymentData = {
-        userid: userId,
-        restaurantid: cart[0]?.restaurantid,
-        menuid: cart.map(item => item.menuid).join(','),
-        totalprice: totalPrice.toString(),
-      };
+      const paymentData = new URLSearchParams();
+      paymentData.append('userid', userId);
+      paymentData.append('restaurantid', restaurantid);
+      paymentData.append('menuid', menuid);
+      paymentData.append('totalprice', totalPrice);
 
-      const response = await axios.post('http://localhost:5000/createpayment/razorpay', new URLSearchParams(paymentData));
+      const response = await axios.post('http://localhost:5000/createpayment/razorpay', paymentData);
 
       if (response.status === 200) {
         const paymentDetails = response.data;
-        
         const options = {
           key: 'rzp_test_nzmqxQYhvCH9rD',  
           amount: paymentDetails.amount,  
@@ -104,6 +117,8 @@ const CartPage: React.FC = () => {
           image: 'https://your-logo-url.com', 
           handler: function (response: any) {
             alert('Payment successful!');
+            // Optionally, update the UI to reflect the cleared cart
+            setCart([]);
           },
           prefill: {
             name: 'User Name',  
@@ -131,9 +146,7 @@ const CartPage: React.FC = () => {
         alert('User is not logged in.');
         return;
       }
-
       const restaurantId = item.restaurantid;
-
       const response = await axios.post('http://localhost:5000/cart/incquantity', new URLSearchParams({
         menuid: item.menuid,
         userid: userId,
@@ -163,7 +176,6 @@ const CartPage: React.FC = () => {
         alert('User is not logged in.');
         return;
       }
-
       const response = await axios.post('http://localhost:5000/cart/decquantity', new URLSearchParams({
         menuid: item.menuid,
         userid: userId,
@@ -234,7 +246,7 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-      {/* Total Price */}
+      {/* Total Price & Checkout */}
       <div className="flex justify-between p-6 bg-gradient-to-r from-red-500 to-pink-500 text-white fixed bottom-0 left-0 w-full">
         <h2 className="font-semibold">Total: ₹{totalPrice}</h2>
         <button

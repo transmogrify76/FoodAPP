@@ -72,7 +72,7 @@ const HomePage: React.FC = () => {
       const data = await response.json();
 
       if (data.menus) {
-        navigate('/restaurant-menu', { state: { menu: data.menus } });
+        navigate('/restaurant-menu', { state: { menu: data.menus, restaurantId } });
       } else {
         throw new Error('No menu found.');
       }
@@ -82,11 +82,9 @@ const HomePage: React.FC = () => {
   };
 
   const filteredRestaurants = restaurants.filter((restaurant) => {
-    
     const matchesSearchQuery =
       restaurant.resturantname.toLowerCase().includes(searchQuery.toLowerCase());
 
-    
     const matchesCuisineFilter =
       selectedFilter === 'All' || restaurant.cuisin_type.toLowerCase() === selectedFilter.toLowerCase();
 
@@ -248,4 +246,3 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
-

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
 
 const RestaurantMenuPage: React.FC = () => {
   const { state } = useLocation();
@@ -15,8 +16,10 @@ const RestaurantMenuPage: React.FC = () => {
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
 
-  const userid = 'user123'; 
-  const restaurantid = 'restaurant123'; 
+  const token = localStorage.getItem('token');
+  const decodedToken: any = token ? jwtDecode(token) : null;
+  const userid = decodedToken?.userid || '';
+  const restaurantid = state?.restaurantId || '';
 
   const handleAddToCart = async (item: any) => {
     setLoadingItemId(item.menuid); 
