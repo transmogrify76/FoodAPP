@@ -26,6 +26,9 @@ import RiderLogin from '../pages/rider/RiderLogin';
 import RiderSignup from '../pages/rider/RiderSignup';
 import RiderDashboard from '../pages/rider/RiderDashboard';
 import OrdersManagement from '../pages/rider/OrdersManagement';
+import OrderDetailsNavigation from '../pages/rider/OrderDetailsNavigation';
+import EarningsTransactions from '../pages/rider/EarningsTransactions';
+import ProfileSettings from '../pages/rider/ProfileSettings';
 
 
 const AppRoutes: React.FC = () => (
@@ -57,6 +60,9 @@ const AppRoutes: React.FC = () => (
     <Route path="/rider-login" element={<RiderLogin />} />
     <Route path="/rider-dashboard" element={<RiderDashboard />} />
     <Route path="/rider-ordermanagement" element={<OrdersManagement />} />
+    <Route path="/rider-ordernavigation" element={<OrderDetailsNavigation />} />
+    <Route path="/rider-earnings" element={<EarningsTransactions />} />
+    <Route path="/rider-profile" element={<ProfileSettings />} />
 
 
 
