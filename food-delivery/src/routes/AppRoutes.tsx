@@ -30,6 +30,7 @@ import OrderDetailsNavigation from '../pages/rider/OrderDetailsNavigation';
 import EarningsTransactions from '../pages/rider/EarningsTransactions';
 import ProfileSettings from '../pages/rider/ProfileSettings';
 import NotificationsAlerts from '../pages/rider/NotificationsAlerts';
+import RatingsReviews from '../pages/rider/RatingsReviews';
 
 
 const AppRoutes: React.FC = () => (
@@ -65,6 +66,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/rider-earnings" element={<EarningsTransactions />} />
     <Route path="/rider-profile" element={<ProfileSettings />} />
     <Route path="/rider-notification" element={<NotificationsAlerts />} />
+    <Route path="/rider-review" element={<RatingsReviews />} />
 
 
 
