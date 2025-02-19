@@ -25,6 +25,7 @@ import UserTransactionHistory from '../pages/user/UserTransactionHistory';
 import RiderLogin from '../pages/rider/RiderLogin';
 import RiderSignup from '../pages/rider/RiderSignup';
 import RiderDashboard from '../pages/rider/RiderDashboard';
+import OrdersManagement from '../pages/rider/OrdersManagement';
 
 
 const AppRoutes: React.FC = () => (
@@ -55,6 +56,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/rider-signup" element={<RiderSignup />} />
     <Route path="/rider-login" element={<RiderLogin />} />
     <Route path="/rider-dashboard" element={<RiderDashboard />} />
+    <Route path="/rider-ordermanagement" element={<OrdersManagement />} />
 
 
 
