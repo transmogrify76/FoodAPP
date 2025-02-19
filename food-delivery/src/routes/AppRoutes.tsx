@@ -22,6 +22,9 @@ import GetMenuByOwnerId from '../pages/resturant/MenuByRestaurant';
 import OrderAnalytics from '../pages/resturant/OrderAnalytics';
 import FavoriteRestaurantsPage from '../pages/user/FavoriteRestaurantsPage';
 import UserTransactionHistory from '../pages/user/UserTransactionHistory';
+import RiderLogin from '../pages/rider/RiderLogin';
+import RiderSignup from '../pages/rider/RiderSignup';
+import RiderDashboard from '../pages/rider/RiderDashboard';
 
 
 const AppRoutes: React.FC = () => (
@@ -49,6 +52,9 @@ const AppRoutes: React.FC = () => (
     <Route path="/report" element={<OrderAnalytics />} />
     <Route path="/favourites" element={<FavoriteRestaurantsPage />} />
     <Route path="/user-transaction" element={<UserTransactionHistory />} />
+    <Route path="/rider-signup" element={<RiderSignup />} />
+    <Route path="/rider-login" element={<RiderLogin />} />
+    <Route path="/rider-dashboard" element={<RiderDashboard />} />
 
 
 

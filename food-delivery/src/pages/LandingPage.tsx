@@ -11,9 +11,9 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex flex-col items-center justify-between">
-      <header className="w-full p-6 bg-white shadow-md flex justify-between items-center mb-6">
+      {/* <header className="w-full p-6 bg-white shadow-md flex justify-between items-center mb-6">
         <h1 className="text-3xl font-extrabold text-red-600">Foodie Heaven</h1>
-      </header>
+      </header> */}
 
       <main className="flex flex-col items-center justify-center flex-1 px-6">
         <div className="mb-5"> {/* Added extra margin between header and logo */}
@@ -37,7 +37,7 @@ const LandingPage: React.FC = () => {
           <GiHotMeal className="text-red-600 text-6xl" />
         </div>
 
-        <div className="w-full flex flex-col items-center space-y-6 mb-4"> {/* Added margin below buttons */}
+        <div className="w-full flex flex-col items-center space-y-6 mb-4"> 
           <a
             href="/signup"
             className="w-4/5 px-8 py-4 bg-red-500 text-white font-bold rounded-xl shadow-lg text-center hover:bg-red-600 text-lg"
@@ -51,7 +51,7 @@ const LandingPage: React.FC = () => {
             Login
           </a>
           
-          {/* Add Restaurant Owner button below Login */}
+         
           <button
             onClick={handleRestaurantOwnerClick}
             className="w-4/5 px-8 py-4 bg-red-500 text-white font-bold rounded-xl shadow-lg text-center hover:bg-red-600 text-lg"
