@@ -126,7 +126,21 @@ const CartPage: React.FC = () => {
           image: 'https://your-logo-url.com', 
           handler: function (response: any) {
             alert('Payment successful!');
-            // Optionally, update the UI to reflect the cleared cart
+            // Integrate the verify payment API after successful payment
+            (async () => {
+              try {
+                const verifyResponse = await axios.post('http://localhost:5000/verifypayment', {
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  userid: userId,
+                  restaurantid: restaurantid,
+                  menuid: menusercartid, // Note: if multiple IDs, adjust as needed.
+                  price: totalPrice
+                });
+                console.log("Verification response:", verifyResponse.data);
+              } catch (err) {
+                console.error("Error verifying payment:", err);
+              }
+            })();
             setCart([]);
           },
           prefill: {
