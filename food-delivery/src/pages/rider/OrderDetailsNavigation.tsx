@@ -18,13 +18,13 @@ const OrderDetailsNavigation = () => {
   const orderDetails = {
     restaurant: {
       name: "La Piazza Restaurant",
-      address: "123 Gourmet Street, Food City",
+      address: "Basana Apartment",
       pickupTime: "7:00 PM - 7:15 PM"
     },
     customer: {
-      name: "John Smith",
-      address: "456 Downtown Avenue, Food City",
-      phone: "+1 (555) 123-4567"
+      name: "Chitradeep Ghosh",
+      address: "Banasa Apartment",
+      phone: "+91 8084281810"
     },
     payment: {
       method: "COD",

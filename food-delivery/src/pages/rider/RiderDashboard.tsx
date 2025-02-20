@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { FaMotorcycle, FaMoneyBillWave, FaClipboardList, FaUser, FaBell, FaStar, FaWallet } from 'react-icons/fa';
 import * as Switch from '@radix-ui/react-switch';
+import { useNavigate } from 'react-router-dom';
 
 const RiderDashboard = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
+  const navigate = useNavigate();
 
   const toggleStatus = () => {
     setIsOnline(!isOnline);
+  };
+
+  // Handler to update active tab and navigate
+  const handleNavigation = (tab: string, route: string) => {
+    setActiveTab(tab);
+    navigate(route);
   };
 
   return (
@@ -19,7 +27,8 @@ const RiderDashboard = () => {
 
           {/* Rider Status */}
           <div className="flex items-center justify-between p-3 bg-red-100 border border-red-300 rounded-xl mb-4 shadow-md">
-            <span className="text-base font-semibold">Status: 
+            <span className="text-base font-semibold">
+              Status:
               <span className={isOnline ? 'text-green-600' : 'text-gray-500'}>
                 {isOnline ? ' Online' : ' Offline'}
               </span>
@@ -73,23 +82,38 @@ const RiderDashboard = () => {
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-2xl">
         <div className="grid grid-cols-5 gap-2 p-2">
-          <button className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'home' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}>
+          <button
+            onClick={() => handleNavigation('home', '/rider-dashboard')}
+            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'home' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
+          >
             <FaMotorcycle className="text-xl mb-1" />
             <span className="text-xs">Home</span>
           </button>
-          <button className="flex flex-col items-center p-2 text-gray-600 rounded-xl">
+          <button
+            onClick={() => handleNavigation('earnings', '/rider-earnings')}
+            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'earnings' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
+          >
             <FaWallet className="text-xl mb-1" />
             <span className="text-xs">Earnings</span>
           </button>
-          <button className="flex flex-col items-center p-2 text-gray-600 rounded-xl">
+          <button
+            onClick={() => handleNavigation('orders', '/rider-ordermanagement')}
+            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'orders' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
+          >
             <FaClipboardList className="text-xl mb-1" />
             <span className="text-xs">Orders</span>
           </button>
-          <button className="flex flex-col items-center p-2 text-gray-600 rounded-xl">
+          <button
+            onClick={() => handleNavigation('alerts', '/rider-notification')}
+            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'alerts' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
+          >
             <FaBell className="text-xl mb-1" />
             <span className="text-xs">Alerts</span>
           </button>
-          <button className="flex flex-col items-center p-2 text-gray-600 rounded-xl">
+          <button
+            onClick={() => handleNavigation('profile', '/rider-profile')}
+            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'profile' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
+          >
             <FaUser className="text-xl mb-1" />
             <span className="text-xs">Profile</span>
           </button>
