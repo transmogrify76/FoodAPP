@@ -31,6 +31,8 @@ import EarningsTransactions from '../pages/rider/EarningsTransactions';
 import ProfileSettings from '../pages/rider/ProfileSettings';
 import NotificationsAlerts from '../pages/rider/NotificationsAlerts';
 import RatingsReviews from '../pages/rider/RatingsReviews';
+import SettingsPage from '../pages/resturant/SettingsPage';
+import SettingsPageUser from '../pages/user/SettingsPageUser';
 
 
 const AppRoutes: React.FC = () => (
@@ -45,6 +47,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/track-order" element={<OrderTrackingPage />} />
     <Route path="/history" element={<OrderHistoryPage />} />
     <Route path="/profile" element={<UserProfile />} />
+    <Route path="/settings" element={<SettingsPageUser />} />
     <Route path="/restaurant-menu" element={<RestaurantMenuPage />} />
     <Route path="/restaurant-signup" element={<RestaurantSignup />} />
     <Route path="/restaurant-login" element={<RestaurantLogin />} />
@@ -54,6 +57,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/create-menu" element={<CreateMenu />} />
     <Route path="/restaurant-details" element={<RestaurantDetails />} />
     <Route path="/restaurant-orders" element={<RestaurantOrders />} />
+    <Route path="/restaurant-settings" element={<SettingsPage />} />
     <Route path="/existingmenu" element={<GetMenuByOwnerId />} />
     <Route path="/report" element={<OrderAnalytics />} />
     <Route path="/favourites" element={<FavoriteRestaurantsPage />} />
