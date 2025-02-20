@@ -84,10 +84,9 @@ const HomePage: React.FC = () => {
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesSearchQuery =
       restaurant.resturantname.toLowerCase().includes(searchQuery.toLowerCase());
-
     const matchesCuisineFilter =
-      selectedFilter === 'All' || restaurant.cuisin_type.toLowerCase() === selectedFilter.toLowerCase();
-
+      selectedFilter === 'All' ||
+      restaurant.cuisin_type.toLowerCase() === selectedFilter.toLowerCase();
     return matchesSearchQuery && matchesCuisineFilter;
   });
 
@@ -95,9 +94,9 @@ const HomePage: React.FC = () => {
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform ${
+        className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-300 ease-in-out`}
+        }`}
       >
         <div className="flex justify-between p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white">
           <h3 className="text-xl font-bold">Chitradeep!</h3>
@@ -106,12 +105,12 @@ const HomePage: React.FC = () => {
           </button>
         </div>
         <div className="p-4">
-          <ul className="space-y-6">
+          <ul className="space-y-4">
             <li className="flex items-center">
               <FaHome className="text-red-500 mr-3 text-lg" />
               <button
                 onClick={() => navigate('/home')}
-                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
               >
                 Home
               </button>
@@ -120,7 +119,7 @@ const HomePage: React.FC = () => {
               <FaFile className="text-red-500 mr-3 text-lg" />
               <button
                 onClick={() => navigate('/profile')}
-                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
               >
                 Profile
               </button>
@@ -129,7 +128,7 @@ const HomePage: React.FC = () => {
               <FaHistory className="text-red-500 mr-3 text-lg" />
               <button
                 onClick={() => navigate('/history')}
-                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
               >
                 Order History
               </button>
@@ -138,7 +137,7 @@ const HomePage: React.FC = () => {
               <FaShoppingBag className="text-red-500 mr-3 text-lg" />
               <button
                 onClick={() => navigate('/track-order')}
-                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
               >
                 Order Tracking
               </button>
@@ -147,15 +146,17 @@ const HomePage: React.FC = () => {
               <FaCog className="text-red-500 mr-3 text-lg" />
               <button
                 onClick={() => navigate('/settings')}
-                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
               >
                 Settings
               </button>
             </li>
             <li className="flex items-center">
               <FaRegHeart className="text-red-500 mr-3 text-lg" />
-              <button onClick={() => navigate('/favourites')}
-               className="w-full text-left text-gray-600 hover:text-red-500 font-medium">
+              <button
+                onClick={() => navigate('/favourites')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
+              >
                 Favorites
               </button>
             </li>
@@ -163,7 +164,7 @@ const HomePage: React.FC = () => {
               <FaShoppingCart className="text-red-500 mr-3 text-lg" />
               <button
                 onClick={() => navigate('/cart')}
-                className="w-full text-left text-gray-600 hover:text-red-500 font-medium"
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
               >
                 View Cart
               </button>
@@ -171,75 +172,74 @@ const HomePage: React.FC = () => {
           </ul>
         </div>
       </div>
+      {isSidebarOpen && (
+        <div onClick={toggleSidebar} className="fixed inset-0 bg-black opacity-50 z-40"></div>
+      )}
 
-      {isSidebarOpen && <div onClick={toggleSidebar} className="fixed inset-0 bg-black opacity-50 z-40"></div>}
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white">
+        <button onClick={toggleSidebar} className="text-2xl">
+          <FaBars />
+        </button>
+        <h1 className="text-xl font-bold">Discover Restaurants</h1>
+        <div className="w-6" /> {/* Spacer */}
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="bg-white shadow-md rounded-xl p-6">
-          <div className="flex justify-between items-center mb-5">
-            <button
-              onClick={toggleSidebar}
-              className="text-3xl text-red-500 p-2 rounded-full hover:bg-gray-200 focus:outline-none sm:hidden"
+      <div className="p-4 pb-24 flex-1">
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row justify-between mb-4 items-center space-y-3 sm:space-y-0">
+          <div className="flex items-center w-full sm:w-auto">
+            <FaSearch className="text-red-500 mr-2" />
+            <input
+              type="text"
+              placeholder="Search for your favorite food..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="p-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-auto text-sm"
+            />
+          </div>
+          <div className="flex items-center w-full sm:w-auto">
+            <FaMapMarkerAlt className="text-red-500 mr-2" />
+            <select
+              value={selectedFilter}
+              onChange={handleFilterChange}
+              className="p-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-auto text-sm"
             >
-              <FaBars />
-            </button>
-            <h1 className="text-3xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-pink-500">
-              Discover Restaurants
-            </h1>
+              <option value="All">All</option>
+            </select>
           </div>
-          <div className="flex flex-col sm:flex-row justify-between mb-6 items-center space-y-4 sm:space-y-0">
-            <div className="flex items-center w-full sm:w-auto">
-              <FaSearch className="text-red-500 mr-2" />
-              <input
-                type="text"
-                placeholder="Search for your favorite food..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="p-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-auto"
-              />
-            </div>
-            <div className="flex items-center w-full sm:w-auto">
-              <FaMapMarkerAlt className="text-red-500 mr-2" />
-              <select
-                value={selectedFilter}
-                onChange={handleFilterChange}
-                className="p-3 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-auto"
-              >
-                <option value="All">All</option>
-                <option value="Finnish">Finnish</option>
-              </select>
-            </div>
-          </div>
-          {error && <p className="text-red-500 text-center font-semibold">{error}</p>}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {filteredRestaurants.map((restaurant) => (
-              <div
-                key={restaurant.resturantid}
-                className="bg-gradient-to-r from-white via-gray-50 to-gray-100 shadow-lg hover:shadow-xl rounded-lg p-6 transition-all"
-              >
-                {/* Restaurant Image */}
-                {restaurant.thumbnail && (
-                  <img
-                    src={`data:image/jpeg;base64,${restaurant.thumbnail}`}
-                    alt={restaurant.resturantname}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                  />
-                )}
-                <h2 className="text-xl font-semibold text-center">{restaurant.resturantname}</h2>
-                <p className="text-gray-600 text-center">{restaurant.location}</p>
-                <p className="text-gray-600 text-center">{restaurant.address}</p>
-                <div className="flex justify-center items-center mt-4">
-                  <button
-                    onClick={() => handleViewMenu(restaurant.resturantid)}
-                    className="px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
-                  >
-                    View Menu
-                  </button>
-                </div>
+        </div>
+
+        {error && <p className="text-red-500 text-center font-semibold">{error}</p>}
+
+        {/* Restaurant Cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+          {filteredRestaurants.map((restaurant) => (
+            <div
+              key={restaurant.resturantid}
+              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-4"
+            >
+              {restaurant.thumbnail && (
+                <img
+                  src={`data:image/jpeg;base64,${restaurant.thumbnail}`}
+                  alt={restaurant.resturantname}
+                  className="w-full h-40 object-cover rounded mb-3"
+                />
+              )}
+              <h2 className="text-lg font-semibold text-center">{restaurant.resturantname}</h2>
+              <p className="text-gray-600 text-center text-sm">{restaurant.location}</p>
+              <p className="text-gray-600 text-center text-sm">{restaurant.address}</p>
+              <div className="flex justify-center items-center mt-3">
+                <button
+                  onClick={() => handleViewMenu(restaurant.resturantid)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition text-sm"
+                >
+                  View Menu
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
