@@ -227,7 +227,8 @@ const HomePage: React.FC = () => {
                   />
                 )}
                 <h2 className="text-xl font-semibold text-center">{restaurant.resturantname}</h2>
-                <p className="text-gray-600 text-center">{restaurant.description}</p>
+                <p className="text-gray-600 text-center">{restaurant.location}</p>
+                <p className="text-gray-600 text-center">{restaurant.address}</p>
                 <div className="flex justify-center items-center mt-4">
                   <button
                     onClick={() => handleViewMenu(restaurant.resturantid)}

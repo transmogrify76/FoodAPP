@@ -8,18 +8,15 @@ interface CartItem {
   menudescription: string;
   menuprice: number;
   quantity: number;
-  menuid: string;
+  menusercartid: string; // This should hold the menu id for the cart item
   restaurantid: string; 
 }
 
 const CartPage: React.FC = () => {
   const { state } = useLocation();
-  // Expecting the location state to include both the cart items and a cartid
+  // Expecting the location state to include the cart items only
   const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-
-  // Retrieve cartid from location state
-  const cartId: string | undefined = state?.cartid;
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -51,6 +48,16 @@ const CartPage: React.FC = () => {
     return null; 
   };
 
+  // Helper function to get the cart id from token
+  const getusercartidFromToken = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      return decoded?.usercartid;
+    }
+    return null;
+  };
+
   const createOrder = async () => {
     try {
       const userId = getUserIdFromToken();
@@ -58,25 +65,28 @@ const CartPage: React.FC = () => {
         alert('User is not logged in.');
         return;
       }
-      if (!cartId) {
+      
+      const usercartid = getusercartidFromToken();
+      if (!usercartid) {
         alert('Cart ID not found.');
         return;
       }
 
       // Capture necessary details for payment before calling the order API
       const restaurantid = cart[0]?.restaurantid || '';
-      const menuid = cart.map(item => item.menuid).join(',');
+      // Assuming each cart item carries its menu id in menusercartid
+      const menusercartid = cart.map(item => item.menusercartid).join(',');
       const totalPriceForPayment = totalPrice.toString();
 
-      // Send only the cartid as required by the new API endpoint
+      // Send only the usercartid as required by the new API endpoint
       const orderData = new URLSearchParams();
-      orderData.append('cartid', cartId);
+      orderData.append('usercartid', usercartid);
 
       const response = await axios.post('http://localhost:5000/order/createorder', orderData);
 
       if (response.status === 200) {
         // Order created successfully; now proceed with payment
-        initiatePayment(userId, restaurantid, menuid, totalPriceForPayment);
+        initiatePayment(userId, restaurantid, menusercartid, totalPriceForPayment);
       }
     } catch (error) {
       console.error('Error creating order:', error);
@@ -84,11 +94,10 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // Modified to accept payment details as parameters rather than reading from cart state
   const initiatePayment = async (
     userId: string,
     restaurantid: string,
-    menuid: string,
+    menusercartid: string,
     totalPrice: string
   ) => {
     if (typeof window !== "undefined" && !window.Razorpay) {
@@ -100,7 +109,7 @@ const CartPage: React.FC = () => {
       const paymentData = new URLSearchParams();
       paymentData.append('userid', userId);
       paymentData.append('restaurantid', restaurantid);
-      paymentData.append('menuid', menuid);
+      paymentData.append('menusercartid', menusercartid);
       paymentData.append('totalprice', totalPrice);
 
       const response = await axios.post('http://localhost:5000/createpayment/razorpay', paymentData);
@@ -139,25 +148,28 @@ const CartPage: React.FC = () => {
     }
   };
 
+  // Updated increase quantity handler according to API
   const handleIncreaseQuantity = async (item: CartItem) => {
     try {
-      const userId = getUserIdFromToken();
-      if (!userId) {
-        alert('User is not logged in.');
+      const usercartid = getusercartidFromToken();
+      if (!usercartid) {
+        alert('User cart ID not found.');
         return;
       }
-      const restaurantId = item.restaurantid;
-      const response = await axios.post('http://localhost:5000/cart/incquantity', new URLSearchParams({
-        menuid: item.menuid,
-        userid: userId,
-        restaurantid: restaurantId,
-      }));
+      const response = await axios.post(
+        'http://localhost:5000/cart/incquantity',
+        new URLSearchParams({
+          usercartid: usercartid,
+          menuid: item.menusercartid,
+        })
+      );
 
       if (response.status === 200) {
+        const newQuantity = response.data.new_quantity;
         setCart(prevCart =>
           prevCart.map(cartItem =>
-            cartItem.menuid === item.menuid
-              ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            cartItem.menusercartid === item.menusercartid
+              ? { ...cartItem, quantity: newQuantity }
               : cartItem
           )
         );
@@ -169,30 +181,39 @@ const CartPage: React.FC = () => {
     }
   };
 
+  // Updated decrease quantity handler according to API
   const handleDecreaseQuantity = async (item: CartItem) => {
     try {
-      const userId = getUserIdFromToken();
-      if (!userId) {
-        alert('User is not logged in.');
+      const usercartid = getusercartidFromToken();
+      if (!usercartid) {
+        alert('User cart ID not found.');
         return;
       }
-      const response = await axios.post('http://localhost:5000/cart/decquantity', new URLSearchParams({
-        menuid: item.menuid,
-        userid: userId,
-        restaurantid: item.restaurantid,
-      }));
+      const response = await axios.post(
+        'http://localhost:5000/cart/decquantity',
+        new URLSearchParams({
+          usercartid: usercartid,
+          menuid: item.menusercartid,
+        })
+      );
 
       if (response.status === 200) {
-        if (item.quantity > 1) {
+        // If the API returns a new_quantity, update it; if not, remove the item
+        if (response.data.new_quantity !== undefined) {
+          const newQuantity = response.data.new_quantity;
           setCart(prevCart =>
             prevCart.map(cartItem =>
-              cartItem.menuid === item.menuid
-                ? { ...cartItem, quantity: cartItem.quantity - 1 }
+              cartItem.menusercartid === item.menusercartid
+                ? { ...cartItem, quantity: newQuantity }
                 : cartItem
             )
           );
+          alert('Item quantity decreased successfully!');
         } else {
-          setCart(prevCart => prevCart.filter(cartItem => cartItem.menuid !== item.menuid));
+          setCart(prevCart =>
+            prevCart.filter(cartItem => cartItem.menusercartid !== item.menusercartid)
+          );
+          alert('Product removed from cart successfully');
         }
         calculateTotalPrice();
       }
