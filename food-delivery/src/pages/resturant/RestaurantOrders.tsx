@@ -10,11 +10,9 @@ const RestaurantOrders: React.FC = () => {
   const [ownerId, setOwnerId] = useState<string>(''); 
 
   useEffect(() => {
-    
     const storedRestaurantToken = localStorage.getItem('restaurant_token');
     if (storedRestaurantToken) {
       try {
-        
         const decodedToken: any = jwtDecode(storedRestaurantToken);
         setOwnerId(decodedToken.owenerid); 
         fetchRestaurantId(decodedToken.owenerid); 
@@ -27,7 +25,6 @@ const RestaurantOrders: React.FC = () => {
     }
   }, []);
 
-  
   const fetchRestaurantId = async (ownerId: string) => {
     try {
       const formData = new FormData();
@@ -66,7 +63,7 @@ const RestaurantOrders: React.FC = () => {
         formData.append('restaurantid', restaurantId); 
 
         const response = await axios.post('http://localhost:5000/order/resorderhistory', formData);
-        console.log('Orders fetched:', response.data)
+        console.log('Orders fetched:', response.data);
         setOrders(response.data.order_list);
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -88,7 +85,6 @@ const RestaurantOrders: React.FC = () => {
       formData.append('orderid', orderId);
       formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected');
 
-     
       const response = await axios.post('http://localhost:5000/ops/updateorder', formData);
 
       if (response.data.message === 'Data update success') {
@@ -113,13 +109,22 @@ const RestaurantOrders: React.FC = () => {
       formData.append('restaurantid', restaurantId);
       formData.append('userid', ownerId);
 
-      
+      // Add preptime only if tempstatus is "inprogress"
+      if (tempStatus === 'inprogress') {
+        const preptime = prompt('Enter preparation time (in minutes):');
+        if (!preptime) {
+          setMessage('Preparation time is required for "inprogress" status.');
+          return;
+        }
+        formData.append('preptime', preptime);
+      }
+
       const response = await axios.post('http://localhost:5000/tmporderstatus', formData);
 
       if (response.status === 200) {
         setMessage(`Order #${orderId} status updated to '${tempStatus}'.`);
         setOrders(orders.map((order) =>
-          order.uid === orderId ? { ...order, status: tempStatus } : order
+          order.uid === orderId ? { ...order, tempstatus: tempStatus } : order
         ));
       } else {
         setMessage('Failed to update temporary order status.');
