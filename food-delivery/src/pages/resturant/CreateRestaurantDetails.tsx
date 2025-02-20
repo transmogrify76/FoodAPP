@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 
 const CreateRestaurant: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     resturantname: "",
     location: "",
@@ -15,7 +18,6 @@ const CreateRestaurant: React.FC = () => {
   const [owenerid, setOwenerId] = useState<string>("");
 
   useEffect(() => {
-    
     const token = localStorage.getItem("restaurant_token"); 
     if (token) {
       try {
@@ -89,95 +91,104 @@ const CreateRestaurant: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6 text-blue-600">
-        Create Restaurant
-      </h1>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md"
-        encType="multipart/form-data"
-      >
-        <div className="mb-4">
-          <label className="block text-gray-700">Restaurant Name</label>
-          <input
-            type="text"
-            name="resturantname"
-            value={formData.resturantname}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Location</label>
-          <input
-            type="text"
-            name="location"
-            value={formData.location}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Cuisine Type</label>
-          <input
-            type="text"
-            name="cuisin_type"
-            value={formData.cuisin_type}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Address</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Total Seats</label>
-          <input
-            type="number"
-            name="totalseats"
-            value={formData.totalseats}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Thumbnail</label>
-          <input
-            type="file"
-            onChange={handleThumbnailChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Images</label>
-          <input
-            type="file"
-            multiple
-            onChange={handleImagesChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-        >
-          Submit
+    <div className="bg-gray-100 min-h-screen flex flex-col">
+      {/* Top Navigation Bar */}
+      <div className="bg-red-600 text-white p-4 flex justify-between items-center">
+        <button onClick={() => navigate(-1)} className="text-white">
+          <FaArrowLeft size={20} />
         </button>
-      </form>
+        <h1 className="text-xl font-bold">Create Restaurant</h1>
+        <div className="w-6"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="p-4 flex-1">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto"
+          encType="multipart/form-data"
+        >
+          <div className="mb-4">
+            <label className="block text-gray-700">Restaurant Name</label>
+            <input
+              type="text"
+              name="resturantname"
+              value={formData.resturantname}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Location</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Cuisine Type</label>
+            <input
+              type="text"
+              name="cuisin_type"
+              value={formData.cuisin_type}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Address</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Total Seats</label>
+            <input
+              type="number"
+              name="totalseats"
+              value={formData.totalseats}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Thumbnail</label>
+            <input
+              type="file"
+              onChange={handleThumbnailChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Images</label>
+            <input
+              type="file"
+              multiple
+              onChange={handleImagesChange}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

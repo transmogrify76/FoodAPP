@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaShoppingCart } from 'react-icons/fa';
-import { jwtDecode } from 'jwt-decode';
+import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
+import {jwtDecode} from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 
 const RestaurantOrders: React.FC = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [message, setMessage] = useState<string>('');
   const [restaurantId, setRestaurantId] = useState<string>(''); 
@@ -109,7 +111,6 @@ const RestaurantOrders: React.FC = () => {
       formData.append('restaurantid', restaurantId);
       formData.append('userid', ownerId);
 
-      // Add preptime only if tempstatus is "inprogress"
       if (tempStatus === 'inprogress') {
         const preptime = prompt('Enter preparation time (in minutes):');
         if (!preptime) {
@@ -136,12 +137,19 @@ const RestaurantOrders: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4">
-      <div className="bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-center text-red-600 mb-4">Restaurant Orders</h1>
+    <div className="bg-gray-100 min-h-screen flex flex-col">
+      {/* Top Navigation Bar */}
+      <div className="bg-red-600 text-white p-4 flex justify-between items-center">
+        <button onClick={() => navigate(-1)} className="text-white">
+          <FaArrowLeft size={20} />
+        </button>
+        <h1 className="text-xl font-bold">Restaurant Orders</h1>
+        <div className="w-8"></div>
+      </div>
 
+      {/* Main Content */}
+      <div className="flex-1 p-4 overflow-y-auto">
         {message && <p className="text-red-500 text-center mb-4">{message}</p>}
-
         <div className="space-y-4">
           {orders.length > 0 ? (
             orders.map((order) => (
@@ -152,7 +160,7 @@ const RestaurantOrders: React.FC = () => {
                     <h2 className="text-lg font-semibold text-gray-700">{order.menuname}</h2>
                   </div>
                 </div>
-                <div className="mt-2">
+                <div className="mt-2 space-y-1">
                   <p className="text-sm text-gray-600"><strong>Description:</strong> {order.menudescription}</p>
                   <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.quantity}</p>
                   <p className="text-sm text-gray-600"><strong>Total Price:</strong> ₹{order.totalprice}</p>
@@ -163,18 +171,18 @@ const RestaurantOrders: React.FC = () => {
                   <p className="text-sm text-gray-600"><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
                 </div>
 
-                {/* Accept and Reject Buttons */}
-                <div className="flex justify-end mt-4 space-x-2">
+                {/* Order Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-end mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
                   <button
                     onClick={() => handleOrderAction(order.uid, 'accept')}
-                    className={`bg-green-500 text-white py-1 px-3 rounded-lg text-sm ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`bg-green-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'}`}
                     disabled={order.orderstatus !== 'pending'}
                   >
                     Accept
                   </button>
                   <button
                     onClick={() => handleOrderAction(order.uid, 'reject')}
-                    className={`bg-red-500 text-white py-1 px-3 rounded-lg text-sm ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`bg-red-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-600'}`}
                     disabled={order.orderstatus !== 'pending'}
                   >
                     Reject
@@ -183,22 +191,22 @@ const RestaurantOrders: React.FC = () => {
 
                 {/* Temporary Status Change Buttons */}
                 {order.orderstatus === 'accepted' && (
-                  <div className="flex justify-end mt-4 space-x-2">
+                  <div className="flex flex-col sm:flex-row justify-end mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
                     <button
                       onClick={() => handleTempStatusChange(order.uid, 'startedpreparing')}
-                      className="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600"
+                      className="bg-blue-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 hover:bg-blue-600"
                     >
                       Started Preparing
                     </button>
                     <button
                       onClick={() => handleTempStatusChange(order.uid, 'inprogress')}
-                      className="bg-yellow-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-yellow-600"
+                      className="bg-yellow-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 hover:bg-yellow-600"
                     >
                       In Progress
                     </button>
                     <button
                       onClick={() => handleTempStatusChange(order.uid, 'dispatch')}
-                      className="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600"
+                      className="bg-purple-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 hover:bg-purple-600"
                     >
                       Dispatch
                     </button>

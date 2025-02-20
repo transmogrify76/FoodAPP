@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { FaArrowLeft } from "react-icons/fa";
 
 const GetMenuByOwnerId: React.FC = () => {
+  const navigate = useNavigate();
   const [ownerId, setOwnerId] = useState<string>("");
   const [restaurantList, setRestaurantList] = useState<any[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
@@ -182,26 +185,32 @@ const GetMenuByOwnerId: React.FC = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen p-4">
-      <h1 className="text-3xl font-bold text-center text-red-600 mb-4">
-        Get Menus by Owner ID
-      </h1>
+      {/* Top Navigation Bar */}
+      <div className="bg-red-600 text-white p-4 flex justify-between items-center mb-4">
+        <button onClick={() => navigate(-1)} className="text-white">
+          <FaArrowLeft size={20} />
+        </button>
+        <h1 className="text-xl font-bold">Get Menus by Owner ID</h1>
+        <div className="w-6"></div>
+      </div>
+
       {error && (
-        <div className="bg-red-100 text-red-800 p-3 rounded mb-3">
+        <div className="bg-red-100 text-red-800 p-3 rounded mb-3 max-w-xl mx-auto">
           {error}
         </div>
       )}
       {successMessage && (
-        <div className="bg-green-100 text-green-800 p-3 rounded mb-3">
+        <div className="bg-green-100 text-green-800 p-3 rounded mb-3 max-w-xl mx-auto">
           {successMessage}
         </div>
       )}
-      {loading && <p className="text-center text-gray-700">Loading...</p>}
+      {loading && <p className="text-center text-gray-700 mb-3">Loading...</p>}
 
-      <div className="bg-white p-4 rounded shadow mx-2">
+      <div className="bg-white p-4 rounded shadow max-w-xl mx-auto mb-4">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Restaurants</h2>
         {restaurantList.length > 0 ? (
           <div className="mb-3">
-            <label className="block font-medium text-gray-700">Select Restaurant</label>
+            <label className="block font-medium text-gray-700 mb-2">Select Restaurant</label>
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded"
               value={selectedRestaurantId}
@@ -220,7 +229,7 @@ const GetMenuByOwnerId: React.FC = () => {
         )}
         <button
           onClick={fetchMenus}
-          className="w-full py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700"
+          className="w-full py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition-colors"
           disabled={!selectedRestaurantId || loading}
         >
           {loading ? "Fetching..." : "Fetch Menus"}
@@ -228,7 +237,7 @@ const GetMenuByOwnerId: React.FC = () => {
       </div>
 
       {menuList.length > 0 && (
-        <div className="bg-white p-4 rounded shadow mt-4 mx-2">
+        <div className="bg-white p-4 rounded shadow max-w-xl mx-auto mt-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-3">Menu List</h2>
           <div className="space-y-3">
             {menuList.map((menu) => {
@@ -253,21 +262,21 @@ const GetMenuByOwnerId: React.FC = () => {
                   <div className="flex flex-col space-y-2 w-full sm:w-auto">
                     <button
                       onClick={() => deleteMenu(menu.menuid)}
-                      className="w-full sm:w-auto px-3 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700"
+                      className="w-full sm:w-auto px-3 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition-colors"
                     >
                       Delete
                     </button>
                     <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                       <button
                         onClick={() => markInStock(menu.menuid)}
-                        className="w-full sm:w-auto px-3 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700"
+                        className="w-full sm:w-auto px-3 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition-colors"
                         disabled={currentStatus === "instock"}
                       >
                         Set In Stock
                       </button>
                       <button
                         onClick={() => markOutOfStock(menu.menuid)}
-                        className="w-full sm:w-auto px-3 py-2 bg-gray-800 text-white font-semibold rounded hover:bg-gray-900"
+                        className="w-full sm:w-auto px-3 py-2 bg-gray-800 text-white font-semibold rounded hover:bg-gray-900 transition-colors"
                         disabled={currentStatus === "outofstock"}
                       >
                         Set Out of Stock

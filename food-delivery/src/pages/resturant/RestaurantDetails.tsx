@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 
 interface RestaurantDetailsProps {
   restaurantid: string;
@@ -16,9 +16,7 @@ interface RestaurantDetailsProps {
 
 const RestaurantDetails: React.FC = () => {
   const navigate = useNavigate();
-  const [restaurant, setRestaurant] = useState<RestaurantDetailsProps | null>(
-    null
-  );
+  const [restaurant, setRestaurant] = useState<RestaurantDetailsProps | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +30,6 @@ const RestaurantDetails: React.FC = () => {
         throw new Error("User is not authenticated");
       }
 
-      
       const decodedToken: { owenerid: string } = jwtDecode(token);
       const ownerid = decodedToken.owenerid;
 
@@ -79,71 +76,65 @@ const RestaurantDetails: React.FC = () => {
       alert("Restaurant ID not found!");
     }
   };
-  
 
   return (
-    <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
+    <div className="bg-gray-100 min-h-screen flex flex-col">
+      {/* Top Navigation Bar */}
+      <div className="bg-red-600 text-white p-4 flex justify-between items-center">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-white"
+        >
+          <FaArrowLeft size={20} />
+        </button>
+        <h1 className="text-xl font-bold">Restaurant Details</h1>
+        <div className="w-8"></div> {/* Placeholder for alignment */}
+      </div>
+
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="bg-white shadow-md rounded-xl p-6">
-          <div className="flex justify-between items-center mb-5">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-3xl text-red-500 p-2 rounded-full hover:bg-gray-200 focus:outline-none"
-            >
-              <FaArrowLeft />
-            </button>
-            <h1 className="text-3xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-pink-500">
-              Restaurant Details
-            </h1>
-          </div>
+      <div className="flex-1 p-4 overflow-y-auto">
+        {loading ? (
+          <div className="text-center text-lg text-red-500">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-lg text-red-500">Error: {error}</div>
+        ) : (
+          restaurant && (
+            <div className="space-y-4">
+              {restaurant.thumbnail ? (
+                <img
+                  src={`data:image/png;base64,${restaurant.thumbnail}`}
+                  alt={`${restaurant.restaurantname} Thumbnail`}
+                  className="w-full h-48 object-cover rounded-lg shadow-md"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 rounded-lg shadow-md flex items-center justify-center">
+                  <span className="text-gray-400 text-sm">No Thumbnail</span>
+                </div>
+              )}
 
-          {loading ? (
-            <div className="text-center text-lg text-red-500">Loading...</div>
-          ) : error ? (
-            <div className="text-center text-lg text-red-500">Error: {error}</div>
-          ) : (
-            restaurant && (
-              <div className="space-y-6">
-                {restaurant.thumbnail ? (
-                  <img
-                    src={`data:image/png;base64,${restaurant.thumbnail}`}
-                    alt={`${restaurant.restaurantname} Thumbnail`}
-                    className="w-full h-64 object-cover rounded-lg shadow-md mb-4"
-                  />
-                ) : (
-                  <div className="w-full h-64 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">No Thumbnail</span>
-                  </div>
-                )}
-
-                <h2 className="text-2xl font-bold text-red-500">
+              <div className="bg-white p-4 rounded-lg shadow-md">
+                <h2 className="text-xl font-bold text-gray-800">
                   {restaurant.restaurantname}
                 </h2>
-                <p className="text-gray-600 text-lg">{restaurant.location}</p>
-                <p className="text-gray-600 text-lg">
+                <p className="text-gray-600">{restaurant.location}</p>
+                <p className="text-gray-600">
                   Cuisine: {restaurant.cuisine_type}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Created on:{" "}
-                  {new Date(restaurant.created_at).toLocaleDateString()}
+                  Created on: {new Date(restaurant.created_at).toLocaleDateString()}
                 </p>
               </div>
-            )
-          )}
-          <button
-            onClick={handleAddMenu}
-            className="mt-6 w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
-          >
-            Add Menu
-          </button>
-          <button
-            onClick={() => navigate(-1)}
-            className="mt-4 w-full bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:bg-gradient-to-l transition-all"
-          >
-            Go Back
-          </button>
-        </div>
+
+              <button
+                onClick={handleAddMenu}
+                className="w-full bg-red-600 text-white font-bold py-2 rounded-lg flex items-center justify-center"
+              >
+                <FaPlus className="mr-2" />
+                Add Menu
+              </button>
+            </div>
+          )
+        )}
       </div>
     </div>
   );
