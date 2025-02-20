@@ -229,36 +229,36 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Fixed header */}
-      <div className="fixed top-0 left-0 w-full p-6 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
-        <h1 className="text-2xl font-bold">Your Cart</h1>
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
+        <h1 className="text-xl font-bold">Your Cart</h1>
       </div>
 
-      {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto p-6 pt-24 pb-16">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-4 pt-20 pb-20">
         {cart.length === 0 ? (
-          <p className="text-center text-lg">Your cart is empty.</p>
+          <p className="text-center text-lg text-gray-700">Your cart is empty.</p>
         ) : (
           <div className="space-y-4">
             {cart.map((item: CartItem, index: number) => (
-              <div key={index} className="bg-gradient-to-r from-white via-gray-50 to-gray-100 shadow-lg rounded-lg p-4">
-                <h3 className="text-lg font-bold text-red-500">{item.menuname}</h3>
-                <p className="text-gray-600 mt-2">{item.menudescription}</p>
-                <p className="text-gray-500 mt-1">Price: {item.menuprice}</p>
-                <p className="text-gray-500 mt-1">Quantity: {item.quantity}</p>
-                
-                <div className="mt-4 flex justify-between">
-                  <button
-                    onClick={() => handleIncreaseQuantity(item)}
-                    className="bg-gradient-to-r from-green-500 to-lime-500 text-white py-1 px-3 rounded-lg hover:bg-gradient-to-l transition-all"
-                  >
-                    +
-                  </button>
+              <div key={index} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-4">
+                <h3 className="text-lg font-bold text-gray-800">{item.menuname}</h3>
+                <p className="text-sm text-gray-600 mt-2">{item.menudescription}</p>
+                <p className="text-sm text-gray-500 mt-1">Price: ₹{item.menuprice}</p>
+                {/* Quantity Control */}
+                <div className="mt-4 flex items-center justify-between bg-gray-100 rounded-lg p-1.5">
                   <button
                     onClick={() => handleDecreaseQuantity(item)}
-                    className="bg-gradient-to-r from-red-500 to-pink-500 text-white py-1 px-3 rounded-lg hover:bg-gradient-to-l transition-all"
+                    className="w-8 h-8 bg-red-500 text-white rounded-lg active:scale-95"
                   >
                     -
+                  </button>
+                  <span className="mx-3 font-bold text-gray-800">{item.quantity}</span>
+                  <button
+                    onClick={() => handleIncreaseQuantity(item)}
+                    className="w-8 h-8 bg-green-500 text-white rounded-lg active:scale-95"
+                  >
+                    +
                   </button>
                 </div>
               </div>
@@ -268,11 +268,11 @@ const CartPage: React.FC = () => {
       </div>
 
       {/* Total Price & Checkout */}
-      <div className="flex justify-between p-6 bg-gradient-to-r from-red-500 to-pink-500 text-white fixed bottom-0 left-0 w-full">
-        <h2 className="font-semibold">Total: ₹{totalPrice}</h2>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-up-lg flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800">Total: ₹{totalPrice}</h2>
         <button
           onClick={createOrder}
-          className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-2 px-6 rounded-full shadow-lg hover:bg-gradient-to-l transition-all"
+          className="bg-red-500 text-white font-semibold py-3.5 px-6 rounded-lg active:scale-98 transition-transform"
         >
           Checkout
         </button>

@@ -1,36 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { IoRestaurant, IoLocation, IoCalendar, IoPricetag } from 'react-icons/io5';
+import axios from 'axios';
 
-interface OrderItem {
-  item_total: number;
-  menu: {
-    foodtype: string;
-    menudescription: string;
-    menuname: string;
-    menuprice: string;
-    menutype: string;
-  };
-  menuid: string;
-  quantity: number;
+interface Menu {
+  foodtype: string;
+  menudescription: string;
+  menuname: string;
+  menuprice: string;
+  menutype: string;
+}
+
+interface Restaurant {
+  address: string;
+  cuisin_type: string;
+  location: string;
+  resturantname: string;
 }
 
 interface Order {
+  items: any;
   uid: string;
-  created_at: string;
-  items: OrderItem[];
-  orderstatus: string;
-  preptime: string | null;
-  restaurant: {
-    address: string;
-    cuisin_type: string;
-    location: string;
-    resturantname: string;
-  };
-  restaurantid: string;
-  tempstatus: string;
-  totalprice: number;
+  productid: string;
+  quantity: number;
   userid: string;
+  restaurantid: string;
+  totalprice: number;
+  created_at: string;
+  orderstatus: string;
+  menu: Menu | null;
+  restaurant: Restaurant | null;
+  preptime?: string | null;
+  tempstatus?: string;
 }
 
 interface DecodedToken {
@@ -97,60 +98,67 @@ const OrderTrackingPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6">
-      <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">Order Tracking</h1>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-2xl font-bold text-red-600 mb-4">Order History</h3>
-        <ul>
-          {orders.map((order) => (
-            <li
-              key={order.uid}
-              className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 p-4 bg-gray-100 rounded-md shadow"
-            >
-              <div className="w-full md:w-3/4">
-                <h4 className="font-semibold text-lg">
-                  {order.restaurant?.resturantname || 'Unknown Restaurant'}
-                </h4>
-                <p className="text-gray-600">
-                  Location: {order.restaurant?.location || 'N/A'}
-                </p>
-                <div className="mt-2">
-                  {order.items.map((item, idx) => (
-                    <div key={idx} className="border-b border-gray-300 pb-1 mb-1">
-                      <p className="text-gray-700">
-                        <strong>Menu:</strong> {item.menu.menuname}
-                      </p>
-                      <p className="text-gray-600">
-                        <strong>Quantity:</strong> {item.quantity}
-                      </p>
-                      <p className="text-gray-600">
-                        <strong>Item Total:</strong> ₹{item.item_total}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-gray-600 mt-2">
-                  <strong>Total Price:</strong> ₹{order.totalprice}
-                </p>
-                {order.preptime && (
-                  <p className="text-gray-600">
-                    <strong>Prep Time:</strong> {order.preptime}
-                  </p>
-                )}
-                <p className="text-gray-600">
-                  <strong>Order Placed:</strong> {formatDate(order.created_at)}
-                </p>
-              </div>
-              <span
-                className={`text-sm font-bold p-2 rounded mt-2 md:mt-0 ${getStatusColor(
-                  order.tempstatus || order.orderstatus
-                )}`}
+    <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
+        <h1 className="text-xl font-bold">Order Tracking</h1>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto p-4 pt-20">
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h3 className="text-2xl font-bold text-red-600 mb-4">Order List</h3>
+          <ul>
+            {orders.map((order) => (
+              <li
+                key={order.uid}
+                className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow"
               >
-                {order.tempstatus || order.orderstatus}
-              </span>
-            </li>
-          ))}
-        </ul>
+                <div className="w-full md:w-3/4">
+                  <h4 className="font-semibold text-lg">
+                    {order.restaurant?.resturantname || 'Unknown Restaurant'}
+                  </h4>
+                  <p className="text-gray-600">
+                    Location: {order.restaurant?.location || 'N/A'}
+                  </p>
+                  <div className="mt-2">
+                    {order.items && order.items.map((item: { menu: { menuname: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }; quantity: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; item_total: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }, idx: React.Key | null | undefined) => (
+                      <div key={idx} className="border-b border-gray-300 pb-1 mb-1">
+                        <p className="text-gray-700">
+                          <strong>Menu:</strong> {item.menu.menuname}
+                        </p>
+                        <p className="text-gray-600">
+                          <strong>Quantity:</strong> {item.quantity}
+                        </p>
+                        <p className="text-gray-600">
+                          <strong>Item Total:</strong> ₹{item.item_total}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-gray-600 mt-2">
+                    <strong>Total Price:</strong> ₹{order.totalprice}
+                  </p>
+                  {order.preptime && (
+                    <p className="text-gray-600">
+                      <strong>Prep Time:</strong> {order.preptime}
+                    </p>
+                  )}
+                  <p className="text-gray-600">
+                    <strong>Order Placed:</strong> {formatDate(order.created_at)}
+                  </p>
+                </div>
+                <span
+                  className={`text-sm font-bold p-2 rounded mt-2 md:mt-0 ${getStatusColor(
+                    order.tempstatus || order.orderstatus
+                  )}`}
+                >
+                  {order.tempstatus || order.orderstatus}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

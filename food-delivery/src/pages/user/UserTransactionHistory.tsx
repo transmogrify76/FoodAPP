@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { IoCalendar, IoPricetag } from 'react-icons/io5';
 
 interface Transaction {
@@ -26,24 +26,20 @@ const UserTransactionHistoryPage: React.FC = () => {
   useEffect(() => {
     const fetchTransactionHistory = async () => {
       try {
-        // Retrieve the token (assumed to be stored under "user_token")
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('token not found.');
         }
 
-        // Decode the token to get the user id
         const decoded: DecodedToken = jwtDecode(token);
         const userId = decoded.userid;
         if (!userId) {
           throw new Error('User ID not found in token.');
         }
 
-        // Create a payload with the user ID
         const formData = new FormData();
         formData.append('userid', userId);
 
-        // Make the API call to your Flask endpoint
         const response = await fetch('http://localhost:5000/ops/usertransactionhistory', {
           method: 'POST',
           body: formData,
@@ -66,39 +62,49 @@ const UserTransactionHistoryPage: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-lg">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-500 via-white to-gray-100">
+        <p className="text-red-600 text-xl font-bold">Loading...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-lg text-red-600">{error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-red-500 via-white to-gray-100">
+        <p className="text-red-600 text-xl font-bold">{error}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4">
-      <h1 className="text-4xl font-bold text-center text-red-600 mb-8">
-        Your Transaction History
-      </h1>
-      
-      {transactionHistory && (
-        <>
-          {/* Summary Card */}
-          <div className="max-w-xl mx-auto bg-white shadow-lg rounded-lg p-6 mb-8">
-            <p className="text-lg font-semibold">
-              Total Transactions: {transactionHistory.transaction_count}
-            </p>
-            <p className="text-lg font-semibold">
-              Total Spent: ₹{transactionHistory.total_spent} {transactionHistory.currency}
-            </p>
-          </div>
+    <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
+        <h1 className="text-xl font-bold">Transaction History</h1>
+      </div>
 
-          {/* Transaction List */}
-          <div className="space-y-6">
-            {transactionHistory.transactions.map((transaction, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-lg overflow-hidden"
-              >
-                <div className="p-4">
+      <div className="flex-1 overflow-y-auto p-4 pt-20">
+        
+        {transactionHistory && (
+          <>
+            {/* Summary Card */}
+            <div className="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 mb-8">
+              <p className="text-lg font-semibold">
+                Total Transactions: {transactionHistory.transaction_count}
+              </p>
+              <p className="text-lg font-semibold">
+                Total Spent: ₹{transactionHistory.total_spent} {transactionHistory.currency}
+              </p>
+            </div>
+
+            {/* Transaction List */}
+            <div className="space-y-6">
+              {transactionHistory.transactions.map((transaction, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-4"
+                >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                       <IoCalendar className="text-gray-500" />
@@ -114,11 +120,11 @@ const UserTransactionHistoryPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
