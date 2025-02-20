@@ -1,68 +1,79 @@
 import React from 'react';
-import { FaPizzaSlice, FaHamburger } from 'react-icons/fa';
+import { FaPizzaSlice, FaHamburger, FaArrowRight, FaMotorcycle } from 'react-icons/fa';
 import { GiHotMeal } from 'react-icons/gi';
-import { useNavigate } from 'react-router-dom'; 
-import logo from '../assets/Red Illustrated Mascot Chef Free Logo.png'; 
+import { useNavigate } from 'react-router-dom';
+import logo from '../assets/Red Illustrated Mascot Chef Free Logo.png';
+
 const LandingPage: React.FC = () => {
-  const navigate = useNavigate(); 
-  const handleRestaurantOwnerClick = () => {
-    navigate('/restaurant-login'); 
-  };
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex flex-col items-center justify-between">
-      {/* <header className="w-full p-6 bg-white shadow-md flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-extrabold text-red-600">Foodie Heaven</h1>
-      </header> */}
-
-      <main className="flex flex-col items-center justify-center flex-1 px-6">
-        <div className="mb-5"> {/* Added extra margin between header and logo */}
+      <main className="flex flex-col items-center justify-center flex-1 w-full px-6 pb-8">
+        {/* Logo Section with extra top padding */}
+        <div className="pt-8 mb-6 animate-bounce">
           <img
-            src={logo} 
+            src={logo}
             alt="Foodie Heaven Logo"
-            className="w-36 h-36 rounded-full shadow-lg"
+            className="w-36 h-36 rounded-full shadow-lg border-4 border-white"
           />
         </div>
 
-        <h2 className="text-5xl font-extrabold text-gray-800 text-center mb-2 leading-tight">
+        {/* Heading Section */}
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-800 text-center mb-4 leading-tight">
           Delicious Food <span className="text-red-600">Delivered</span>!
         </h2>
-        <p className="text-base sm:text-lg text-gray-600 text-center max-w-lg mb-10">
+        <p className="text-sm sm:text-base text-gray-600 text-center max-w-md mb-8">
           Explore cuisines from around the globe, made fresh and delivered fast. Savor the taste, savor the moment.
         </p>
 
-        <div className="flex space-x-6 mb-7">
-          <FaPizzaSlice className="text-red-500 text-6xl" />
-          <FaHamburger className="text-red-400 text-6xl" />
-          <GiHotMeal className="text-red-600 text-6xl" />
+        {/* Food Icons Section */}
+        <div className="flex space-x-6 mb-8">
+          <FaPizzaSlice className="text-red-500 text-5xl sm:text-6xl hover:scale-110 transition-transform" />
+          <FaHamburger className="text-red-400 text-5xl sm:text-6xl hover:scale-110 transition-transform" />
+          <GiHotMeal className="text-red-600 text-5xl sm:text-6xl hover:scale-110 transition-transform" />
         </div>
 
-        <div className="w-full flex flex-col items-center space-y-6 mb-4"> 
-          <a
-            href="/signup"
-            className="w-4/5 px-8 py-4 bg-red-500 text-white font-bold rounded-xl shadow-lg text-center hover:bg-red-600 text-lg"
+        {/* Buttons Section */}
+        <div className="w-full max-w-sm flex flex-col items-center space-y-4">
+          <button
+            onClick={() => navigate('/signup')}
+            className="w-full px-6 py-4 bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold rounded-xl shadow-lg flex items-center justify-center hover:opacity-90 transition-transform"
           >
-            Sign Up
-          </a>
-          <a
-            href="/login"
-            className="w-4/5 px-8 py-4 border border-gray-300 text-gray-800 font-bold rounded-xl shadow-lg text-center hover:bg-gray-200 text-lg"
+            SignUp
+            <FaArrowRight className="ml-2" />
+          </button>
+
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full px-6 py-3 bg-white text-gray-800 font-bold rounded-xl shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
           >
             Login
-          </a>
-          
-         
+            <FaArrowRight className="ml-2" />
+          </button>
+
           <button
-            onClick={handleRestaurantOwnerClick}
-            className="w-4/5 px-8 py-4 bg-red-500 text-white font-bold rounded-xl shadow-lg text-center hover:bg-red-600 text-lg"
+            onClick={() => navigate('/restaurant-login')}
+            className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-400 text-white font-bold rounded-xl shadow-lg flex items-center justify-center hover:opacity-90 transition-all"
           >
-            Restaurant Owner?
+            Restaurant Owner
+            <FaArrowRight className="ml-2" />
+          </button>
+
+          <button
+            onClick={() => navigate('/rider-signup')}
+            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bold rounded-xl shadow-lg flex items-center justify-center hover:opacity-90 transition-all mb-16"
+          >
+            <FaMotorcycle className="mr-2" />
+            Become a Rider
           </button>
         </div>
       </main>
 
-      <footer className="w-full p-5 bg-white shadow-md text-center">
-        <p className="text-sm sm:text-base text-gray-500">&copy; 2024 Foodie Heaven. All rights reserved.</p>
+      <footer className="w-full p-4 bg-white shadow-md text-center">
+        <p className="text-xs sm:text-sm text-gray-500">
+          &copy; 2024 Foodie Heaven. All rights reserved.
+        </p>
       </footer>
     </div>
   );
