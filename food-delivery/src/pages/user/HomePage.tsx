@@ -10,6 +10,7 @@ import {
   FaCog,
   FaFile,
   FaShoppingCart,
+  FaUtensils
 } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
@@ -140,6 +141,15 @@ const HomePage: React.FC = () => {
                 className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
               >
                 Order Tracking
+              </button>
+            </li>
+            <li className="flex items-center">
+              <FaUtensils className="text-red-500 mr-3 text-lg" />
+              <button
+                onClick={() => navigate('/menu')}
+                className="w-full text-left text-gray-600 hover:text-red-500 font-medium text-sm"
+              >
+                All Menus
               </button>
             </li>
             <li className="flex items-center">
