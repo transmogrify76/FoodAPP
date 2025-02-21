@@ -8,14 +8,14 @@ const OrdersManagement = () => {
 
   const orders = {
     newOrders: [
-      { id: 1, pickup: 'Restaurant A', dropoff: 'Customer 1', customer: 'John Doe' },
-      { id: 2, pickup: 'Store B', dropoff: 'Customer 2', customer: 'Jane Smith' }
+      { id: 1, pickup: 'Restaurant A', dropoff: 'Customer 1', customer: 'Manjima ' },
+      { id: 2, pickup: 'Store B', dropoff: 'Customer 2', customer: 'Sayan ' }
     ],
     ongoingOrders: [
-      { id: 3, pickup: 'Cafe C', dropoff: 'Customer 3', customer: 'Mike Ross' }
+      { id: 3, pickup: 'Cafe C', dropoff: 'Customer 3', customer: 'Sandip' }
     ],
     completedOrders: [
-      { id: 4, pickup: 'Bakery D', dropoff: 'Customer 4', earnings: '$20' }
+      { id: 4, pickup: 'Bakery D', dropoff: 'Customer 4', earnings: '20' }
     ]
   };
 

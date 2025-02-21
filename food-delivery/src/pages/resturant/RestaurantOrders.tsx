@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
 const RestaurantOrders: React.FC = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [message, setMessage] = useState<string>('');
-  const [restaurantId, setRestaurantId] = useState<string>(''); 
-  const [ownerId, setOwnerId] = useState<string>(''); 
+  const [restaurantId, setRestaurantId] = useState<string>('');
+  const [ownerId, setOwnerId] = useState<string>('');
 
   useEffect(() => {
     const storedRestaurantToken = localStorage.getItem('restaurant_token');
     if (storedRestaurantToken) {
       try {
         const decodedToken: any = jwtDecode(storedRestaurantToken);
-        setOwnerId(decodedToken.owenerid); 
-        fetchRestaurantId(decodedToken.owenerid); 
+        setOwnerId(decodedToken.owenerid);
+        fetchRestaurantId(decodedToken.owenerid);
       } catch (error) {
         console.error('Error decoding token:', error);
         setMessage('Invalid token.');
@@ -30,7 +30,7 @@ const RestaurantOrders: React.FC = () => {
   const fetchRestaurantId = async (ownerId: string) => {
     try {
       const formData = new FormData();
-      formData.append('ownerid', ownerId); 
+      formData.append('ownerid', ownerId);
 
       const response = await fetch('http://localhost:5000/owenerresturentfetch', {
         method: 'POST',
@@ -44,9 +44,9 @@ const RestaurantOrders: React.FC = () => {
       }
 
       const data = await response.json();
-      const restaurantIdFromResponse = data.data[0]?.restaurantid; 
+      const restaurantIdFromResponse = data.data[0]?.restaurantid;
       if (restaurantIdFromResponse) {
-        setRestaurantId(restaurantIdFromResponse); 
+        setRestaurantId(restaurantIdFromResponse);
       } else {
         setMessage('No restaurant found for this owner.');
       }
@@ -57,14 +57,14 @@ const RestaurantOrders: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!restaurantId) return; 
-    
+    if (!restaurantId) return;
+
     const fetchOrders = async () => {
       try {
         const formData = new FormData();
-        formData.append('restaurantid', restaurantId); 
+        formData.append('restaurantid', restaurantId);
 
-        const response = await axios.post('http://localhost:5000/order/resorderhistory', formData);
+        const response = await axios.post('http://localhost:5000/order/orderhistory', formData);
         console.log('Orders fetched:', response.data);
         setOrders(response.data.order_list);
       } catch (error) {
@@ -93,7 +93,7 @@ const RestaurantOrders: React.FC = () => {
         setMessage(`Order #${orderId} has been ${action}ed.`);
         setOrders(orders.map((order) =>
           order.uid === orderId ? { ...order, orderstatus: action === 'accept' ? 'accepted' : 'rejected' } : order
-        )); 
+        ));
       } else {
         setMessage('Failed to update order status.');
       }
@@ -157,17 +157,17 @@ const RestaurantOrders: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <FaShoppingCart className="text-red-600 mr-2" />
-                    <h2 className="text-lg font-semibold text-gray-700">{order.menuname}</h2>
+                    <h2 className="text-lg font-semibold text-gray-700">{order.items[0].menu.menuname}</h2>
                   </div>
                 </div>
                 <div className="mt-2 space-y-1">
-                  <p className="text-sm text-gray-600"><strong>Description:</strong> {order.menudescription}</p>
-                  <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.quantity}</p>
+                  <p className="text-sm text-gray-600"><strong>Description:</strong> {order.items[0].menu.menudescription}</p>
+                  <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.items[0].quantity}</p>
                   <p className="text-sm text-gray-600"><strong>Total Price:</strong> ₹{order.totalprice}</p>
                   <p className="text-sm text-gray-600"><strong>Order Status:</strong> {order.orderstatus}</p>
-                  <p className="text-sm text-gray-600"><strong>Customer:</strong> {order.username}</p>
-                  <p className="text-sm text-gray-600"><strong>Contact:</strong> {order.user_phone_no}</p>
-                  <p className="text-sm text-gray-600"><strong>Address:</strong> {order.useraddress}</p>
+                  <p className="text-sm text-gray-600"><strong>Customer:</strong> {order.userid}</p>
+                  <p className="text-sm text-gray-600"><strong>Contact:</strong> N/A</p>
+                  <p className="text-sm text-gray-600"><strong>Address:</strong> N/A</p>
                   <p className="text-sm text-gray-600"><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
                 </div>
 

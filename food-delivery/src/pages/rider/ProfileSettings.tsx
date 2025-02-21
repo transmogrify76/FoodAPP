@@ -36,8 +36,8 @@ const ProfileSettings = () => {
       { id: 2, question: "How do I update my delivery areas?", answer: "Go to Settings > Preferred Delivery Areas." }
     ],
     emergencyContacts: [
-      { id: 1, name: "Police", number: "911" },
-      { id: 2, name: "Rider Support", number: "+1 (800) 123-4567" }
+      { id: 1, name: "Police", number: "100" },
+      { id: 2, name: "Rider Support", number: "+91 9955679832" }
     ]
   };
 
