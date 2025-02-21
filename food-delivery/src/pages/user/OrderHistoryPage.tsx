@@ -18,6 +18,7 @@ interface Restaurant {
 }
 
 interface Order {
+  items: any;
   uid: string;
   productid: string;
   quantity: number;
@@ -155,9 +156,9 @@ const OrderHistoryPage: React.FC = () => {
                 </div>
 
                 <div className="mt-3 flex justify-between">
-                  <div className="text-gray-600">
-                    <p className="font-medium">Product ID: {order.productid}</p>
-                    <p>Quantity: {order.quantity}</p>
+                  <div className="text-black-900 bold-xl">
+                    <p className="font-medium">Item : {order.items[0].menu.menuname}</p>
+                    <p>Quantity: {order.items[0].quantity}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xl font-semibold">
