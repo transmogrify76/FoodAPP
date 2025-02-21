@@ -12,7 +12,7 @@ const RiderDashboard = () => {
     setIsOnline(!isOnline);
   };
 
-  // Handler to update active tab and navigate
+
   const handleNavigation = (tab: string, route: string) => {
     setActiveTab(tab);
     navigate(route);
@@ -20,12 +20,11 @@ const RiderDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Main Content */}
+
       <div className="w-full p-4">
         <div className="w-full bg-white shadow-2xl rounded-2xl p-4">
           <h1 className="text-2xl font-extrabold text-gray-800 text-center mb-4">Rider Dashboard</h1>
 
-          {/* Rider Status */}
           <div className="flex items-center justify-between p-3 bg-red-100 border border-red-300 rounded-xl mb-4 shadow-md">
             <span className="text-base font-semibold">
               Status:
@@ -42,7 +41,6 @@ const RiderDashboard = () => {
             </Switch.Root>
           </div>
 
-          {/* Orders Overview */}
           <div className="space-y-3 mb-4">
             <div className="p-3 bg-red-50 border border-red-300 rounded-xl flex items-center shadow-md">
               <FaClipboardList className="text-red-500 text-3xl mr-3" />
@@ -60,7 +58,6 @@ const RiderDashboard = () => {
             </div>
           </div>
 
-          {/* Earnings Summary */}
           <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl shadow-md">
             <h2 className="text-lg font-semibold mb-3 text-center text-gray-800">Earnings Summary</h2>
             <div className="space-y-3">
@@ -79,7 +76,6 @@ const RiderDashboard = () => {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-2xl">
         <div className="grid grid-cols-5 gap-2 p-2">
           <button

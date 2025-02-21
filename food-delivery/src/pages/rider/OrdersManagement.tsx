@@ -21,7 +21,7 @@ const OrdersManagement = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Header */}
+
       <div className="w-full p-4 bg-white shadow-md">
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-red-50">
@@ -31,9 +31,8 @@ const OrdersManagement = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="p-4">
-        {/* Tabs */}
+
         <div className="flex space-x-2 mb-4 overflow-x-auto">
           {['newOrders', 'ongoingOrders', 'completedOrders'].map(tab => (
             <button
@@ -50,7 +49,6 @@ const OrdersManagement = () => {
           ))}
         </div>
 
-        {/* Orders List */}
         <div className="space-y-3">
           {activeTab === 'newOrders' && orders.newOrders.map(order => (
             <div key={order.id} className="bg-white p-4 rounded-xl shadow-md">

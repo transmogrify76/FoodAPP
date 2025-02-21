@@ -43,7 +43,7 @@ const ProfileSettings = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Header */}
+
       <div className="w-full p-4 bg-white shadow-md">
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-red-50">
@@ -53,7 +53,6 @@ const ProfileSettings = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex space-x-2 p-4">
         {['profile', 'settings', 'support'].map(tab => (
           <button
@@ -70,11 +69,10 @@ const ProfileSettings = () => {
         ))}
       </div>
 
-      {/* Main Content */}
       <div className="p-4 space-y-4">
         {activeTab === 'profile' && (
           <>
-            {/* Profile Section */}
+
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex flex-col items-center space-y-4">
                 <img
@@ -90,7 +88,6 @@ const ProfileSettings = () => {
               </div>
             </div>
 
-            {/* Vehicle Details */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaMotorcycle className="text-red-500 text-xl" />
@@ -107,7 +104,7 @@ const ProfileSettings = () => {
 
         {activeTab === 'settings' && (
           <>
-            {/* Change Password */}
+
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaLock className="text-red-500 text-xl" />
@@ -135,7 +132,6 @@ const ProfileSettings = () => {
               </div>
             </div>
 
-            {/* Notification Settings */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaBell className="text-red-500 text-xl" />
@@ -158,7 +154,6 @@ const ProfileSettings = () => {
               </div>
             </div>
 
-            {/* Preferred Delivery Areas */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaMapMarkerAlt className="text-red-500 text-xl" />
@@ -180,7 +175,7 @@ const ProfileSettings = () => {
 
         {activeTab === 'support' && (
           <>
-            {/* Contact Support */}
+
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaPhone className="text-red-500 text-xl" />
@@ -195,7 +190,6 @@ const ProfileSettings = () => {
               </div>
             </div>
 
-            {/* FAQs */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaQuestionCircle className="text-red-500 text-xl" />
@@ -211,7 +205,6 @@ const ProfileSettings = () => {
               </div>
             </div>
 
-            {/* Emergency Contacts */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaPhone className="text-red-500 text-xl" />

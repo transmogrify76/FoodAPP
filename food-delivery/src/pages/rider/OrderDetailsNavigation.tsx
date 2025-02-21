@@ -35,7 +35,7 @@ const OrderDetailsNavigation = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Header */}
+
       <div className="w-full p-4 bg-white shadow-md">
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-red-50">
@@ -46,9 +46,7 @@ const OrderDetailsNavigation = () => {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Order Details Card */}
         <div className="bg-white rounded-xl shadow-md p-4">
-          {/* Restaurant Section */}
           <div className="mb-4">
             <div className="flex items-center mb-2">
               <FaMapMarkerAlt className="text-red-500 mr-2 text-lg" />
@@ -62,7 +60,6 @@ const OrderDetailsNavigation = () => {
             </div>
           </div>
 
-          {/* Customer Section */}
           <div className="mb-4">
             <div className="flex items-center mb-2">
               <FaUser className="text-red-500 mr-2 text-lg" />
@@ -76,7 +73,6 @@ const OrderDetailsNavigation = () => {
             </div>
           </div>
 
-          {/* Payment & Instructions */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <div className="flex items-center mb-2">
@@ -99,18 +95,16 @@ const OrderDetailsNavigation = () => {
           </div>
         </div>
 
-        {/* Map Section */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="h-64 bg-gray-200 flex items-center justify-center">
-            {/* Replace with actual map component */}
+
             <div className="text-center text-gray-500">
               <FaRoute className="text-4xl mb-2" />
               <p>Map integration placeholder</p>
               <p className="text-sm">(Google Maps implementation)</p>
             </div>
           </div>
-          
-          {/* Navigation Controls */}
+
           <div className="p-4 border-t">
             <button 
               onClick={() => setIsNavigating(!isNavigating)}
@@ -138,7 +132,6 @@ const OrderDetailsNavigation = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2">
           <button className="bg-white text-gray-800 p-3 rounded-xl shadow-md hover:bg-gray-50">
             Contact Customer

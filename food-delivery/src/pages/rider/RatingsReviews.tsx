@@ -19,7 +19,7 @@ const RatingsReviews = () => {
   const riderPerformance = {
     rating: 4.7,
     totalRatings: 128,
-    breakdown: [5, 4, 3, 2, 1], // Count of each star rating
+    breakdown: [5, 4, 3, 2, 1], 
     recentReviews: [
       {
         id: 1,
@@ -53,7 +53,7 @@ const RatingsReviews = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Header */}
+
       <div className="w-full p-4 bg-white shadow-md">
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-red-50">
@@ -63,9 +63,8 @@ const RatingsReviews = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="p-4 space-y-4">
-        {/* Rate Restaurant */}
+
         <div className="bg-white rounded-xl shadow-md p-4">
           <div className="flex items-center space-x-3 mb-4">
             <FaUtensils className="text-red-500 text-xl" />
@@ -86,7 +85,6 @@ const RatingsReviews = () => {
           </div>
         </div>
 
-        {/* Rate Customer */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <div className="flex items-center space-x-3 mb-4">
             <FaUser className="text-red-500 text-xl" />
@@ -107,7 +105,6 @@ const RatingsReviews = () => {
           </div>
         </div>
 
-        {/* Feedback Form */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <h2 className="text-lg font-semibold mb-4">Additional Feedback</h2>
           <textarea
@@ -115,7 +112,6 @@ const RatingsReviews = () => {
             onChange={(e) => setFeedback(e.target.value)}
             placeholder="Share your experience..."
             className="w-full p-2 border rounded-lg mb-4"
-            // rows="3"
           />
           <button
             onClick={submitFeedback}
@@ -125,7 +121,6 @@ const RatingsReviews = () => {
           </button>
         </div>
 
-        {/* Rider Performance */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <div className="flex items-center space-x-3 mb-4">
             <FaChartLine className="text-red-500 text-xl" />
@@ -154,7 +149,6 @@ const RatingsReviews = () => {
             </div>
           </div>
 
-          {/* Rating Breakdown */}
           <div className="mt-4 space-y-2">
             {[5, 4, 3, 2, 1].map((star) => (
               <div key={star} className="flex items-center space-x-2">
@@ -172,7 +166,6 @@ const RatingsReviews = () => {
           </div>
         </div>
 
-        {/* Recent Reviews */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <h2 className="text-lg font-semibold mb-4">Recent Reviews</h2>
           <div className="space-y-3">

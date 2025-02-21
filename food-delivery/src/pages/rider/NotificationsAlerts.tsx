@@ -41,7 +41,7 @@ const NotificationsAlerts = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Header */}
+ 
       <div className="w-full p-4 bg-white shadow-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -59,9 +59,7 @@ const NotificationsAlerts = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="p-4 space-y-4">
-        {/* Notifications Toggle */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -83,7 +81,6 @@ const NotificationsAlerts = () => {
           </div>
         </div>
 
-        {/* Notifications List */}
         <div className="space-y-3">
           {notifications.map(notification => (
             <div
@@ -119,8 +116,7 @@ const NotificationsAlerts = () => {
             </div>
           ))}
         </div>
-
-        {/* Notification Categories */}
+        
         <div className="bg-white rounded-xl shadow-md p-4">
           <h2 className="text-lg font-semibold mb-3">Notification Preferences</h2>
           <div className="space-y-4">

@@ -40,7 +40,7 @@ const RiderSignup: React.FC = () => {
       setError(error.message);
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-xl p-10 max-w-md w-full min-h-[850px]">

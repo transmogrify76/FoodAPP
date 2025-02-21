@@ -41,7 +41,6 @@ const EarningsTransactions = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Header */}
       <div className="w-full p-4 bg-white shadow-md">
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-red-50">
@@ -51,7 +50,6 @@ const EarningsTransactions = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex space-x-2 p-4">
         <button
           onClick={() => setActiveTab('earnings')}
@@ -75,11 +73,10 @@ const EarningsTransactions = () => {
         </button>
       </div>
 
-      {/* Main Content */}
       <div className="p-4 space-y-4">
         {activeTab === 'earnings' ? (
           <>
-            {/* Total Earnings */}
+
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -90,7 +87,6 @@ const EarningsTransactions = () => {
               </div>
             </div>
 
-            {/* Reports */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white rounded-xl shadow-md p-4">
                 <div className="flex items-center space-x-2 mb-2">
@@ -114,7 +110,6 @@ const EarningsTransactions = () => {
               </div>
             </div>
 
-            {/* Earnings Breakdown */}
             <div className="bg-white rounded-xl shadow-md">
               <div className="p-4 border-b">
                 <h2 className="text-lg font-semibold">Earnings Breakdown</h2>
@@ -134,7 +129,7 @@ const EarningsTransactions = () => {
           </>
         ) : (
           <>
-            {/* Wallet Balance */}
+
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -145,7 +140,6 @@ const EarningsTransactions = () => {
               </div>
             </div>
 
-            {/* Withdrawal Options */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <h2 className="text-lg font-semibold mb-4">Withdrawal Options</h2>
               <div className="space-y-2">
@@ -158,7 +152,6 @@ const EarningsTransactions = () => {
               </div>
             </div>
 
-            {/* Payment History */}
             <div className="bg-white rounded-xl shadow-md">
               <div className="p-4 border-b flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Payment History</h2>
