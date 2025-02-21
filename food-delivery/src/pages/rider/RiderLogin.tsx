@@ -16,7 +16,7 @@ const RiderLogin: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/riders/login", {
+      const response = await fetch("http://127.0.0.1:5000/raider/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams(formData),
@@ -29,7 +29,7 @@ const RiderLogin: React.FC = () => {
       }
 
       localStorage.setItem("token", data.token);
-      navigate("/dashboard");
+      navigate("/rider-dashboard");
     } catch (error: any) {
       setError(error.message);
     }
