@@ -138,7 +138,6 @@ const RestaurantOrders: React.FC = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
       <div className="bg-red-600 text-white p-4 flex justify-between items-center">
         <button onClick={() => navigate(-1)} className="text-white">
           <FaArrowLeft size={20} />
@@ -146,8 +145,6 @@ const RestaurantOrders: React.FC = () => {
         <h1 className="text-xl font-bold">Restaurant Orders</h1>
         <div className="w-8"></div>
       </div>
-
-      {/* Main Content */}
       <div className="flex-1 p-4 overflow-y-auto">
         {message && <p className="text-red-500 text-center mb-4">{message}</p>}
         <div className="space-y-4">
@@ -165,9 +162,8 @@ const RestaurantOrders: React.FC = () => {
                   <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.items[0].quantity}</p>
                   <p className="text-sm text-gray-600"><strong>Total Price:</strong> ₹{order.totalprice}</p>
                   <p className="text-sm text-gray-600"><strong>Order Status:</strong> {order.orderstatus}</p>
-                  <p className="text-sm text-gray-600"><strong>Customer:</strong> {order.userid}</p>
-                  <p className="text-sm text-gray-600"><strong>Contact:</strong> N/A</p>
-                  <p className="text-sm text-gray-600"><strong>Address:</strong> N/A</p>
+                  <p className="text-sm text-gray-600"><strong>Contact:</strong> {order.usercontact}</p>
+                  <p className="text-sm text-gray-600"><strong>Address:</strong> {order.useraddress}</p>
                   <p className="text-sm text-gray-600"><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
                 </div>
 
