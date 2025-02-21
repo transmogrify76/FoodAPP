@@ -92,7 +92,6 @@ const CreateRestaurant: React.FC = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
       <div className="bg-red-600 text-white p-4 flex justify-between items-center">
         <button onClick={() => navigate(-1)} className="text-white">
           <FaArrowLeft size={20} />
@@ -101,7 +100,6 @@ const CreateRestaurant: React.FC = () => {
         <div className="w-6"></div>
       </div>
 
-      {/* Main Content */}
       <div className="p-4 flex-1">
         <form
           onSubmit={handleSubmit}

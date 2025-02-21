@@ -79,7 +79,7 @@ const RestaurantDetails: React.FC = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
+
       <div className="bg-red-600 text-white p-4 flex justify-between items-center">
         <button
           onClick={() => navigate(-1)}
@@ -88,10 +88,9 @@ const RestaurantDetails: React.FC = () => {
           <FaArrowLeft size={20} />
         </button>
         <h1 className="text-xl font-bold">Restaurant Details</h1>
-        <div className="w-8"></div> {/* Placeholder for alignment */}
+        <div className="w-8"></div> 
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-4 overflow-y-auto">
         {loading ? (
           <div className="text-center text-lg text-red-500">Loading...</div>

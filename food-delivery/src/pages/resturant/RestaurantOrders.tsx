@@ -167,7 +167,7 @@ const RestaurantOrders: React.FC = () => {
                   <p className="text-sm text-gray-600"><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
                 </div>
 
-                {/* Order Action Buttons */}
+
                 <div className="flex flex-col sm:flex-row justify-end mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
                   <button
                     onClick={() => handleOrderAction(order.uid, 'accept')}
@@ -185,7 +185,7 @@ const RestaurantOrders: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Temporary Status Change Buttons */}
+
                 {order.orderstatus === 'accepted' && (
                   <div className="flex flex-col sm:flex-row justify-end mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
                     <button

@@ -38,7 +38,7 @@ const RestaurantSignup: React.FC = () => {
         
         const response = await axios.post('http://127.0.0.1:5000/users/resauth_signup', formDataToSend);
         setMessage(response.data.message);
-        setIsOtpSent(true); // Mark OTP as sent
+        setIsOtpSent(true); 
       } else if (otp) {
         
         formDataToSend.append('otp', otp);

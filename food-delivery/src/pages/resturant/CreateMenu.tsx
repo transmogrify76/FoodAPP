@@ -143,7 +143,6 @@ const CreateMenu: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Top Navigation Bar */}
       <div className="bg-red-600 text-white p-4 flex justify-between items-center">
         <button onClick={() => navigate(-1)} className="text-white">
           <FaArrowLeft size={20} />
@@ -152,7 +151,6 @@ const CreateMenu: React.FC = () => {
         <div className="w-6"></div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-4 overflow-y-auto">
         {error && (
           <div className="bg-red-100 text-red-800 p-4 rounded-lg mb-4 max-w-xl mx-auto">
@@ -197,7 +195,6 @@ const CreateMenu: React.FC = () => {
           <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Menu Details</h2>
             <form onSubmit={handleSubmit}>
-              {/* Menu Name */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Menu Name</label>
                 <input
@@ -209,8 +206,6 @@ const CreateMenu: React.FC = () => {
                   required
                 />
               </div>
-
-              {/* Description */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Description</label>
                 <textarea
@@ -222,7 +217,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Price */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Price</label>
                 <input
@@ -235,7 +229,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Menu Type */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Menu Type</label>
                 <input
@@ -248,7 +241,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Food Type */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Food Type</label>
                 <input
@@ -261,7 +253,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Menu Item Type */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Menu Item Type</label>
                 <input
@@ -274,7 +265,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Serving Type */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">For how many people?</label>
                 <input
@@ -287,7 +277,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Discount Percentage */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Discount Percentage</label>
                 <input
@@ -300,7 +289,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Food Weight */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Food Weight (for rice items)</label>
                 <input
@@ -312,7 +300,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Veg or Non-Veg */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Veg or Non-Veg</label>
                 <select
@@ -328,7 +315,6 @@ const CreateMenu: React.FC = () => {
                 </select>
               </div>
 
-              {/* Image Upload */}
               <div className="mb-4">
                 <label className="block font-semibold text-gray-700 mb-1">Images (Minimum 3)</label>
                 <input
@@ -341,7 +327,6 @@ const CreateMenu: React.FC = () => {
                 />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 className="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"

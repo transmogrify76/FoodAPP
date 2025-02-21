@@ -18,7 +18,7 @@ const RestaurantDashboard: React.FC = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
+      
       <div className="bg-red-600 text-white p-4 flex justify-around items-center">
         <div
           onClick={() => navigateTo("/restaurant-dashboard")}
@@ -57,13 +57,12 @@ const RestaurantDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-4 overflow-y-auto">
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           Welcome to your Dashboard
         </h2>
         <div className="grid grid-cols-1 gap-4">
-          {/* Dashboard Cards */}
+
           <div
             onClick={() => navigateTo("/restaurant-details")}
             className="bg-white p-4 rounded-lg shadow cursor-pointer"

@@ -70,7 +70,6 @@ const GetMenuByOwnerId: React.FC = () => {
         return;
       }
       const data = await response.json();
-      // If the API does not return a stock status, assume "instock" by default.
       const menusWithStatus = (data.menus || []).map((menu: any) => ({
         ...menu,
         currentstatus: menu.currentstatus || "instock",
@@ -110,7 +109,6 @@ const GetMenuByOwnerId: React.FC = () => {
     }
   };
 
-  // Mark product as out of stock.
   const markOutOfStock = async (menuid: string) => {
     setLoading(true);
     setError(null);
@@ -118,7 +116,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("menuid", menuid);
     formData.append("currentstatus", "outofstock");
-    // For outofstock, numbers should not be provided.
+
     formData.append("numberoffillups", "");
     try {
       const response = await fetch("http://localhost:5000/ops/fastfilling", {
@@ -133,7 +131,7 @@ const GetMenuByOwnerId: React.FC = () => {
       }
       const data = await response.json();
       setSuccessMessage(data.message || "Menu marked as out of stock successfully");
-      // Update currentstatus in state.
+
       setMenuList((prev) =>
         prev.map((menu) =>
           menu.menuid === menuid ? { ...menu, currentstatus: "outofstock" } : menu
@@ -146,7 +144,6 @@ const GetMenuByOwnerId: React.FC = () => {
     }
   };
 
-  // Mark product as in stock.
   const markInStock = async (menuid: string) => {
     setLoading(true);
     setError(null);
@@ -154,7 +151,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("menuid", menuid);
     formData.append("currentstatus", "instock");
-    // Prompt for numberoffillups when setting to instock.
+
     const numberoffillups = window.prompt("Enter number of fill-ups (stock count):", "0") || "0";
     formData.append("numberoffillups", numberoffillups);
     try {
@@ -185,7 +182,7 @@ const GetMenuByOwnerId: React.FC = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen p-4">
-      {/* Top Navigation Bar */}
+
       <div className="bg-red-600 text-white p-4 flex justify-between items-center mb-4">
         <button onClick={() => navigate(-1)} className="text-white">
           <FaArrowLeft size={20} />
@@ -241,7 +238,6 @@ const GetMenuByOwnerId: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-3">Menu List</h2>
           <div className="space-y-3">
             {menuList.map((menu) => {
-              // Default status: if not set, assume "instock"
               const currentStatus = menu.currentstatus || "instock";
               return (
                 <div

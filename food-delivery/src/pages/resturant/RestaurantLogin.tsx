@@ -60,13 +60,11 @@ const RestaurantLogin: React.FC = () => {
         <p className="text-center text-lg text-gray-600 mb-8">
           Please log in to manage your restaurant.
         </p>
-        
-        {/* Display error message */}
+
         {error && (
           <p className="text-center text-red-500 font-bold mb-4">{error}</p>
         )}
 
-        {/* Login form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="mb-4">
             <label

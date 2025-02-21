@@ -15,13 +15,13 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear(); // Clear everything from local storage
+    localStorage.clear(); 
     navigate("/restaurant-login");
   };
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
+    
       <div className="bg-red-600 text-white p-4 flex justify-between items-center">
         <button onClick={() => navigate(-1)} className="text-white">
           <FaArrowLeft size={20} />
@@ -30,9 +30,7 @@ const SettingsPage: React.FC = () => {
         <div className="w-6"></div>
       </div>
 
-      {/* Main Content */}
       <div className="p-4 flex-1 overflow-y-auto max-w-xl mx-auto">
-        {/* Profile Section */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-4">
           <h2 className="text-2xl font-bold mb-4">Profile</h2>
           <label className="block text-gray-700">Name</label>
@@ -60,7 +58,6 @@ const SettingsPage: React.FC = () => {
           />
         </div>
 
-        {/* Preferences Section */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-4">
           <h2 className="text-2xl font-bold mb-4">Preferences</h2>
           <div className="flex items-center justify-between mb-3">
@@ -86,7 +83,6 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Save & Logout Buttons */}
         <button
           onClick={handleSave}
           className="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 mb-4"
