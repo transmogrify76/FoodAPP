@@ -93,7 +93,6 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -186,18 +185,16 @@ const HomePage: React.FC = () => {
         <div onClick={toggleSidebar} className="fixed inset-0 bg-black opacity-50 z-40"></div>
       )}
 
-      {/* Header */}
       <div className="flex justify-between items-center p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white">
         <button onClick={toggleSidebar} className="text-2xl">
           <FaBars />
         </button>
         <h1 className="text-xl font-bold">Discover Restaurants</h1>
-        <div className="w-6" /> {/* Spacer */}
+        <div className="w-6" /> 
       </div>
 
-      {/* Main Content */}
       <div className="p-4 pb-24 flex-1">
-        {/* Search and Filter */}
+
         <div className="flex flex-col sm:flex-row justify-between mb-4 items-center space-y-3 sm:space-y-0">
           <div className="flex items-center w-full sm:w-auto">
             <FaSearch className="text-red-500 mr-2" />
@@ -223,7 +220,6 @@ const HomePage: React.FC = () => {
 
         {error && <p className="text-red-500 text-center font-semibold">{error}</p>}
 
-        {/* Restaurant Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {filteredRestaurants.map((restaurant) => (
             <div

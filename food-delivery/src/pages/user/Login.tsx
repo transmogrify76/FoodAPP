@@ -8,7 +8,7 @@ const Login: React.FC = () => {
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate(); 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

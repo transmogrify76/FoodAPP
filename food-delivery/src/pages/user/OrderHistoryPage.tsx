@@ -169,7 +169,6 @@ const OrderHistoryPage: React.FC = () => {
               </div>
 
               <div className="border-t p-4">
-                {/* Menu Details */}
                 {order.menu ? (
                   <div className="space-y-2">
                     <h4 className="text-lg font-bold text-gray-800">
@@ -189,7 +188,6 @@ const OrderHistoryPage: React.FC = () => {
                   <p className="text-gray-500">Menu details not available</p>
                 )}
 
-                {/* Restaurant Details */}
                 {order.restaurant ? (
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center space-x-2">

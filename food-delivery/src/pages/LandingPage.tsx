@@ -10,7 +10,6 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex flex-col items-center justify-between">
       <main className="flex flex-col items-center justify-center flex-1 w-full px-6 pb-8">
-        {/* Logo Section with extra top padding */}
         <div className="pt-8 mb-6 animate-bounce">
           <img
             src={logo}
@@ -18,23 +17,17 @@ const LandingPage: React.FC = () => {
             className="w-36 h-36 rounded-full shadow-lg border-4 border-white"
           />
         </div>
-
-        {/* Heading Section */}
         <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-800 text-center mb-4 leading-tight">
           Delicious Food <span className="text-red-600">Delivered</span>!
         </h2>
         <p className="text-sm sm:text-base text-gray-600 text-center max-w-md mb-8">
           Explore cuisines from around the globe, made fresh and delivered fast. Savor the taste, savor the moment.
         </p>
-
-        {/* Food Icons Section */}
         <div className="flex space-x-6 mb-8">
           <FaPizzaSlice className="text-red-500 text-5xl sm:text-6xl hover:scale-110 transition-transform" />
           <FaHamburger className="text-red-400 text-5xl sm:text-6xl hover:scale-110 transition-transform" />
           <GiHotMeal className="text-red-600 text-5xl sm:text-6xl hover:scale-110 transition-transform" />
         </div>
-
-        {/* Buttons Section */}
         <div className="w-full max-w-sm flex flex-col items-center space-y-4">
           <button
             onClick={() => navigate('/signup')}

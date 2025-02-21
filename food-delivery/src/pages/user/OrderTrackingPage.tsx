@@ -99,12 +99,9 @@ const OrderTrackingPage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Fixed Header */}
       <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
         <h1 className="text-xl font-bold">Order Tracking</h1>
       </div>
-
-      {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-4 pt-20">
         <div className="bg-white rounded-xl shadow-md p-6">
           <h3 className="text-2xl font-bold text-red-600 mb-4">Order List</h3>

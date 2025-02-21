@@ -32,8 +32,6 @@ const SettingsPageUser: React.FC = () => {
               Edit
             </button>
           </div>
-
-          {/* Notification Settings */}
           <div className="bg-white rounded-xl shadow-md p-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FaBell className="text-red-500 text-2xl" />
@@ -47,7 +45,6 @@ const SettingsPageUser: React.FC = () => {
             </button>
           </div>
 
-          {/* Privacy & Security */}
           <div className="bg-white rounded-xl shadow-md p-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FaShieldAlt className="text-red-500 text-2xl" />
@@ -61,7 +58,6 @@ const SettingsPageUser: React.FC = () => {
             </button>
           </div>
 
-          {/* Terms & Conditions */}
           <div className="bg-white rounded-xl shadow-md p-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FaFileAlt className="text-red-500 text-2xl" />
@@ -75,7 +71,6 @@ const SettingsPageUser: React.FC = () => {
             </button>
           </div>
 
-          {/* Logout */}
           <div className="bg-white rounded-xl shadow-md p-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <FaSignOutAlt className="text-red-500 text-2xl" />

@@ -79,7 +79,6 @@ const UserTransactionHistoryPage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Fixed Header */}
       <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
         <h1 className="text-xl font-bold">Transaction History</h1>
       </div>
@@ -88,7 +87,6 @@ const UserTransactionHistoryPage: React.FC = () => {
         
         {transactionHistory && (
           <>
-            {/* Summary Card */}
             <div className="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 mb-8">
               <p className="text-lg font-semibold">
                 Total Transactions: {transactionHistory.transaction_count}
@@ -98,7 +96,6 @@ const UserTransactionHistoryPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Transaction List */}
             <div className="space-y-6">
               {transactionHistory.transactions.map((transaction, index) => (
                 <div

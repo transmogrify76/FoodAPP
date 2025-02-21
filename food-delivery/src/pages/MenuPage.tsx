@@ -18,7 +18,6 @@ const MenuPage: React.FC = () => {
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Get token details from localStorage
   const token = localStorage.getItem('token');
   const decodedToken: any = token ? jwtDecode(token) : null;
   const userid = decodedToken?.userid || '';
@@ -50,7 +49,7 @@ const MenuPage: React.FC = () => {
           menuid: item.menuid,
           quantity: '1',
           userid: userid,
-          restaurantid: item.restaurantid, // using restaurantid from item
+          restaurantid: item.restaurantid, 
           usercartid: usercartid,
         })
       );
@@ -141,7 +140,6 @@ const MenuPage: React.FC = () => {
     }
   };
 
-  // Save updated cart to localStorage on cart change
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
@@ -151,12 +149,10 @@ const MenuPage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Header */}
       <div className="flex justify-between items-center p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white">
         <h1 className="text-xl font-bold">All Dishes</h1>
       </div>
 
-      {/* Main Content */}
       <div className="p-4 pb-24 flex-1">
         <div className="grid grid-cols-1 gap-4">
           {menuItems.map((item) => {

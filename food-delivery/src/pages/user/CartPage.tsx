@@ -8,13 +8,13 @@ interface CartItem {
   menudescription: string;
   menuprice: number;
   quantity: number;
-  menusercartid: string; // This should hold the menu id for the cart item
+  menusercartid: string; 
   restaurantid: string; 
 }
 
 const CartPage: React.FC = () => {
   const { state } = useLocation();
-  // Expecting the location state to include the cart items only
+
   const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
@@ -48,7 +48,7 @@ const CartPage: React.FC = () => {
     return null; 
   };
 
-  // Helper function to get the cart id from token
+
   const getusercartidFromToken = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -72,20 +72,18 @@ const CartPage: React.FC = () => {
         return;
       }
 
-      // Capture necessary details for payment before calling the order API
+
       const restaurantid = cart[0]?.restaurantid || '';
-      // Assuming each cart item carries its menu id in menusercartid
       const menusercartid = cart.map(item => item.menusercartid).join(',');
       const totalPriceForPayment = totalPrice.toString();
 
-      // Send only the usercartid as required by the new API endpoint
       const orderData = new URLSearchParams();
       orderData.append('usercartid', usercartid);
 
       const response = await axios.post('http://localhost:5000/order/createorder', orderData);
 
       if (response.status === 200) {
-        // Order created successfully; now proceed with payment
+
         initiatePayment(userId, restaurantid, menusercartid, totalPriceForPayment);
       }
     } catch (error) {
@@ -126,14 +124,14 @@ const CartPage: React.FC = () => {
           image: 'https://your-logo-url.com', 
           handler: function (response: any) {
             alert('Payment successful!');
-            // Integrate the verify payment API after successful payment
+
             (async () => {
               try {
                 const verifyResponse = await axios.post('http://localhost:5000/verifypayment', {
                   razorpay_payment_id: response.razorpay_payment_id,
                   userid: userId,
                   restaurantid: restaurantid,
-                  menuid: menusercartid, // Note: if multiple IDs, adjust as needed.
+                  menuid: menusercartid, 
                   price: totalPrice
                 });
                 console.log("Verification response:", verifyResponse.data);
@@ -162,7 +160,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // Updated increase quantity handler according to API
   const handleIncreaseQuantity = async (item: CartItem) => {
     try {
       const usercartid = getusercartidFromToken();
@@ -194,8 +191,6 @@ const CartPage: React.FC = () => {
       alert('Failed to increase quantity.');
     }
   };
-
-  // Updated decrease quantity handler according to API
   const handleDecreaseQuantity = async (item: CartItem) => {
     try {
       const usercartid = getusercartidFromToken();
@@ -212,7 +207,6 @@ const CartPage: React.FC = () => {
       );
 
       if (response.status === 200) {
-        // If the API returns a new_quantity, update it; if not, remove the item
         if (response.data.new_quantity !== undefined) {
           const newQuantity = response.data.new_quantity;
           setCart(prevCart =>
@@ -243,12 +237,12 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Fixed Header */}
+     
       <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
         <h1 className="text-xl font-bold">Your Cart</h1>
       </div>
 
-      {/* Scrollable Content */}
+     
       <div className="flex-1 overflow-y-auto p-4 pt-20 pb-20">
         {cart.length === 0 ? (
           <p className="text-center text-lg text-gray-700">Your cart is empty.</p>
@@ -259,7 +253,7 @@ const CartPage: React.FC = () => {
                 <h3 className="text-lg font-bold text-gray-800">{item.menuname}</h3>
                 <p className="text-sm text-gray-600 mt-2">{item.menudescription}</p>
                 <p className="text-sm text-gray-500 mt-1">Price: ₹{item.menuprice}</p>
-                {/* Quantity Control */}
+             
                 <div className="mt-4 flex items-center justify-between bg-gray-100 rounded-lg p-1.5">
                   <button
                     onClick={() => handleDecreaseQuantity(item)}
@@ -281,7 +275,6 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-      {/* Total Price & Checkout */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-up-lg flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">Total: ₹{totalPrice}</h2>
         <button

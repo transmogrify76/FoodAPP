@@ -122,11 +122,9 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-500 via-white to-gray-100 flex flex-col">
-      {/* Fixed Header */}
       <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
         <h1 className="text-xl font-bold">Profile</h1>
       </div>
-      {/* Main Content */}
       <div className="flex-1 flex items-center justify-center pt-20 pb-12 px-4">
         <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-md">
           <div className="text-center mb-8">

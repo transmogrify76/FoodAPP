@@ -60,7 +60,7 @@ const FavoriteRestaurantsPage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Fixed Header */}
+
       <div className="flex justify-between items-center p-6 bg-gradient-to-r from-red-500 to-pink-500 text-white">
         <h1 className="text-2xl font-bold">My Favorite Restaurants</h1>
       </div>
@@ -90,7 +90,6 @@ const FavoriteRestaurantsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-up-lg flex justify-center items-center">
         <button
           onClick={() => navigate('/home')}
