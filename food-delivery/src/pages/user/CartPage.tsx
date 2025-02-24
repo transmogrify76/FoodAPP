@@ -268,12 +268,12 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      {/* Keep original header unchanged */}
+
       <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
         <h1 className="text-xl font-bold">Your Cart</h1>
       </div>
 
-      {/* Modified Delivery Options Section */}
+
       <div className="p-4 pt-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="flex gap-3 mb-4">
           <button
@@ -356,7 +356,7 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-      {/* Keep original cart items section unchanged */}
+ 
       <div className="flex-1 overflow-y-auto p-4 pb-20">
         {cart.length === 0 ? (
           <p className="text-center text-lg text-gray-700">Your cart is empty.</p>
@@ -388,7 +388,7 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-      {/* Keep original footer unchanged */}
+    
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-up-lg flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">Total: ₹{totalPrice}</h2>
         <button

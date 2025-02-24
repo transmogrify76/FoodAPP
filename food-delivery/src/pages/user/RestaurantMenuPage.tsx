@@ -27,6 +27,33 @@ const RestaurantMenuPage: React.FC = () => {
   const usercartid = decodedToken?.usercartid || '';
   const restaurantid = state?.restaurantId || '';
 
+  // Clear cart state when component unmounts
+  useEffect(() => {
+    return () => {
+      setCart([]); // Reset cart to empty array
+      localStorage.removeItem('cart'); // Clear cart from localStorage
+    };
+  }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
+
+  // Load menu and favorites when component mounts
+  useEffect(() => {
+    if (state && state.menu) {
+      setMenu(state.menu);
+      const initialFavorites = state.menu.reduce((acc: any, item: any) => {
+        acc[item.menuid] = false;
+        return acc;
+      }, {});
+      setFavorites(initialFavorites);
+    } else {
+      setError('Failed to load menu.');
+    }
+  }, [state]);
+
   const handleAddToCart = async (item: any) => {
     setLoadingItemId(item.menuid);
     try {
@@ -149,27 +176,9 @@ const RestaurantMenuPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
-  useEffect(() => {
-    if (state && state.menu) {
-      setMenu(state.menu);
-      const initialFavorites = state.menu.reduce((acc: any, item: any) => {
-        acc[item.menuid] = false;
-        return acc;
-      }, {});
-      setFavorites(initialFavorites);
-    } else {
-      setError('Failed to load menu.');
-    }
-  }, [state]);
-
   const handleCheckout = () => {
     navigate('/cart', { state: { cart } });
   };
-
   return (
 <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
   <div className="flex justify-between items-center p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white">
