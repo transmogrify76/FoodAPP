@@ -50,11 +50,11 @@ const ProfileSettings = () => {
     confirm_password: '',
   });
 
-  // Get raider ID from JWT token
-  const getRaiderIdFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const decoded: any = jwtDecode(token);
+  // Get raider ID from JWT raider_token
+  const getRaiderIdFromraider_token = () => {
+    const raider_token = localStorage.getItem('raider_token');
+    if (raider_token) {
+      const decoded: any = jwtDecode(raider_token);
       return decoded?.raiderid;
     }
     return null;
@@ -64,7 +64,7 @@ const ProfileSettings = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const raiderid = getRaiderIdFromToken();
+        const raiderid = getRaiderIdFromraider_token();
         if (!raiderid) {
           throw new Error('Raider not authenticated');
         }
@@ -120,7 +120,7 @@ const ProfileSettings = () => {
   // Update profile
   const handleUpdateProfile = async () => {
     try {
-      const raiderid = getRaiderIdFromToken();
+      const raiderid = getRaiderIdFromraider_token();
       if (!raiderid) {
         throw new Error('Raider not authenticated');
       }
@@ -162,7 +162,7 @@ const ProfileSettings = () => {
   // Update password
   const handleUpdatePassword = async () => {
     try {
-      const raiderid = getRaiderIdFromToken();
+      const raiderid = getRaiderIdFromraider_token();
       if (!raiderid) {
         throw new Error('Raider not authenticated');
       }

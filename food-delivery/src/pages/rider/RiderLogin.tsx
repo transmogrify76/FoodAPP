@@ -28,7 +28,7 @@ const RiderLogin: React.FC = () => {
         throw new Error(data.error || "Login failed");
       }
 
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("raider_token", data.raider_token);
       navigate("/rider-dashboard");
     } catch (error: any) {
       setError(error.message);

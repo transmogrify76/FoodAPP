@@ -1,30 +1,73 @@
 import React, { useState } from 'react';
-import { FaMotorcycle, FaMoneyBillWave, FaClipboardList, FaUser, FaBell, FaStar, FaWallet } from 'react-icons/fa';
+import { FaMotorcycle, FaClipboardList, FaUser, FaBell, FaWallet } from 'react-icons/fa';
 import * as Switch from '@radix-ui/react-switch';
 import { useNavigate } from 'react-router-dom';
+import {jwtDecode} from 'jwt-decode';
 
-const RiderDashboard = () => {
-  const [isOnline, setIsOnline] = useState(true);
-  const [activeTab, setActiveTab] = useState('home');
+// Define the interface for the decoded token payload
+interface DecodedToken {
+  raiderid: string;
+  // include additional fields from the token payload if needed
+}
+
+const RiderDashboard: React.FC = () => {
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<string>('home');
   const navigate = useNavigate();
 
-  const toggleStatus = () => {
-    setIsOnline(!isOnline);
+  const toggleStatus = async () => {
+    // Retrieve the token from localStorage
+    const token = localStorage.getItem('raider_token');
+    if (!token) {
+      console.error('No token found in localStorage');
+      return;
+    }
+    
+    // Decode the token to extract the raiderid
+    let raiderid: string;
+    try {
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      raiderid = decodedToken.raiderid;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return;
+    }
+
+    // Prepare form data with the extracted raiderid
+    const formData = new FormData();
+    formData.append('raiderid', raiderid);
+
+    try {
+      // Replace the URL below with your actual API endpoint
+      const response = await fetch('http://127.0.0.1:5000/ops/raiderstatus', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        // Update UI based on the new status returned by the API
+        setIsOnline(result.online_status === 'on');
+        console.log(result.message);
+      } else {
+        console.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error updating raider status:", error);
+    }
   };
 
-
-  const handleNavigation = (tab: string, route: string) => {
+  const handleNavigation = (tab: string, route: string): void => {
     setActiveTab(tab);
     navigate(route);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-
       <div className="w-full p-4">
         <div className="w-full bg-white shadow-2xl rounded-2xl p-4">
           <h1 className="text-2xl font-extrabold text-gray-800 text-center mb-4">Rider Dashboard</h1>
-
+          
           <div className="flex items-center justify-between p-3 bg-red-100 border border-red-300 rounded-xl mb-4 shadow-md">
             <span className="text-base font-semibold">
               Status:
