@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaUser, 
   FaCog, 
@@ -11,23 +11,189 @@ import {
   FaMotorcycle
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+
+interface RaiderProfile {
+  fullname: string;
+  email: string;
+  address?: string;
+  phonenumber?: string;
+  profilepicture?: string;
+  vehicleregno: string;
+  drivinglicense: string;
+  preferreddelivelrylocation: string;
+  raiderstatus: string;
+}
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [notificationEnabled, setNotificationEnabled] = useState(true);
+  const [profileData, setProfileData] = useState<RaiderProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    fullname: '',
+    email: '',
+    phonenumber: '',
+    address: '',
+    vehicleregno: '',
+    drivinglicense: '',
+    preferreddelivelrylocation: '',
+    profilepicture: null as File | null,
+  });
+  const [passwordData, setPasswordData] = useState({
+    old_password: '',
+    new_password: '',
+    confirm_password: '',
+  });
 
-  const profileData = {
-    name: "Chitradeep Ghosh",
-    photo: "https://st3.depositphotos.com/15648834/17930/v/450/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg",
-    contact: "+91 8084281810",
-    vehicle: {
-      type: "Motorcycle",
-      model: "Yamaha MT-15",
-      licensePlate: "ABC 1234"
+  // Get raider ID from JWT token
+  const getRaiderIdFromToken = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      return decoded?.raiderid;
+    }
+    return null;
+  };
+
+  // Fetch raider profile data
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const raiderid = getRaiderIdFromToken();
+        if (!raiderid) {
+          throw new Error('Raider not authenticated');
+        }
+
+        const response = await axios.post(
+          'http://localhost:5000/raiderops/getprofilebyid',
+          new URLSearchParams({ raiderid })
+        );
+
+        if (response.data.data) {
+          setProfileData(response.data.data);
+          setFormData({
+            fullname: response.data.data.fullname,
+            email: response.data.data.email,
+            phonenumber: response.data.data.phonenumber || '',
+            address: response.data.data.address || '',
+            vehicleregno: response.data.data.vehicleregno,
+            drivinglicense: response.data.data.drivinglicense,
+            preferreddelivelrylocation: response.data.data.preferreddelivelrylocation,
+            profilepicture: null,
+          });
+        }
+      } catch (err) {
+        setError('Failed to load profile data');
+        console.error('Error fetching profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({ ...formData, profilepicture: e.target.files[0] });
     }
   };
 
+  // Handle password input changes
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData({ ...passwordData, [name]: value });
+  };
+
+  // Update profile
+  const handleUpdateProfile = async () => {
+    try {
+      const raiderid = getRaiderIdFromToken();
+      if (!raiderid) {
+        throw new Error('Raider not authenticated');
+      }
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('raiderid', raiderid);
+      formDataToSend.append('fullname', formData.fullname);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('phonenumber', formData.phonenumber);
+      formDataToSend.append('address', formData.address);
+      formDataToSend.append('vehicleregno', formData.vehicleregno);
+      formDataToSend.append('drivinglicense', formData.drivinglicense);
+      formDataToSend.append('preferreddelivelrylocation', formData.preferreddelivelrylocation);
+      if (formData.profilepicture) {
+        formDataToSend.append('profilepicture', formData.profilepicture);
+      }
+
+      const response = await axios.post(
+        'http://localhost:5000/raiderops/updateprofile',
+        formDataToSend,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setProfileData(response.data.updated_data);
+        setEditMode(false);
+        alert('Profile updated successfully!');
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      alert('Failed to update profile.');
+    }
+  };
+
+  // Update password
+  const handleUpdatePassword = async () => {
+    try {
+      const raiderid = getRaiderIdFromToken();
+      if (!raiderid) {
+        throw new Error('Raider not authenticated');
+      }
+
+      if (passwordData.new_password !== passwordData.confirm_password) {
+        alert('New password and confirm password do not match.');
+        return;
+      }
+
+      const response = await axios.post(
+        'http://localhost:5000/raiderops/updateprofile',
+        new URLSearchParams({
+          raiderid,
+          old_password: passwordData.old_password,
+          new_password: passwordData.new_password,
+        })
+      );
+
+      if (response.status === 200) {
+        alert('Password updated successfully!');
+        setPasswordData({
+          old_password: '',
+          new_password: '',
+          confirm_password: '',
+        });
+      }
+    } catch (err) {
+      console.error('Error updating password:', err);
+      alert('Failed to update password.');
+    }
+  };
   const supportData = {
     contact: "+91 8084281810",
     email: "support@riderapp.com",
@@ -41,9 +207,25 @@ const ProfileSettings = () => {
     ]
   };
 
+  if (loading) {
+    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center text-red-600">{error}</div>;
+  }
+
+  if (loading) {
+    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center text-red-600">{error}</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-
+      {/* Header */}
       <div className="w-full p-4 bg-white shadow-md">
         <div className="flex items-center space-x-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-red-50">
@@ -53,6 +235,7 @@ const ProfileSettings = () => {
         </div>
       </div>
 
+      {/* Tab Navigation */}
       <div className="flex space-x-2 p-4">
         {['profile', 'settings', 'support'].map(tab => (
           <button
@@ -69,34 +252,126 @@ const ProfileSettings = () => {
         ))}
       </div>
 
+      {/* Content */}
       <div className="p-4 space-y-4">
-        {activeTab === 'profile' && (
+        {activeTab === 'profile' && profileData && (
           <>
-
+            {/* Profile Section */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex flex-col items-center space-y-4">
                 <img
-                  src={profileData.photo}
+                  src={profileData.profilepicture 
+                    ? `data:image/png;base64,${profileData.profilepicture}`
+                    : "https://st3.depositphotos.com/15648834/17930/v/450/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"}
                   alt="Profile"
                   className="w-24 h-24 rounded-full object-cover border-4 border-red-100"
                 />
-                <h2 className="text-2xl font-bold text-gray-800">{profileData.name}</h2>
+                {editMode ? (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="mt-2"
+                  />
+                ) : null}
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {editMode ? (
+                    <input
+                      type="text"
+                      name="fullname"
+                      value={formData.fullname}
+                      onChange={handleInputChange}
+                      className="border rounded-lg p-2"
+                    />
+                  ) : (
+                    profileData.fullname
+                  )}
+                </h2>
                 <div className="flex items-center space-x-2 text-gray-600">
                   <FaPhone />
-                  <span>{profileData.contact}</span>
+                  {editMode ? (
+                    <input
+                      type="text"
+                      name="phonenumber"
+                      value={formData.phonenumber}
+                      onChange={handleInputChange}
+                      className="border rounded-lg p-2"
+                    />
+                  ) : (
+                    <span>{profileData.phonenumber || 'N/A'}</span>
+                  )}
                 </div>
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <FaUser />
+                  <span>Status: {profileData.raiderstatus}</span>
+                </div>
+                {editMode ? (
+                  <button
+                    onClick={handleUpdateProfile}
+                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
+                  >
+                    Save Changes
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
+                  >
+                    Edit Profile
+                  </button>
+                )}
               </div>
             </div>
 
+            {/* Vehicle Details Section */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaMotorcycle className="text-red-500 text-xl" />
                 <h2 className="text-lg font-semibold">Vehicle Details</h2>
               </div>
               <div className="space-y-2">
-                <p><span className="font-medium">Type:</span> {profileData.vehicle.type}</p>
-                <p><span className="font-medium">Model:</span> {profileData.vehicle.model}</p>
-                <p><span className="font-medium">License Plate:</span> {profileData.vehicle.licensePlate}</p>
+                <p>
+                  <span className="font-medium">Registration:</span>
+                  {editMode ? (
+                    <input
+                      type="text"
+                      name="vehicleregno"
+                      value={formData.vehicleregno}
+                      onChange={handleInputChange}
+                      className="border rounded-lg p-2"
+                    />
+                  ) : (
+                    profileData.vehicleregno
+                  )}
+                </p>
+                <p>
+                  <span className="font-medium">License:</span>
+                  {editMode ? (
+                    <input
+                      type="text"
+                      name="drivinglicense"
+                      value={formData.drivinglicense}
+                      onChange={handleInputChange}
+                      className="border rounded-lg p-2"
+                    />
+                  ) : (
+                    profileData.drivinglicense
+                  )}
+                </p>
+                <p>
+                  <span className="font-medium">Preferred Areas:</span>
+                  {editMode ? (
+                    <input
+                      type="text"
+                      name="preferreddelivelrylocation"
+                      value={formData.preferreddelivelrylocation}
+                      onChange={handleInputChange}
+                      className="border rounded-lg p-2"
+                    />
+                  ) : (
+                    profileData.preferreddelivelrylocation
+                  )}
+                </p>
               </div>
             </div>
           </>
@@ -104,7 +379,7 @@ const ProfileSettings = () => {
 
         {activeTab === 'settings' && (
           <>
-
+            {/* Change Password Section */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaLock className="text-red-500 text-xl" />
@@ -113,25 +388,38 @@ const ProfileSettings = () => {
               <div className="space-y-3">
                 <input
                   type="password"
+                  name="old_password"
                   placeholder="Current Password"
+                  value={passwordData.old_password}
+                  onChange={handlePasswordChange}
                   className="w-full p-2 border rounded-lg"
                 />
                 <input
                   type="password"
+                  name="new_password"
                   placeholder="New Password"
+                  value={passwordData.new_password}
+                  onChange={handlePasswordChange}
                   className="w-full p-2 border rounded-lg"
                 />
                 <input
                   type="password"
+                  name="confirm_password"
                   placeholder="Confirm New Password"
+                  value={passwordData.confirm_password}
+                  onChange={handlePasswordChange}
                   className="w-full p-2 border rounded-lg"
                 />
-                <button className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">
+                <button
+                  onClick={handleUpdatePassword}
+                  className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+                >
                   Update Password
                 </button>
               </div>
             </div>
 
+            {/* Notification Settings Section */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaBell className="text-red-500 text-xl" />
@@ -153,29 +441,12 @@ const ProfileSettings = () => {
                 </button>
               </div>
             </div>
-
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <FaMapMarkerAlt className="text-red-500 text-xl" />
-                <h2 className="text-lg font-semibold">Preferred Delivery Areas</h2>
-              </div>
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Add Delivery Area"
-                  className="w-full p-2 border rounded-lg"
-                />
-                <button className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">
-                  Save Changes
-                </button>
-              </div>
-            </div>
           </>
         )}
 
         {activeTab === 'support' && (
           <>
-
+            {/* Contact Support Section */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaPhone className="text-red-500 text-xl" />
@@ -190,6 +461,7 @@ const ProfileSettings = () => {
               </div>
             </div>
 
+            {/* FAQs Section */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaQuestionCircle className="text-red-500 text-xl" />
@@ -205,6 +477,7 @@ const ProfileSettings = () => {
               </div>
             </div>
 
+            {/* Emergency Contacts Section */}
             <div className="bg-white rounded-xl shadow-md p-4">
               <div className="flex items-center space-x-2 mb-4">
                 <FaPhone className="text-red-500 text-xl" />
