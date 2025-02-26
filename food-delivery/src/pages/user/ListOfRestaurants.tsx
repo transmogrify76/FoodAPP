@@ -34,7 +34,7 @@ const ListOfRestaurants: React.FC = () => {
       const formData = new FormData();
       formData.append('ownerid', ownerId);
 
-      const response = await fetch('http://localhost:5000/owenerresturentfetch', {
+      const response = await fetch('http://192.168.0.225:5000/owenerresturentfetch', {
         method: 'POST',
         headers: {
           Authorization: `Bearer {token}`,

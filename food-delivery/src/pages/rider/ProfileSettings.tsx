@@ -50,7 +50,7 @@ const ProfileSettings = () => {
     confirm_password: '',
   });
 
-  // Get raider ID from JWT raider_token
+ 
   const getRaiderIdFromraider_token = () => {
     const raider_token = localStorage.getItem('raider_token');
     if (raider_token) {
@@ -60,7 +60,7 @@ const ProfileSettings = () => {
     return null;
   };
 
-  // Fetch raider profile data
+  
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -70,7 +70,7 @@ const ProfileSettings = () => {
         }
 
         const response = await axios.post(
-          'http://localhost:5000/raiderops/getprofilebyid',
+          'http://192.168.0.225:5000/raiderops/getprofilebyid',
           new URLSearchParams({ raiderid })
         );
 
@@ -98,26 +98,23 @@ const ProfileSettings = () => {
     fetchProfileData();
   }, []);
 
-  // Handle form input changes
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle file input change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFormData({ ...formData, profilepicture: e.target.files[0] });
     }
   };
 
-  // Handle password input changes
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setPasswordData({ ...passwordData, [name]: value });
   };
 
-  // Update profile
   const handleUpdateProfile = async () => {
     try {
       const raiderid = getRaiderIdFromraider_token();
@@ -139,7 +136,7 @@ const ProfileSettings = () => {
       }
 
       const response = await axios.post(
-        'http://localhost:5000/raiderops/updateprofile',
+        'http://192.168.0.225:5000/raiderops/updateprofile',
         formDataToSend,
         {
           headers: {
@@ -173,7 +170,7 @@ const ProfileSettings = () => {
       }
 
       const response = await axios.post(
-        'http://localhost:5000/raiderops/updateprofile',
+        'http://192.168.0.225:5000/raiderops/updateprofile',
         new URLSearchParams({
           raiderid,
           old_password: passwordData.old_password,

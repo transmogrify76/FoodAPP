@@ -32,7 +32,7 @@ const RestaurantOrders: React.FC = () => {
       const formData = new FormData();
       formData.append('ownerid', ownerId);
 
-      const response = await fetch('http://localhost:5000/owenerresturentfetch', {
+      const response = await fetch('http://192.168.0.225:5000/owenerresturentfetch', {
         method: 'POST',
         body: formData,
       });
@@ -64,7 +64,7 @@ const RestaurantOrders: React.FC = () => {
         const formData = new FormData();
         formData.append('restaurantid', restaurantId);
 
-        const response = await axios.post('http://localhost:5000/order/orderhistory', formData);
+        const response = await axios.post('http://192.168.0.225:5000/order/orderhistory', formData);
         console.log('Orders fetched:', response.data);
         setOrders(response.data.order_list);
       } catch (error) {
@@ -87,7 +87,7 @@ const RestaurantOrders: React.FC = () => {
       formData.append('orderid', orderId);
       formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected');
 
-      const response = await axios.post('http://localhost:5000/ops/updateorder', formData);
+      const response = await axios.post('http://192.168.0.225:5000/ops/updateorder', formData);
 
       if (response.data.message === 'Data update success') {
         setMessage(`Order #${orderId} has been ${action}ed.`);
@@ -120,7 +120,7 @@ const RestaurantOrders: React.FC = () => {
         formData.append('preptime', preptime);
       }
 
-      const response = await axios.post('http://localhost:5000/tmporderstatus', formData);
+      const response = await axios.post('http://192.168.0.225:5000/tmporderstatus', formData);
 
       if (response.status === 200) {
         setMessage(`Order #${orderId} status updated to '${tempStatus}'.`);

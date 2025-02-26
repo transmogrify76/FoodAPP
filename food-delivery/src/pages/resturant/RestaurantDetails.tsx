@@ -41,7 +41,7 @@ const RestaurantDetails: React.FC = () => {
       formData.append("ownerid", ownerid);
 
       const response = await fetch(
-        "http://localhost:5000/owenerresturentfetch",
+        "http://192.168.0.225:5000/owenerresturentfetch",
         {
           method: "POST",
           headers: {

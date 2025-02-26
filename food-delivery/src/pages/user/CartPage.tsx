@@ -112,7 +112,7 @@ const CartPage: React.FC = () => {
       const orderData = new URLSearchParams();
       orderData.append('usercartid', usercartid);
 
-      const response = await axios.post('http://localhost:5000/order/createorder', orderData);
+      const response = await axios.post('http://192.168.0.225:5000/order/createorder', orderData);
 
       if (response.status === 200) {
         initiatePayment(userId, restaurantid, menusercartid, totalPriceForPayment);
@@ -141,7 +141,7 @@ const CartPage: React.FC = () => {
       paymentData.append('menusercartid', menusercartid);
       paymentData.append('totalprice', totalPrice);
 
-      const response = await axios.post('http://localhost:5000/createpayment/razorpay', paymentData);
+      const response = await axios.post('http://192.168.0.225:5000/createpayment/razorpay', paymentData);
 
       if (response.status === 200) {
         const paymentDetails = response.data;
@@ -157,7 +157,7 @@ const CartPage: React.FC = () => {
             alert('Payment successful!');
             (async () => {
               try {
-                const verifyResponse = await axios.post('http://localhost:5000/verifypayment', {
+                const verifyResponse = await axios.post('http://192.168.0.225:5000/verifypayment', {
                   razorpay_payment_id: response.razorpay_payment_id,
                   userid: userId,
                   restaurantid: restaurantid,
@@ -198,7 +198,7 @@ const CartPage: React.FC = () => {
         return;
       }
       const response = await axios.post(
-        'http://localhost:5000/cart/incquantity',
+        'http://192.168.0.225:5000/cart/incquantity',
         new URLSearchParams({
           usercartid: usercartid,
           menuid: item.menusercartid,
@@ -230,7 +230,7 @@ const CartPage: React.FC = () => {
         return;
       }
       const response = await axios.post(
-        'http://localhost:5000/cart/decquantity',
+        'http://192.168.0.225:5000/cart/decquantity',
         new URLSearchParams({
           usercartid: usercartid,
           menuid: item.menusercartid,
