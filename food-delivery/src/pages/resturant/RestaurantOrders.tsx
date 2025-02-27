@@ -65,14 +65,11 @@ const RestaurantOrders: React.FC = () => {
         formData.append('restaurantid', restaurantId);
 
         const response = await axios.post('http://192.168.0.225:5000/order/orderhistory', formData);
-        console.log('Orders fetched:', response.data);
         setOrders(response.data.order_list);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.log('API Error:', error.response);
           setMessage(error.response?.data?.error || 'Error fetching orders!');
         } else {
-          console.error('Unexpected Error:', error);
           setMessage('Unexpected error occurred!');
         }
       }
@@ -103,15 +100,15 @@ const RestaurantOrders: React.FC = () => {
     }
   };
 
-  const handleTempStatusChange = async (orderId: string, tempStatus: string) => {
+  const handlePreparationStatus = async (orderId: string, status: 'startedpreparing' | 'inprogress' | 'dispatch') => {
     try {
       const formData = new FormData();
       formData.append('orderid', orderId);
-      formData.append('tempstatus', tempStatus);
+      formData.append('tempstatus', status);
       formData.append('restaurantid', restaurantId);
       formData.append('userid', ownerId);
 
-      if (tempStatus === 'inprogress') {
+      if (status === 'inprogress') {
         const preptime = prompt('Enter preparation time (in minutes):');
         if (!preptime) {
           setMessage('Preparation time is required for "inprogress" status.');
@@ -123,17 +120,24 @@ const RestaurantOrders: React.FC = () => {
       const response = await axios.post('http://192.168.0.225:5000/tmporderstatus', formData);
 
       if (response.status === 200) {
-        setMessage(`Order #${orderId} status updated to '${tempStatus}'.`);
+        setMessage(`Order #${orderId} status updated to '${status}'.`);
         setOrders(orders.map((order) =>
-          order.uid === orderId ? { ...order, tempstatus: tempStatus } : order
+          order.uid === orderId ? { ...order, tempstatus: status } : order
         ));
       } else {
-        setMessage('Failed to update temporary order status.');
+        setMessage('Failed to update preparation status.');
       }
     } catch (error) {
-      console.error('Error updating temporary order status:', error);
-      setMessage('Error updating temporary order status.');
+      console.error('Error updating preparation status:', error);
+      setMessage('Error updating preparation status.');
     }
+  };
+
+  const handleDeliveryOption = (orderId: string, option: 'self' | 'rider') => {
+    setMessage(`Delivery option '${option}' selected for order #${orderId}`);
+    setOrders(orders.map((order) =>
+      order.uid === orderId ? { ...order, deliveryOption: option } : order
+    ));
   };
 
   return (
@@ -145,6 +149,7 @@ const RestaurantOrders: React.FC = () => {
         <h1 className="text-xl font-bold">Restaurant Orders</h1>
         <div className="w-8"></div>
       </div>
+      
       <div className="flex-1 p-4 overflow-y-auto">
         {message && <p className="text-red-500 text-center mb-4">{message}</p>}
         <div className="space-y-4">
@@ -154,64 +159,99 @@ const RestaurantOrders: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <FaShoppingCart className="text-red-600 mr-2" />
-                    <h2 className="text-lg font-semibold text-gray-700">{order.items[0].menu.menuname}</h2>
+                    <h2 className="text-lg font-semibold text-gray-700">{order.items[0]?.menu?.menuname || 'N/A'}</h2>
                   </div>
                 </div>
                 <div className="mt-2 space-y-1">
-                  <p className="text-sm text-gray-600"><strong>Description:</strong> {order.items[0].menu.menudescription}</p>
-                  <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.items[0].quantity}</p>
-                  <p className="text-sm text-gray-600"><strong>Total Price:</strong> ₹{order.totalprice}</p>
-                  <p className="text-sm text-gray-600"><strong>Order Status:</strong> {order.orderstatus}</p>
+                  <p className="text-sm text-gray-600"><strong>Description:</strong> {order.items[0]?.menu?.menudescription || 'N/A'}</p>
+                  <p className="text-sm text-gray-600"><strong>Quantity:</strong> {order.items[0]?.quantity || 0}</p>
+                  <p className="text-sm text-gray-600"><strong>Total Price:</strong> ₹{order.totalprice || 0}</p>
+                  <p className="text-sm text-gray-600"><strong>Status:</strong> {order.orderstatus}</p>
                   <p className="text-sm text-gray-600"><strong>Contact:</strong> {order.usercontact}</p>
                   <p className="text-sm text-gray-600"><strong>Address:</strong> {order.useraddress}</p>
-                  <p className="text-sm text-gray-600"><strong>Created At:</strong> {new Date(order.created_at).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600"><strong>Order Time:</strong> {new Date(order.created_at).toLocaleString()}</p>
                 </div>
-
 
                 <div className="flex flex-col sm:flex-row justify-end mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
                   <button
                     onClick={() => handleOrderAction(order.uid, 'accept')}
-                    className={`bg-green-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'}`}
+                    className={`bg-green-500 text-white py-2 px-4 rounded-lg text-sm ${
+                      order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
+                    }`}
                     disabled={order.orderstatus !== 'pending'}
                   >
                     Accept
                   </button>
                   <button
                     onClick={() => handleOrderAction(order.uid, 'reject')}
-                    className={`bg-red-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 ${order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-600'}`}
+                    className={`bg-red-500 text-white py-2 px-4 rounded-lg text-sm ${
+                      order.orderstatus !== 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-600'
+                    }`}
                     disabled={order.orderstatus !== 'pending'}
                   >
                     Reject
                   </button>
                 </div>
 
-
                 {order.orderstatus === 'accepted' && (
-                  <div className="flex flex-col sm:flex-row justify-end mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
-                    <button
-                      onClick={() => handleTempStatusChange(order.uid, 'startedpreparing')}
-                      className="bg-blue-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 hover:bg-blue-600"
-                    >
-                      Started Preparing
-                    </button>
-                    <button
-                      onClick={() => handleTempStatusChange(order.uid, 'inprogress')}
-                      className="bg-yellow-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 hover:bg-yellow-600"
-                    >
-                      In Progress
-                    </button>
-                    <button
-                      onClick={() => handleTempStatusChange(order.uid, 'dispatch')}
-                      className="bg-purple-500 text-white py-2 px-4 rounded-lg text-sm transition-colors duration-200 hover:bg-purple-600"
-                    >
-                      Dispatch
-                    </button>
-                  </div>
+                  <>
+                    {/* Delivery Options Section */}
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Select Delivery Method</h3>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <button
+                          onClick={() => handleDeliveryOption(order.uid, 'self')}
+                          className={`flex-1 py-2 px-4 rounded-lg text-sm ${
+                            order.deliveryOption === 'self' 
+                              ? 'bg-green-600 text-white ring-2 ring-green-300'
+                              : 'bg-green-500 text-white hover:bg-green-600'
+                          }`}
+                        >
+                          Self Delivery
+                        </button>
+                        <button
+                          onClick={() => handleDeliveryOption(order.uid, 'rider')}
+                          className={`flex-1 py-2 px-4 rounded-lg text-sm ${
+                            order.deliveryOption === 'rider'
+                              ? 'bg-blue-600 text-white ring-2 ring-blue-300'
+                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                          }`}
+                        >
+                          Choose Rider
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Preparation Progress Section */}
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Preparation Progress</h3>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <button
+                          onClick={() => handlePreparationStatus(order.uid, 'startedpreparing')}
+                          className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-blue-600"
+                        >
+                          Started Preparing
+                        </button>
+                        <button
+                          onClick={() => handlePreparationStatus(order.uid, 'inprogress')}
+                          className="flex-1 bg-yellow-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-yellow-600"
+                        >
+                          In Progress
+                        </button>
+                        <button
+                          onClick={() => handlePreparationStatus(order.uid, 'dispatch')}
+                          className="flex-1 bg-purple-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-purple-600"
+                        >
+                          Dispatch
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             ))
           ) : (
-            <p className="text-center text-gray-600">No orders available.</p>
+            <p className="text-center text-gray-600">No orders found</p>
           )}
         </div>
       </div>
