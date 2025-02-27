@@ -10,6 +10,12 @@ const RestaurantOrders: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [restaurantId, setRestaurantId] = useState<string>('');
   const [ownerId, setOwnerId] = useState<string>('');
+  const [riders, setRiders] = useState<any[]>([]);
+  const [showRiderModal, setShowRiderModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string>('');
+  const [selectedRiderId, setSelectedRiderId] = useState<string>('');
+  const [loadingRiders, setLoadingRiders] = useState(false);
+  const [assigningRider, setAssigningRider] = useState(false);
 
   useEffect(() => {
     const storedRestaurantToken = localStorage.getItem('restaurant_token');
@@ -133,6 +139,58 @@ const RestaurantOrders: React.FC = () => {
     }
   };
 
+  const fetchAllRiders = async () => {
+    try {
+      setLoadingRiders(true);
+      const response = await axios.get('http://192.168.0.225:5000/ops/getallraiders');
+      setRiders(response.data.data);
+    } catch (error) {
+      console.error('Error fetching riders:', error);
+      setMessage('Error fetching available riders');
+    } finally {
+      setLoadingRiders(false);
+    }
+  };
+
+  const assignRiderToOrder = async (orderId: string) => {
+    if (!selectedRiderId) {
+      setMessage('Please select a rider first');
+      return;
+    }
+
+    try {
+      setAssigningRider(true);
+      const formData = new FormData();
+      formData.append('raiderid', selectedRiderId);
+      formData.append('orderid', orderId);
+
+      const response = await axios.post(
+        'http://192.168.0.225:5000/order/assignorderraider',
+        formData
+      );
+
+      if (response.status === 200) {
+        setMessage('Rider assigned successfully');
+        // Update order with rider information
+        setOrders(orders.map(order => 
+          order.uid === orderId ? { ...order, assignedRaider: response.data.data } : order
+        ));
+        setShowRiderModal(false);
+      }
+    } catch (error: any) {
+      setMessage(error.response?.data?.error || 'Error assigning rider');
+      console.error('Assignment error:', error);
+    } finally {
+      setAssigningRider(false);
+    }
+  };
+
+  const handleRiderSelection = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    fetchAllRiders();
+    setShowRiderModal(true);
+  };
+
   const handleDeliveryOption = (orderId: string, option: 'self' | 'rider') => {
     setMessage(`Delivery option '${option}' selected for order #${orderId}`);
     setOrders(orders.map((order) =>
@@ -149,7 +207,7 @@ const RestaurantOrders: React.FC = () => {
         <h1 className="text-xl font-bold">Restaurant Orders</h1>
         <div className="w-8"></div>
       </div>
-      
+
       <div className="flex-1 p-4 overflow-y-auto">
         {message && <p className="text-red-500 text-center mb-4">{message}</p>}
         <div className="space-y-4">
@@ -197,32 +255,102 @@ const RestaurantOrders: React.FC = () => {
                   <>
                     {/* Delivery Options Section */}
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Select Delivery Method</h3>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Delivery Method</h3>
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <button
-                          onClick={() => handleDeliveryOption(order.uid, 'self')}
-                          className={`flex-1 py-2 px-4 rounded-lg text-sm ${
-                            order.deliveryOption === 'self' 
-                              ? 'bg-green-600 text-white ring-2 ring-green-300'
-                              : 'bg-green-500 text-white hover:bg-green-600'
-                          }`}
-                        >
-                          Self Delivery
-                        </button>
-                        <button
-                          onClick={() => handleDeliveryOption(order.uid, 'rider')}
-                          className={`flex-1 py-2 px-4 rounded-lg text-sm ${
-                            order.deliveryOption === 'rider'
-                              ? 'bg-blue-600 text-white ring-2 ring-blue-300'
-                              : 'bg-blue-500 text-white hover:bg-blue-600'
-                          }`}
-                        >
-                          Choose Rider
-                        </button>
+                        {order.assignedRaider ? (
+                          <div className="flex-1 p-2 bg-green-100 rounded-lg">
+                            <p className="text-sm text-green-700">
+                              Rider Assigned: {order.assignedRaider.raiderfullname}
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleDeliveryOption(order.uid, 'self')}
+                              className={`flex-1 py-2 px-4 rounded-lg text-sm ${
+                                order.deliveryOption === 'self' 
+                                  ? 'bg-green-600 text-white ring-2 ring-green-300'
+                                  : 'bg-green-500 text-white hover:bg-green-600'
+                              }`}
+                            >
+                              Self Delivery
+                            </button>
+                            <button
+                              onClick={() => handleRiderSelection(order.uid)}
+                              className={`flex-1 py-2 px-4 rounded-lg text-sm ${
+                                order.deliveryOption === 'rider'
+                                  ? 'bg-blue-600 text-white ring-2 ring-blue-300'
+                                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                              }`}
+                            >
+                              {order.deliveryOption === 'rider' ? 'Change Rider' : 'Choose Rider'}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
 
-                    {/* Preparation Progress Section */}
+                    {/* Rider Selection Modal */}
+                    {showRiderModal && selectedOrderId === order.uid && (
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="bg-white p-6 rounded-lg max-w-md w-full">
+                          <h3 className="text-lg font-semibold mb-4">Select Rider</h3>
+                          
+                          {loadingRiders ? (
+                            <p>Loading available riders...</p>
+                          ) : riders.length > 0 ? (
+                            <div className="space-y-2">
+                              {riders.map(rider => (
+                                <div 
+                                  key={rider.uid}
+                                  className={`p-3 rounded-lg cursor-pointer ${
+                                    selectedRiderId === rider.uid 
+                                      ? 'bg-blue-100 border-2 border-blue-500'
+                                      : 'hover:bg-gray-100 border'
+                                  }`}
+                                  onClick={() => setSelectedRiderId(rider.uid)}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-medium">{rider.fullname}</p>
+                                      <p className="text-sm text-gray-600">{rider.preferreddelivelrylocation}</p>
+                                    </div>
+                                    <span className={`inline-block w-3 h-3 rounded-full ${
+                                      rider.raiderstatus === 'on' ? 'bg-green-500' : 'bg-red-500'
+                                    }`}></span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p>No available riders found</p>
+                          )}
+
+                          <div className="mt-4 flex justify-end space-x-2">
+                            <button
+                              onClick={() => {
+                                setShowRiderModal(false);
+                                setSelectedRiderId('');
+                              }}
+                              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => assignRiderToOrder(order.uid)}
+                              disabled={!selectedRiderId || assigningRider}
+                              className={`px-4 py-2 bg-blue-600 text-white rounded-lg ${
+                                (!selectedRiderId || assigningRider) ? 'opacity-50' : 'hover:bg-blue-700'
+                              }`}
+                            >
+                              {assigningRider ? 'Assigning...' : 'Assign Rider'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Preparation Steps Section */}
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                       <h3 className="text-sm font-semibold text-gray-700 mb-2">Preparation Progress</h3>
                       <div className="flex flex-col sm:flex-row gap-2">
