@@ -40,7 +40,7 @@ const UserTransactionHistoryPage: React.FC = () => {
         const formData = new FormData();
         formData.append('userid', userId);
 
-        const response = await fetch('http://192.168.0.225:5000/ops/usertransactionhistory', {
+        const response = await fetch('http://127.0.0.1:5000/ops/usertransactionhistory', {
           method: 'POST',
           body: formData,
         });

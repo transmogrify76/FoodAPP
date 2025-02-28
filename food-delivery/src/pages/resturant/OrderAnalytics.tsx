@@ -33,7 +33,7 @@ const AnalyticsByOwnerId: React.FC = () => {
     formData.append("ownerid", owenerid);
 
     try {
-      const response = await fetch("http://192.168.0.225:5000/owenerresturentfetch", {
+      const response = await fetch("http://127.0.0.1:5000/owenerresturentfetch", {
         method: "POST",
         body: formData,
       });
@@ -64,7 +64,7 @@ const AnalyticsByOwnerId: React.FC = () => {
     formData.append("restaurantid", selectedRestaurantId);
 
     try {
-      const response = await fetch("http://192.168.0.225:5000/ops/orderanalytics", {
+      const response = await fetch("http://127.0.0.1:5000/ops/orderanalytics", {
         method: "POST",
         body: formData,
       });

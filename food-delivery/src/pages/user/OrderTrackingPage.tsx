@@ -59,7 +59,7 @@ const OrderTrackingPage: React.FC = () => {
       const fetchOrders = async () => {
         try {
           const response = await axios.post(
-            'http://192.168.0.225:5000/order/orderhistory',
+            'http://127.0.0.1:5000/order/orderhistory',
             { userid: userId },
             { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
           );

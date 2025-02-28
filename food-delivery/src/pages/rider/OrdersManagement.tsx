@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FaMapMarkedAlt, FaCheckCircle, FaTimesCircle, FaClipboardList, FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 // Define types
 interface DecodedToken {
   raiderid: string;
-  [key: string]: any; // Allow other properties
+  [key: string]: any;
 }
 
 interface MenuDetail {
@@ -25,6 +25,7 @@ interface Order {
   orderstatus: string;
   phone_number: string;
   raideracceptstatus: string;
+  raiderarrivaltime: string;
   raideremail: string;
   raiderfullname: string;
   raiderid: string;
@@ -50,49 +51,77 @@ const OrdersManagement = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      const raiderToken = localStorage.getItem('raider_token');
-      if (!raiderToken) {
-        console.error('No raider token found');
-        return;
-      }
-
-      const decodedToken: DecodedToken = jwtDecode(raiderToken);
-      const raiderid = decodedToken.raiderid;
-
-      try {
-        const response = await fetch('http://127.0.0.1:5000/ops/getorderbyraiderid', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `raiderid=${raiderid}`,
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch orders');
-        }
-
-        const data = await response.json();
-
-        // Filter orders based on status
-        const newOrders = data.orders.filter((order: Order) => order.orderstatus === 'accepted');
-        const ongoingOrders = data.orders.filter((order: Order) => order.orderstatus === 'ongoing');
-        const completedOrders = data.orders.filter((order: Order) => order.orderstatus === 'completed');
-
-        setOrders({
-          newOrders,
-          ongoingOrders,
-          completedOrders
-        });
-
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      }
-    };
-
     fetchOrders();
   }, []);
+
+  // Fetch orders from backend
+  const fetchOrders = async () => {
+    const raiderToken = localStorage.getItem('raider_token');
+    if (!raiderToken) {
+      console.error('No raider token found');
+      return;
+    }
+
+    const decodedToken: DecodedToken = jwtDecode(raiderToken);
+    const raiderid = decodedToken.raiderid;
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/ops/getorderbyraiderid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `raiderid=${raiderid}`,
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch orders');
+      
+      const data = await response.json();
+      
+      setOrders({
+        newOrders: data.orders.filter((order: Order) => order.raideracceptstatus === ''),
+        ongoingOrders: data.orders.filter((order: Order) => order.raideracceptstatus === 'accepted'),
+        completedOrders: data.orders.filter((order: Order) => order.raideracceptstatus === 'delivered')
+      });
+
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      alert('Failed to load orders. Please try again.');
+    }
+  };
+
+  // Update order status
+  const updateOrderStatus = async (orderid: string, raideracceptstatus: string) => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/order/updateraiderorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `raiderorderid=${orderid}&raideracceptstatus=${raideracceptstatus}`,
+      });
+
+      if (!response.ok) throw new Error('Failed to update order status');
+      
+      const updatedOrder = await response.json();
+
+      // Optimistic UI update
+      setOrders(prev => ({
+        newOrders: prev.newOrders.filter(order => order.orderid !== orderid),
+        ongoingOrders: 
+          raideracceptstatus === 'accepted' 
+            ? [...prev.ongoingOrders, updatedOrder] 
+            : prev.ongoingOrders.filter(order => order.orderid !== orderid),
+        completedOrders: 
+          raideracceptstatus === 'delivered' 
+            ? [...prev.completedOrders, updatedOrder] 
+            : prev.completedOrders
+      }));
+
+      // Refresh data from server
+      fetchOrders();
+
+    } catch (error) {
+      console.error('Error updating order:', error);
+      alert('Failed to update order. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
@@ -123,6 +152,7 @@ const OrdersManagement = () => {
         </div>
 
         <div className="space-y-3">
+          {/* New Orders Section */}
           {activeTab === 'newOrders' && orders.newOrders.map(order => (
             <div key={order.orderid} className="bg-white p-4 rounded-xl shadow-md">
               <div className="flex justify-between items-start">
@@ -143,10 +173,16 @@ const OrdersManagement = () => {
                   <p className="text-sm font-semibold text-gray-800 mt-2">Total: ₹{order.totalprice}</p>
                 </div>
                 <div className="flex space-x-2">
-                  <button className="p-2 bg-green-100 text-green-600 rounded-full hover:bg-green-200">
+                  <button
+                    onClick={() => updateOrderStatus(order.orderid, 'accepted')}
+                    className="p-2 bg-green-100 text-green-600 rounded-full hover:bg-green-200"
+                  >
                     <FaCheckCircle className="text-xl" />
                   </button>
-                  <button className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200">
+                  <button
+                    onClick={() => updateOrderStatus(order.orderid, 'rejected')}
+                    className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200"
+                  >
                     <FaTimesCircle className="text-xl" />
                   </button>
                 </div>
@@ -154,6 +190,7 @@ const OrdersManagement = () => {
             </div>
           ))}
 
+          {/* Ongoing Orders Section */}
           {activeTab === 'ongoingOrders' && orders.ongoingOrders.map(order => (
             <div key={order.orderid} className="bg-white p-4 rounded-xl shadow-md">
               <div className="flex justify-between items-start">
@@ -161,6 +198,7 @@ const OrdersManagement = () => {
                   <p className="text-lg font-semibold text-gray-800">{order.userfullname}</p>
                   <p className="text-sm text-gray-600">{order.address}</p>
                   <p className="text-sm text-gray-600">Phone: {order.phone_number}</p>
+                  <p className="text-sm text-gray-600">Arrival Time: {order.raiderarrivaltime}</p>
                   <div className="mt-2">
                     <p className="text-sm font-semibold text-gray-800">Order Details:</p>
                     <ul className="list-disc list-inside">
@@ -174,13 +212,10 @@ const OrdersManagement = () => {
                   <p className="text-sm font-semibold text-gray-800 mt-2">Total: ₹{order.totalprice}</p>
                 </div>
                 <div className="flex space-x-2">
-                  <button className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200">
-                    <FaMapMarkedAlt className="text-xl" />
-                  </button>
-                  <button className="p-2 bg-yellow-100 text-yellow-600 rounded-full hover:bg-yellow-200">
-                    Picked Up
-                  </button>
-                  <button className="p-2 bg-green-100 text-green-600 rounded-full hover:bg-green-200">
+                  <button
+                    onClick={() => updateOrderStatus(order.orderid, 'delivered')}
+                    className="p-2 bg-green-100 text-green-600 rounded-full hover:bg-green-200"
+                  >
                     Delivered
                   </button>
                 </div>
@@ -188,6 +223,7 @@ const OrdersManagement = () => {
             </div>
           ))}
 
+          {/* Completed Orders Section */}
           {activeTab === 'completedOrders' && orders.completedOrders.map(order => (
             <div key={order.orderid} className="bg-white p-4 rounded-xl shadow-md">
               <div className="flex justify-between items-center">
