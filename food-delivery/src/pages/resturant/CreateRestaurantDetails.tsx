@@ -70,7 +70,7 @@ const CreateRestaurant: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/resown/createresurantdetails",
+        "https://backend.foodapp.transev.site/resown/createresurantdetails",
         data,
         {
           headers: {

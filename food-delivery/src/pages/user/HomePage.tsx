@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5000/resown/listofresturants');
+        const response = await fetch('https://backend.foodapp.transev.site/resown/listofresturants');
         if (!response.ok) {
           throw new Error('Failed to fetch restaurants.');
         }
@@ -61,7 +61,7 @@ const HomePage: React.FC = () => {
       const formData = new FormData();
       formData.append('resturnatid', restaurantId);
 
-      const response = await fetch('http://127.0.0.1:5000/menu/getmenubyresturantid', {
+      const response = await fetch('https://backend.foodapp.transev.site/menu/getmenubyresturantid', {
         method: 'POST',
         body: formData,
       });

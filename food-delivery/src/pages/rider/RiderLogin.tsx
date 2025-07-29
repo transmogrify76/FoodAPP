@@ -16,7 +16,7 @@ const RiderLogin: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/raider/login", {
+      const response = await fetch("https://backend.foodapp.transev.site/raider/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams(formData),

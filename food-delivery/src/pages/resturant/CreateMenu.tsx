@@ -46,7 +46,7 @@ const CreateMenu: React.FC = () => {
     formData.append("ownerid", owenerid);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/owenerresturentfetch", {
+      const response = await fetch("https://backend.foodapp.transev.site/owenerresturentfetch", {
         method: "POST",
         body: formData,
       });
@@ -108,7 +108,7 @@ const CreateMenu: React.FC = () => {
     });
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/resops/createmenu", {
+      const response = await fetch("https://backend.foodapp.transev.site/resops/createmenu", {
         method: "POST",
         body: formData,
       });

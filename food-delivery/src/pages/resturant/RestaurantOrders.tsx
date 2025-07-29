@@ -38,7 +38,7 @@ const RestaurantOrders: React.FC = () => {
       const formData = new FormData();
       formData.append('ownerid', ownerId);
 
-      const response = await fetch('http://127.0.0.1:5000/owenerresturentfetch', {
+      const response = await fetch('https://backend.foodapp.transev.site/owenerresturentfetch', {
         method: 'POST',
         body: formData,
       });
@@ -70,7 +70,7 @@ const RestaurantOrders: React.FC = () => {
         const formData = new FormData();
         formData.append('restaurantid', restaurantId);
 
-        const response = await axios.post('http://127.0.0.1:5000/order/orderhistory', formData);
+        const response = await axios.post('https://backend.foodapp.transev.site/order/orderhistory', formData);
         setOrders(response.data.order_list);
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -90,7 +90,7 @@ const RestaurantOrders: React.FC = () => {
       formData.append('orderid', orderId);
       formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected');
 
-      const response = await axios.post('http://127.0.0.1:5000/ops/updateorder', formData);
+      const response = await axios.post('https://backend.foodapp.transev.site/ops/updateorder', formData);
 
       if (response.data.message === 'Data update success') {
         setMessage(`Order #${orderId} has been ${action}ed.`);
@@ -123,7 +123,7 @@ const RestaurantOrders: React.FC = () => {
         formData.append('preptime', preptime);
       }
 
-      const response = await axios.post('http://127.0.0.1:5000/tmporderstatus', formData);
+      const response = await axios.post('https://backend.foodapp.transev.site/tmporderstatus', formData);
 
       if (response.status === 200) {
         setMessage(`Order #${orderId} status updated to '${status}'.`);
@@ -142,7 +142,7 @@ const RestaurantOrders: React.FC = () => {
   const fetchAllRiders = async () => {
     try {
       setLoadingRiders(true);
-      const response = await axios.get('http://127.0.0.1:5000/ops/getallraiders');
+      const response = await axios.get('https://backend.foodapp.transev.site/ops/getallraiders');
       setRiders(response.data.data);
     } catch (error) {
       console.error('Error fetching riders:', error);
@@ -165,7 +165,7 @@ const RestaurantOrders: React.FC = () => {
       formData.append('orderid', orderId);
 
       const response = await axios.post(
-        'http://127.0.0.1:5000/order/assignorderraider',
+        'https://backend.foodapp.transev.site/order/assignorderraider',
         formData
       );
 

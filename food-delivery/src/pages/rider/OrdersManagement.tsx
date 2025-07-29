@@ -66,7 +66,7 @@ const OrdersManagement = () => {
     const raiderid = decodedToken.raiderid;
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/ops/getorderbyraiderid', {
+      const response = await fetch('https://backend.foodapp.transev.site/ops/getorderbyraiderid', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `raiderid=${raiderid}`,
@@ -91,7 +91,7 @@ const OrdersManagement = () => {
   // Update order status
   const updateOrderStatus = async (orderid: string, raideracceptstatus: string) => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/order/updateraiderorder', {
+      const response = await fetch('https://backend.foodapp.transev.site/order/updateraiderorder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `raiderorderid=${orderid}&raideracceptstatus=${raideracceptstatus}`,

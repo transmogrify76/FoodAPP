@@ -59,7 +59,7 @@ const OrderTrackingPage: React.FC = () => {
       const fetchOrders = async () => {
         try {
           const response = await axios.post(
-            'http://127.0.0.1:5000/order/orderhistory',
+            'https://backend.foodapp.transev.site/order/orderhistory',
             { userid: userId },
             { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
           );

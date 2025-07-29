@@ -39,7 +39,7 @@ const RiderDashboard: React.FC = () => {
 
     try {
       // Replace the URL below with your actual API endpoint
-      const response = await fetch('http://127.0.0.1:5000/ops/raiderstatus', {
+      const response = await fetch('https://backend.foodapp.transev.site/ops/raiderstatus', {
         method: 'POST',
         body: formData,
       });

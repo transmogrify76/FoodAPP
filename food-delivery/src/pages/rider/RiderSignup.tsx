@@ -28,7 +28,7 @@ const RiderSignup: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/raiderops/signup", {
+      const response = await fetch("https://backend.foodapp.transev.site/raiderops/signup", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -55,7 +55,7 @@ const RiderSignup: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/raiderops/signup", {
+      const response = await fetch("https://backend.foodapp.transev.site/raiderops/signup", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({

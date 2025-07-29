@@ -33,7 +33,7 @@ const GetMenuByOwnerId: React.FC = () => {
     formData.append("ownerid", owenerid);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/owenerresturentfetch", {
+      const response = await fetch("https://backend.foodapp.transev.site/owenerresturentfetch", {
         method: "POST",
         body: formData,
       });
@@ -59,7 +59,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("resturnatid", selectedRestaurantId);
     try {
-      const response = await fetch("http://127.0.0.1:5000/menu/getmenubyresturantid", {
+      const response = await fetch("https://backend.foodapp.transev.site/menu/getmenubyresturantid", {
         method: "POST",
         body: formData,
       });
@@ -89,7 +89,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("menuid", menuid);
     try {
-      const response = await fetch("http://127.0.0.1:5000/resops/deletemenu", {
+      const response = await fetch("https://backend.foodapp.transev.site/resops/deletemenu", {
         method: "POST",
         body: formData,
       });
@@ -119,7 +119,7 @@ const GetMenuByOwnerId: React.FC = () => {
 
     formData.append("numberoffillups", "");
     try {
-      const response = await fetch("http://127.0.0.1:5000/ops/fastfilling", {
+      const response = await fetch("https://backend.foodapp.transev.site/ops/fastfilling", {
         method: "POST",
         body: formData,
       });
@@ -155,7 +155,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const numberoffillups = window.prompt("Enter number of fill-ups (stock count):", "0") || "0";
     formData.append("numberoffillups", numberoffillups);
     try {
-      const response = await fetch("http://127.0.0.1:5000/ops/fastfilling", {
+      const response = await fetch("https://backend.foodapp.transev.site/ops/fastfilling", {
         method: "POST",
         body: formData,
       });

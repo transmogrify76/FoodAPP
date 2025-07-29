@@ -70,7 +70,7 @@ const ProfileSettings = () => {
         }
 
         const response = await axios.post(
-          'http://127.0.0.1:5000/raiderops/getprofilebyid',
+          'https://backend.foodapp.transev.site/raiderops/getprofilebyid',
           new URLSearchParams({ raiderid })
         );
 
@@ -136,7 +136,7 @@ const ProfileSettings = () => {
       }
 
       const response = await axios.post(
-        'http://127.0.0.1:5000/raiderops/updateprofile',
+        'https://backend.foodapp.transev.site/raiderops/updateprofile',
         formDataToSend,
         {
           headers: {
@@ -170,7 +170,7 @@ const ProfileSettings = () => {
       }
 
       const response = await axios.post(
-        'http://127.0.0.1:5000/raiderops/updateprofile',
+        'https://backend.foodapp.transev.site/raiderops/updateprofile',
         new URLSearchParams({
           raiderid,
           old_password: passwordData.old_password,

@@ -56,7 +56,7 @@ const OrderHistoryPage: React.FC = () => {
         const formData = new FormData();
         formData.append('userid', userId);
 
-        const response = await fetch('http://127.0.0.1:5000/order/orderhistory', {
+        const response = await fetch('https://backend.foodapp.transev.site/order/orderhistory', {
           method: 'POST',
           body: formData,
         });

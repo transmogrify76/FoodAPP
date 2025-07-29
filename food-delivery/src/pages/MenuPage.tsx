@@ -26,7 +26,7 @@ const MenuPage: React.FC = () => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/resown/getallmenus');
+        const response = await axios.get('https://backend.foodapp.transev.site/resown/getallmenus');
         console.log('API Response:', response.data);
         setMenuItems(response.data.menus);
       } catch (err) {
@@ -44,7 +44,7 @@ const MenuPage: React.FC = () => {
     setLoadingItemId(item.menuid);
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/cart/assigntocart',
+        'https://backend.foodapp.transev.site/cart/assigntocart',
         new URLSearchParams({
           menuid: item.menuid,
           quantity: '1',
@@ -81,7 +81,7 @@ const MenuPage: React.FC = () => {
     setLoadingItemId(item.menuid);
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/cart/incquantity',
+        'https://backend.foodapp.transev.site/cart/incquantity',
         new URLSearchParams({
           menuid: item.menuid,
           usercartid: usercartid,
@@ -109,7 +109,7 @@ const MenuPage: React.FC = () => {
     setLoadingItemId(item.menuid);
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/cart/decquantity',
+        'https://backend.foodapp.transev.site/cart/decquantity',
         new URLSearchParams({
           menuid: item.menuid,
           usercartid: usercartid,

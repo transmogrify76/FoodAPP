@@ -36,7 +36,7 @@ const UserProfile: React.FC = () => {
         formData.append('userid', userid);
 
         const response = await axios.post(
-          'http://127.0.0.1:5000/users/details',
+          'https://backend.foodapp.transev.site/users/details',
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
@@ -91,7 +91,7 @@ const UserProfile: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/users/updateprofile',
+        'https://backend.foodapp.transev.site/users/updateprofile',
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );

@@ -58,7 +58,7 @@ const RestaurantMenuPage: React.FC = () => {
     setLoadingItemId(item.menuid);
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/cart/assigntocart',
+        'https://backend.foodapp.transev.site/cart/assigntocart',
         new URLSearchParams({
           menuid: item.menuid,
           quantity: '1',
@@ -95,7 +95,7 @@ const RestaurantMenuPage: React.FC = () => {
     setLoadingItemId(item.menuid);
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/cart/incquantity',
+        'https://backend.foodapp.transev.site/cart/incquantity',
         new URLSearchParams({
           menuid: item.menuid,
           usercartid: usercartid,
@@ -123,7 +123,7 @@ const RestaurantMenuPage: React.FC = () => {
     setLoadingItemId(item.menuid);
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/cart/decquantity',
+        'https://backend.foodapp.transev.site/cart/decquantity',
         new URLSearchParams({
           menuid: item.menuid,
           usercartid: usercartid,
@@ -155,7 +155,7 @@ const RestaurantMenuPage: React.FC = () => {
   const handleToggleFavorite = async (item: any) => {
     try {
       const response = await axios.post(
-        'http://127.0.0.1:5000/ops/makemenufav',
+        'https://backend.foodapp.transev.site/ops/makemenufav',
         new URLSearchParams({
           menuid: item.menuid,
           userid: userid,

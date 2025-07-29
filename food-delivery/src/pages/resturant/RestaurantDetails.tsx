@@ -41,7 +41,7 @@ const RestaurantDetails: React.FC = () => {
       formData.append("ownerid", ownerid);
 
       const response = await fetch(
-        "http://127.0.0.1:5000/owenerresturentfetch",
+        "https://backend.foodapp.transev.site/owenerresturentfetch",
         {
           method: "POST",
           headers: {
