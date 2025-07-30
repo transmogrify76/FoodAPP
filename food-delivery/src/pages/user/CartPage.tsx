@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { FaMapMarkerAlt, FaCrosshairs, FaMotorcycle, FaShoppingBag, FaEdit } from 'react-icons/fa';
-
+import { 
+  FiShoppingBag, 
+  FiTruck, 
+  FiMapPin, 
+  FiCrosshair, 
+  FiEdit2,
+  FiPlus,
+  FiMinus,
+  FiArrowLeft
+} from 'react-icons/fi';
+import { FaLeaf, FaFire } from 'react-icons/fa';
 
 interface CartItem {
+  menuid: string;
   menuname: string;
   menudescription: string;
   menuprice: number;
+  menudiscountprice?: number;
   quantity: number;
-  menusercartid: string;
   restaurantid: string;
+  vegornonveg?: string;
 }
 
 const CartPage: React.FC = () => {
   const { state } = useLocation();
+  const navigate = useNavigate();
   const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [deliveryOption, setDeliveryOption] = useState<'takeaway' | 'delivery'>('takeaway');
@@ -24,27 +36,15 @@ const CartPage: React.FC = () => {
     coordinates?: { lat: number; lng: number } 
   }>({ address: '' });
   const [showLocationInput, setShowLocationInput] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // Calculate total price
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => {
-      console.log("Razorpay script loaded successfully");
-    };
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  const calculateTotalPrice = () => {
-    let total = 0;
-    cart.forEach(item => {
-      total += item.menuprice * item.quantity;
-    });
+    const total = cart.reduce((sum, item) => {
+      return sum + (item.menudiscountprice || item.menuprice) * item.quantity;
+    }, 0);
     setTotalPrice(total);
-  };
+  }, [cart]);
 
   const getUserIdFromToken = () => {
     const token = localStorage.getItem('token');
@@ -91,296 +91,238 @@ const CartPage: React.FC = () => {
     }
   };
 
-  const createOrder = async () => {
+  const handleQuantityChange = async (item: CartItem, action: 'inc' | 'dec') => {
+    const usercartid = getusercartidFromToken();
+    if (!usercartid) return;
+
     try {
-      const userId = getUserIdFromToken();
-      if (!userId) {
-        alert('User is not logged in.');
-        return;
-      }
-      
-      const usercartid = getusercartidFromToken();
-      if (!usercartid) {
-        alert('Cart ID not found.');
-        return;
-      }
+      setLoading(true);
+      const endpoint = action === 'inc' 
+        ? 'https://backend.foodapp.transev.site/cart/incquantity' 
+        : 'https://backend.foodapp.transev.site/cart/decquantity';
 
-      const restaurantid = cart[0]?.restaurantid || '';
-      const menusercartid = cart.map(item => item.menusercartid).join(',');
-      const totalPriceForPayment = totalPrice.toString();
-
-      const orderData = new URLSearchParams();
-      orderData.append('usercartid', usercartid);
-
-      const response = await axios.post('https://backend.foodapp.transev.site/order/createorder', orderData);
+      const response = await axios.post(
+        endpoint,
+        new URLSearchParams({
+          usercartid,
+          menuid: item.menuid,
+        })
+      );
 
       if (response.status === 200) {
-        initiatePayment(userId, restaurantid, menusercartid, totalPriceForPayment);
+        if (action === 'dec' && response.data.new_quantity === undefined) {
+          setCart(prev => prev.filter(i => i.menuid !== item.menuid));
+        } else {
+          setCart(prev =>
+            prev.map(i =>
+              i.menuid === item.menuid 
+                ? { ...i, quantity: response.data.new_quantity } 
+                : i
+            )
+          );
+        }
       }
     } catch (error) {
-      console.error('Error creating order:', error);
-      alert('Failed to create order.');
+      console.error('Error updating quantity:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const initiatePayment = async (
-    userId: string,
-    restaurantid: string,
-    menusercartid: string,
-    totalPrice: string
-  ) => {
-    if (typeof window !== "undefined" && !window.Razorpay) {
-      alert('Razorpay is not loaded.');
+  const handleCheckout = async () => {
+    if (deliveryOption === 'delivery' && !deliveryLocation.address) {
+      alert('Please select a delivery location');
       return;
     }
 
+    const userId = getUserIdFromToken();
+    const usercartid = getusercartidFromToken();
+    if (!userId || !usercartid) return;
+
     try {
-      const paymentData = new URLSearchParams();
-      paymentData.append('userid', userId);
-      paymentData.append('restaurantid', restaurantid);
-      paymentData.append('menusercartid', menusercartid);
-      paymentData.append('totalprice', totalPrice);
+      setLoading(true);
+      const orderData = new URLSearchParams();
+      orderData.append('usercartid', usercartid);
 
-      const response = await axios.post('https://backend.foodapp.transev.site/createpayment/razorpay', paymentData);
-
-      if (response.status === 200) {
-        const paymentDetails = response.data;
-        const options = {
-          key: 'rzp_test_nzmqxQYhvCH9rD',
-          amount: paymentDetails.amount,
-          currency: paymentDetails.currency,
-          order_id: paymentDetails.id,
-          name: 'Restaurant Name',
-          description: 'Complete your payment',
-          image: 'https://your-logo-url.com',
-          handler: function (response: any) {
-            alert('Payment successful!');
-            (async () => {
-              try {
-                const verifyResponse = await axios.post('https://backend.foodapp.transev.site/verifypayment', {
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  userid: userId,
-                  restaurantid: restaurantid,
-                  menuid: menusercartid,
-                  price: totalPrice
-                });
-                console.log("Verification response:", verifyResponse.data);
-              } catch (err) {
-                console.error("Error verifying payment:", err);
-              }
-            })();
-            setCart([]);
-          },
-          prefill: {
-            name: 'User Name',
-            email: 'user@example.com',
-            contact: '1234567890',
-          },
-          theme: {
-            color: '#F37254',
-          },
-        };
-
-        const rzp1 = new window.Razorpay(options);
-        rzp1.open();
-      }
-    } catch (error) {
-      console.error('Error initiating payment:', error);
-      alert('Failed to initiate payment.');
-    }
-  };
-
-  const handleIncreaseQuantity = async (item: CartItem) => {
-    try {
-      const usercartid = getusercartidFromToken();
-      if (!usercartid) {
-        alert('User cart ID not found.');
-        return;
-      }
       const response = await axios.post(
-        'https://backend.foodapp.transev.site/cart/incquantity',
-        new URLSearchParams({
-          usercartid: usercartid,
-          menuid: item.menusercartid,
-        })
+        'https://backend.foodapp.transev.site/order/createorder', 
+        orderData
       );
 
       if (response.status === 200) {
-        const newQuantity = response.data.new_quantity;
-        setCart(prevCart =>
-          prevCart.map(cartItem =>
-            cartItem.menusercartid === item.menusercartid
-              ? { ...cartItem, quantity: newQuantity }
-              : cartItem
-          )
-        );
-        calculateTotalPrice();
+        navigate('/payment', { 
+          state: { 
+            cart, 
+            totalPrice,
+            deliveryOption,
+            deliveryLocation 
+          } 
+        });
       }
     } catch (error) {
-      console.error('Error increasing quantity:', error);
-      alert('Failed to increase quantity.');
+      console.error('Error creating order:', error);
+    } finally {
+      setLoading(false);
     }
   };
-
-  const handleDecreaseQuantity = async (item: CartItem) => {
-    try {
-      const usercartid = getusercartidFromToken();
-      if (!usercartid) {
-        alert('User cart ID not found.');
-        return;
-      }
-      const response = await axios.post(
-        'https://backend.foodapp.transev.site/cart/decquantity',
-        new URLSearchParams({
-          usercartid: usercartid,
-          menuid: item.menusercartid,
-        })
-      );
-
-      if (response.status === 200) {
-        if (response.data.new_quantity !== undefined) {
-          const newQuantity = response.data.new_quantity;
-          setCart(prevCart =>
-            prevCart.map(cartItem =>
-              cartItem.menusercartid === item.menusercartid
-                ? { ...cartItem, quantity: newQuantity }
-                : cartItem
-            )
-          );
-          alert('Item quantity decreased successfully!');
-        } else {
-          setCart(prevCart =>
-            prevCart.filter(cartItem => cartItem.menusercartid !== item.menusercartid)
-          );
-          alert('Product removed from cart successfully');
-        }
-        calculateTotalPrice();
-      }
-    } catch (error) {
-      console.error('Error decreasing quantity:', error);
-      alert('Failed to decrease quantity.');
-    }
-  };
-
-  useEffect(() => {
-    calculateTotalPrice();
-  }, [cart]);
 
   return (
-    <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50 pb-24">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-white shadow-sm p-4 border-b border-gray-200">
+        <div className="flex items-center">
+          <button 
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-full hover:bg-gray-100 mr-2"
+          >
+            <FiArrowLeft className="text-lg text-gray-700" />
+          </button>
+          <h1 className="text-lg font-semibold text-gray-800">Your Cart</h1>
+        </div>
+      </header>
 
-      <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
-        <h1 className="text-xl font-bold">Your Cart</h1>
-      </div>
-
-
-      <div className="p-4 pt-20 bg-white border-b border-gray-200 shadow-sm">
+      {/* Delivery Options */}
+      <div className="p-4 bg-white border-b border-gray-100">
         <div className="flex gap-3 mb-4">
           <button
             onClick={() => setDeliveryOption('takeaway')}
-            className={`flex-1 p-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
+            className={`flex-1 p-3 rounded-lg flex flex-col items-center justify-center gap-1 ${
               deliveryOption === 'takeaway' 
-                ? 'bg-red-100 border-2 border-red-500 text-red-600'
-                : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:border-red-200'
+                ? 'bg-orange-100 border border-orange-300 text-orange-700'
+                : 'bg-gray-50 border border-gray-200 text-gray-700'
             }`}
           >
-            <FaShoppingBag className="text-lg" />
-            <span className="font-medium">Takeaway</span>
+            <FiShoppingBag className="text-xl" />
+            <span className="text-sm font-medium">Takeaway</span>
           </button>
           
           <button
             onClick={() => setDeliveryOption('delivery')}
-            className={`flex-1 p-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
+            className={`flex-1 p-3 rounded-lg flex flex-col items-center justify-center gap-1 ${
               deliveryOption === 'delivery' 
-                ? 'bg-red-100 border-2 border-red-500 text-red-600'
-                : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:border-red-200'
+                ? 'bg-orange-100 border border-orange-300 text-orange-700'
+                : 'bg-gray-50 border border-gray-200 text-gray-700'
             }`}
           >
-            <FaMotorcycle className="text-lg" />
-            <span className="font-medium">Delivery</span>
+            <FiTruck className="text-xl" />
+            <span className="text-sm font-medium">Delivery</span>
           </button>
         </div>
 
         {deliveryOption === 'delivery' && (
           <div className="space-y-3">
-            {!deliveryLocation.address && (
+            {!deliveryLocation.address ? (
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleLocationSelection('current')}
-                  className="p-3 bg-gray-50 rounded-lg flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
+                  className="p-3 bg-gray-50 rounded-lg flex flex-col items-center justify-center gap-1 hover:bg-orange-50 border border-gray-200"
                 >
-                  <FaCrosshairs className="text-red-500" />
-                  <span>Current Location</span>
+                  <FiCrosshair className="text-orange-600 text-lg" />
+                  <span className="text-xs text-gray-700">Current Location</span>
                 </button>
                 <button
                   onClick={() => handleLocationSelection('manual')}
-                  className="p-3 bg-gray-50 rounded-lg flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
+                  className="p-3 bg-gray-50 rounded-lg flex flex-col items-center justify-center gap-1 hover:bg-orange-50 border border-gray-200"
                 >
-                  <FaMapMarkerAlt className="text-red-500" />
-                  <span>Enter Address</span>
+                  <FiMapPin className="text-orange-600 text-lg" />
+                  <span className="text-xs text-gray-700">Enter Address</span>
                 </button>
               </div>
-            )}
-
-            {showLocationInput && (
-              <div className="relative">
-                <FaMapMarkerAlt className="absolute left-3 top-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Enter delivery address"
-                  className="w-full pl-10 p-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:ring-0"
-                  value={deliveryLocation.address}
-                  onChange={(e) => setDeliveryLocation({ ...deliveryLocation, address: e.target.value })}
-                />
-              </div>
-            )}
-
-            {deliveryLocation.address && (
-              <div className="p-3 bg-red-50 rounded-lg flex items-center justify-between">
+            ) : (
+              <div className="p-3 bg-orange-50 rounded-lg flex items-center justify-between border border-orange-100">
                 <div className="flex items-center gap-2">
-                  <FaMapMarkerAlt className="text-red-600" />
-                  <span className="text-gray-700">{deliveryLocation.address}</span>
+                  <FiMapPin className="text-orange-600" />
+                  <span className="text-sm text-gray-800">{deliveryLocation.address}</span>
                 </div>
                 <button
                   onClick={() => {
                     setDeliveryLocation({ address: '' });
                     setShowLocationInput(false);
                   }}
-                  className="text-red-600 hover:text-red-700 p-1"
+                  className="text-orange-600 hover:text-orange-700 p-1"
                 >
-                  <FaEdit className="text-sm" />
+                  <FiEdit2 className="text-sm" />
                 </button>
+              </div>
+            )}
+
+            {showLocationInput && (
+              <div className="relative">
+                <FiMapPin className="absolute left-3 top-3 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Enter delivery address"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-200 text-gray-800 bg-white"
+                  value={deliveryLocation.address}
+                  onChange={(e) => setDeliveryLocation({ ...deliveryLocation, address: e.target.value })}
+                />
               </div>
             )}
           </div>
         )}
       </div>
 
- 
-      <div className="flex-1 overflow-y-auto p-4 pb-20">
+      {/* Cart Items */}
+      <div className="p-4">
         {cart.length === 0 ? (
-          <p className="text-center text-lg text-gray-700">Your cart is empty.</p>
+          <div className="text-center py-10">
+            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <FiShoppingBag className="text-gray-500 text-2xl" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-800">Your cart is empty</h3>
+            <p className="text-gray-600 mt-1">Add some delicious items to get started</p>
+            <button
+              onClick={() => navigate(-1)}
+              className="mt-4 px-6 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700"
+            >
+              Browse Menu 
+            </button>
+          </div>
         ) : (
-          <div className="space-y-4">
-            {cart.map((item: CartItem, index: number) => (
-              <div key={index} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-4">
-                <h3 className="text-lg font-bold text-gray-800">{item.menuname}</h3>
-                <p className="text-sm text-gray-600 mt-2">{item.menudescription}</p>
-                <p className="text-sm text-gray-500 mt-1">Price: ₹{item.menuprice}</p>
-                <div className="mt-4 flex items-center justify-between bg-gray-100 rounded-lg p-1.5">
-                  <button
-                    onClick={() => handleDecreaseQuantity(item)}
-                    className="w-8 h-8 bg-red-500 text-white rounded-lg active:scale-95"
-                  >
-                    -
-                  </button>
-                  <span className="mx-3 font-bold text-gray-800">{item.quantity}</span>
-                  <button
-                    onClick={() => handleIncreaseQuantity(item)}
-                    className="w-8 h-8 bg-green-500 text-white rounded-lg active:scale-95"
-                  >
-                    +
-                  </button>
+          <div className="space-y-3">
+            {cart.map((item, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-xs border border-gray-200 p-3">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-gray-900">{item.menuname}</h3>
+                      {item.vegornonveg === 'veg' ? (
+                        <FaLeaf className="text-green-600 text-xs" />
+                      ) : (
+                        <FaFire className="text-red-600 text-xs" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{item.menudescription}</p>
+                    
+                    <div className="mt-2">
+                      {item.menudiscountprice ? (
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-bold text-gray-900">₹{item.menudiscountprice}</span>
+                          <span className="text-xs text-gray-500 line-through">₹{item.menuprice}</span>
+                        </div>
+                      ) : (
+                        <span className="font-bold text-gray-900">₹{item.menuprice}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center bg-gray-100 rounded-lg border border-gray-200">
+                    <button
+                      onClick={() => handleQuantityChange(item, 'dec')}
+                      disabled={loading}
+                      className="px-3 py-1 text-gray-700 hover:text-orange-600 disabled:opacity-50"
+                    >
+                      <FiMinus />
+                    </button>
+                    <span className="px-2 font-medium text-sm text-gray-800">{item.quantity}</span>
+                    <button
+                      onClick={() => handleQuantityChange(item, 'inc')}
+                      disabled={loading}
+                      className="px-3 py-1 text-gray-700 hover:text-orange-600 disabled:opacity-50"
+                    >
+                      <FiPlus />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -388,18 +330,26 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-    
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-up-lg flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">Total: ₹{totalPrice}</h2>
-        <button
-          onClick={createOrder}
-          className="bg-red-500 text-white font-semibold py-3.5 px-6 rounded-lg active:scale-98 transition-transform"
-        >
-          Checkout
-        </button>
-      </div>
+      {/* Checkout Footer */}
+      {cart.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-xs text-gray-600">Total Amount</p>
+              <p className="font-bold text-gray-900">₹{totalPrice.toFixed(2)}</p>
+            </div>
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 disabled:opacity-70"
+            >
+              {loading ? 'Processing...' : 'Proceed to Pay'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default CartPage;
+export default CartPage;  

@@ -305,7 +305,7 @@ const HomePage: React.FC = () => {
                     </span>
                   </div>
                   <div className="mt-2 flex justify-between items-center">
-                    <span className="text-xs text-gray-500">30-45 min • $5 delivery</span>
+                    <span className="text-xs text-gray-500">30-45 min  </span>
                     <button className="text-orange-500 text-xs font-semibold flex items-center">
                       View <FaChevronRight className="ml-1 text-xs" />
                     </button>
