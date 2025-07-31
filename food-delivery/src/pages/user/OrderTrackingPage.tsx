@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { IoRestaurant, IoLocation, IoCalendar, IoPricetag } from 'react-icons/io5';
+import { FaShoppingBag, FaHistory, FaHome, FaUserAlt, FaShoppingCart, FaSearch, FaChevronRight, FaMapMarkerAlt, FaClock, FaMoneyBillAlt } from 'react-icons/fa';
+import { AiOutlineClose } from 'react-icons/ai';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 interface Menu {
@@ -41,6 +43,8 @@ interface DecodedToken {
 const OrderTrackingPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token'); 
@@ -76,19 +80,19 @@ const OrderTrackingPage: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
-        return 'bg-yellow-200 text-yellow-700';
+        return 'bg-yellow-100 text-yellow-800';
       case 'accepted':
-        return 'bg-green-200 text-green-700';
+        return 'bg-green-100 text-green-800';
       case 'inprogress':
-        return 'bg-blue-200 text-blue-700';
+        return 'bg-blue-100 text-blue-800';
       case 'dispatched':
-        return 'bg-purple-200 text-purple-700';
+        return 'bg-purple-100 text-purple-800';
       case 'delivered':
-        return 'bg-green-200 text-green-700';
+        return 'bg-green-100 text-green-800';
       case 'rejected':
-        return 'bg-red-200 text-red-700';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-200 text-gray-700';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -97,65 +101,209 @@ const OrderTrackingPage: React.FC = () => {
     return date.toLocaleString();
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="bg-gradient-to-b from-red-500 via-white to-gray-100 min-h-screen flex flex-col">
-      <div className="fixed top-0 left-0 w-full p-4 bg-gradient-to-r from-red-500 to-pink-500 text-white z-10">
-        <h1 className="text-xl font-bold">Order Tracking</h1>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4 pt-20">
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h3 className="text-2xl font-bold text-red-600 mb-4">Order List</h3>
-          <ul>
-            {orders.map((order) => (
-              <li
-                key={order.uid}
-                className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow"
+    <div className="min-h-screen bg-orange-50">
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 w-64 h-full bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex justify-between items-center p-4 bg-orange-500 text-white">
+          <div className="flex items-center">
+            <img 
+              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
+              alt="Logo" 
+              className="w-8 h-8 mr-2"
+            />
+            <h3 className="text-lg font-bold">Foodie Heaven</h3>
+          </div>
+          <button onClick={toggleSidebar} className="text-xl">
+            <AiOutlineClose />
+          </button>
+        </div>
+        <div className="p-4">
+          <ul className="space-y-3">
+            <li>
+              <button
+                onClick={() => navigate('/home')}
+                className="flex items-center w-full p-3 rounded-lg hover:bg-orange-100 text-gray-700"
               >
-                <div className="w-full md:w-3/4">
-                  <h4 className="font-semibold text-lg">
-                    {order.restaurant?.resturantname || 'Unknown Restaurant'}
-                  </h4>
-                  <p className="text-gray-600">
-                    Location: {order.restaurant?.location || 'N/A'}
-                  </p>
-                  <div className="mt-2">
-                    {order.items && order.items.map((item: { menu: { menuname: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }; quantity: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; item_total: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }, idx: React.Key | null | undefined) => (
-                      <div key={idx} className="border-b border-gray-300 pb-1 mb-1">
-                        <p className="text-gray-700">
-                          <strong>Menu:</strong> {item.menu.menuname}
-                        </p>
-                        <p className="text-gray-600">
-                          <strong>Quantity:</strong> {item.quantity}
-                        </p>
-                        <p className="text-gray-600">
-                          <strong>Item Total:</strong> ₹{item.item_total}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-gray-600 mt-2">
-                    <strong>Total Price:</strong> ₹{order.totalprice}
-                  </p>
-                  {order.preptime && (
-                    <p className="text-gray-600">
-                      <strong>Prep Time:</strong> {order.preptime}
-                    </p>
-                  )}
-                  <p className="text-gray-600">
-                    <strong>Order Placed:</strong> {formatDate(order.created_at)}
-                  </p>
-                </div>
-                <span
-                  className={`text-sm font-bold p-2 rounded mt-2 md:mt-0 ${getStatusColor(
-                    order.tempstatus || order.orderstatus
-                  )}`}
-                >
-                  {order.tempstatus || order.orderstatus}
-                </span>
-              </li>
-            ))}
+                <FaHome className="text-orange-500 mr-3 text-lg" />
+                <span className="font-medium">Home</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center w-full p-3 rounded-lg hover:bg-orange-100 text-gray-700"
+              >
+                <FaUserAlt className="text-orange-500 mr-3 text-lg" />
+                <span className="font-medium">Profile</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => navigate('/history')}
+                className="flex items-center w-full p-3 rounded-lg hover:bg-orange-100 text-gray-700"
+              >
+                <FaHistory className="text-orange-500 mr-3 text-lg" />
+                <span className="font-medium">Order History</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => navigate('/track-order')}
+                className="flex items-center w-full p-3 rounded-lg hover:bg-orange-100 text-gray-700"
+              >
+                <FaShoppingBag className="text-orange-500 mr-3 text-lg" />
+                <span className="font-medium">Order Tracking</span>
+              </button>
+            </li>
           </ul>
         </div>
+      </div>
+      
+      {/* Overlay */}
+      {isSidebarOpen && (
+        <div 
+          onClick={toggleSidebar} 
+          className="fixed inset-0 bg-black opacity-50 z-40"
+        ></div>
+      )}
+
+      {/* Main Content */}
+      <div className="pb-20">
+        {/* Header */}
+        <div className="bg-orange-500 text-white p-4 sticky top-0 z-30 shadow-md">
+          <div className="flex justify-between items-center">
+            <button onClick={toggleSidebar} className="text-xl">
+              <FaSearch />
+            </button>
+            <div className="flex items-center">
+              <img 
+                src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
+                alt="Logo" 
+                className="w-6 h-6 mr-2"
+              />
+              <h1 className="text-lg font-bold">Order Tracking</h1>
+            </div>
+            <div className="w-6"></div> {/* For balance */}
+          </div>
+        </div>
+
+        {/* Order List */}
+        <div className="p-4">
+          <h2 className="font-bold text-lg text-gray-800 mb-4">Your Orders</h2>
+
+          {orders.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">
+              No orders found
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <div 
+                  key={order.uid}
+                  className="bg-white rounded-xl shadow-sm overflow-hidden"
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-semibold text-gray-800 text-lg">
+                          {order.restaurant?.resturantname || 'Unknown Restaurant'}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                          <FaMapMarkerAlt className="mr-1 text-orange-400" />
+                          <span>{order.restaurant?.location || 'N/A'}</span>
+                        </div>
+                      </div>
+                      <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(
+                        order.tempstatus || order.orderstatus
+                      )}`}>
+                        {order.tempstatus || order.orderstatus}
+                      </span>
+                    </div>
+                    
+                    <div className="mb-3 border-b border-gray-100 pb-3">
+                      {order.items && order.items.map((item: { menu: { menuname: string }; quantity: number; item_total: number }, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center text-sm text-gray-600 mb-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">{item.quantity}x</span>
+                            <span>{item.menu.menuname}</span>
+                          </div>
+                          <span>₹{item.item_total}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-sm mb-2">
+                      <div className="flex items-center text-gray-500">
+                        <FaClock className="mr-1 text-orange-400" />
+                        <span>{formatDate(order.created_at)}</span>
+                      </div>
+                      {order.preptime && (
+                        <div className="text-gray-500">
+                          <span>Prep time: {order.preptime}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                      <div className="text-sm text-gray-500">
+                        Cuisine: {order.restaurant?.cuisin_type || 'N/A'}
+                      </div>
+                      <div className="flex items-center font-semibold text-orange-500">
+                        <FaMoneyBillAlt className="mr-1" />
+                        <span>₹{order.totalprice}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
+        <button 
+          onClick={() => navigate('/home')}
+          className="text-gray-500 flex flex-col items-center"
+        >
+          <FaHome className="text-lg" />
+          <span className="text-xs mt-1">Home</span>
+        </button>
+        <button className="text-gray-500 flex flex-col items-center">
+          <FaSearch className="text-lg" />
+          <span className="text-xs mt-1">Search</span>
+        </button>
+        <button 
+          onClick={() => navigate('/cart')}
+          className="text-gray-500 flex flex-col items-center"
+        >
+          <FaShoppingCart className="text-lg" />
+          <span className="text-xs mt-1">Cart</span>
+        </button>
+        <button 
+          onClick={() => navigate('/track-order')}
+          className="text-orange-500 flex flex-col items-center"
+        >
+          <FaHistory className="text-lg" />
+          <span className="text-xs mt-1">Orders</span>
+        </button>
+        <button 
+          onClick={() => navigate('/profile')}
+          className="text-gray-500 flex flex-col items-center"
+        >
+          <FaUserAlt className="text-lg" />
+          <span className="text-xs mt-1">Profile</span>
+        </button>
       </div>
     </div>
   );

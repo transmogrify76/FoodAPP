@@ -67,7 +67,7 @@ const CartPage: React.FC = () => {
   const handleLocationSelection = async (type: 'current' | 'manual') => {
     if (type === 'current') {
       try {
-        navigator.geolocation.getCurrentPosition(
+        navigator.geolocation.getCurrentPosition(    
           (position) => {
             setDeliveryLocation({
               address: 'Current Location',
