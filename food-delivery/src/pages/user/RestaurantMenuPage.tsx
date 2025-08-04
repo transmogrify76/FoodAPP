@@ -27,7 +27,6 @@ const RestaurantMenuPage: React.FC = () => {
   const usercartid = decodedToken?.usercartid || '';
   const restaurantid = state?.restaurantId || '';
 
-  // Clear cart state when component unmounts
   useEffect(() => {
     return () => {
       setCart([]);
@@ -35,12 +34,12 @@ const RestaurantMenuPage: React.FC = () => {
     };
   }, []);
 
-  // Save cart to localStorage whenever it changes
+
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Load menu and favorites when component mounts
+
   useEffect(() => {
     if (state && state.menu) {
       setMenu(state.menu);
@@ -193,7 +192,6 @@ const RestaurantMenuPage: React.FC = () => {
         </div>
       )}
 
-      {/* Menu Items */}
       <div className="p-4 space-y-4">
         {menu.map((item) => {
           const cartItem = cart.find((cartItem) => cartItem.menuid === item.menuid);
@@ -208,7 +206,7 @@ const RestaurantMenuPage: React.FC = () => {
               key={item.menuid}
               className="bg-white rounded-xl shadow-sm overflow-hidden"
             >
-              {/* Image Slider */}
+           
               <div className="relative">
                 {item.images?.length > 0 ? (
                   <Swiper
@@ -241,7 +239,6 @@ const RestaurantMenuPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Item Details */}
               <div className="p-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -285,7 +282,7 @@ const RestaurantMenuPage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Add to Cart Button */}
+
                 <div className="mt-4">
                   {!isItemInCart ? (
                     <button
@@ -342,7 +339,7 @@ const RestaurantMenuPage: React.FC = () => {
         })}
       </div>
 
-      {/* Checkout Bar */}
+
       {cartItemCount > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg">
           <div className="flex justify-between items-center">
