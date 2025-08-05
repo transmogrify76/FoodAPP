@@ -20,8 +20,14 @@ interface Restaurant {
   resturantname: string;
 }
 
+interface OrderItem {
+  menu: Menu | null;
+  quantity: number;
+  item_total: number;
+}
+
 interface Order {
-  items: any;
+  items: OrderItem[];
   uid: string;
   productid: string;
   quantity: number;
@@ -30,7 +36,6 @@ interface Order {
   totalprice: number;
   created_at: string;
   orderstatus: string;
-  menu: Menu | null;
   restaurant: Restaurant | null;
   preptime?: string | null;
   tempstatus?: string;
@@ -44,6 +49,8 @@ const OrderTrackingPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,22 +61,29 @@ const OrderTrackingPage: React.FC = () => {
         setUserId(decoded.userid);
       } catch (error) {
         console.error('Error decoding token:', error);
+        setError('Failed to authenticate. Please login again.');
       }
+    } else {
+      setError('No authentication token found. Please login.');
     }
   }, []);
 
   useEffect(() => {
     if (userId) {
       const fetchOrders = async () => {
+        setIsLoading(true);
         try {
           const response = await axios.post(
             'https://backend.foodapp.transev.site/order/orderhistory',
             { userid: userId },
             { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
           );
-          setOrders(response.data.order_list);
+          setOrders(response.data.order_list || []);
         } catch (error) {
           console.error('Error fetching order history:', error);
+          setError('Failed to load order history. Please try again later.');
+        } finally {
+          setIsLoading(false);
         }
       };
 
@@ -78,6 +92,8 @@ const OrderTrackingPage: React.FC = () => {
   }, [userId]);
 
   const getStatusColor = (status: string) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    
     switch (status.toLowerCase()) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
@@ -97,13 +113,42 @@ const OrderTrackingPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    } catch (e) {
+      return 'Unknown date';
+    }
   };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
+          <h3 className="text-lg font-semibold text-red-500 mb-2">Error</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-orange-50">
@@ -230,11 +275,11 @@ const OrderTrackingPage: React.FC = () => {
                     </div>
                     
                     <div className="mb-3 border-b border-gray-100 pb-3">
-                      {order.items && order.items.map((item: { menu: { menuname: string }; quantity: number; item_total: number }, idx: number) => (
+                      {order.items?.map((item, idx) => (
                         <div key={idx} className="flex justify-between items-center text-sm text-gray-600 mb-2">
                           <div className="flex items-center">
                             <span className="font-medium mr-2">{item.quantity}x</span>
-                            <span>{item.menu.menuname}</span>
+                            <span>{item.menu?.menuname || 'Unknown Item'}</span>
                           </div>
                           <span>₹{item.item_total}</span>
                         </div>
