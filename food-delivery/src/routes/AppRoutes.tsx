@@ -33,6 +33,7 @@ import NotificationsAlerts from '../pages/rider/NotificationsAlerts';
 import RatingsReviews from '../pages/rider/RatingsReviews';
 import SettingsPage from '../pages/resturant/SettingsPage';
 import SettingsPageUser from '../pages/user/SettingsPageUser';
+import TermsAndConditions from '../pages/user/TermsAndConditions';
 
 
 const AppRoutes: React.FC = () => (
@@ -71,6 +72,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/rider-profile" element={<ProfileSettings />} />
     <Route path="/rider-notification" element={<NotificationsAlerts />} />
     <Route path="/rider-review" element={<RatingsReviews />} />
+    <Route path="/settings/terms" element={<TermsAndConditions />} />
 
 
 
