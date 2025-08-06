@@ -20,21 +20,42 @@ import {
 } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 
-interface CartItem {
-  menuid: string;
-  menuname: string;
+interface MenuDetails {
+  created_at: string;
+  final_price: string;
+  foodtype: string;
+  foodweight: string;
+  gst_rate: string;
+  images: string[];
   menudescription: string;
-  menuprice: number;
-  menudiscountprice?: number;
-  quantity: number;
+  menudiscountpercent: string;
+  menudiscountprice: string;
+  menuitemtype: string;
+  menuname: string;
+  menuprice: string;
+  menutype: string;
   restaurantid: string;
-  vegornonveg?: string;
+  servingtype: string;
+  uid: string;
+  vegornonveg: string;
+}
+
+interface CartItem {
+  created_at: string;
+  menu_details: MenuDetails;
+  menuid: string;
+  quantity: string;
+  restaurantid: string;
+  total_price: string;
+  uid: string;
+  usercartid: string;
+  userid: string;
 }
 
 const CartPage: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const [cart, setCart] = useState<CartItem[]>(state?.cart || []);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [deliveryOption, setDeliveryOption] = useState<'takeaway' | 'delivery'>('takeaway');
   const [deliveryLocation, setDeliveryLocation] = useState<{ 
@@ -52,7 +73,7 @@ const CartPage: React.FC = () => {
   // Calculate total price
   useEffect(() => {
     const total = cart.reduce((sum, item) => {
-      return sum + (item.menudiscountprice || item.menuprice) * item.quantity;
+      return sum + parseFloat(item.total_price);
     }, 0);
     setTotalPrice(total);
   }, [cart]);
@@ -105,8 +126,15 @@ const CartPage: React.FC = () => {
 
   // Call fetchCartItems when component mounts
   useEffect(() => {
-    // Only fetch if we don't have cart items passed via state
-    if (!state?.cart || state.cart.length === 0) {
+    if (state?.cart && state.cart.length > 0) {
+      // Convert the state cart items to match the new interface if needed
+      const formattedCart = state.cart.map((item: any) => ({
+        ...item,
+        quantity: item.quantity.toString(),
+        total_price: ((item.menudiscountprice || parseFloat(item.menuprice)) * item.quantity).toString()
+      }));
+      setCart(formattedCart);
+    } else {
       fetchCartItems();
     }
   }, []);
@@ -160,10 +188,15 @@ const CartPage: React.FC = () => {
         if (action === 'dec' && response.data.new_quantity === undefined) {
           setCart(prev => prev.filter(i => i.menuid !== item.menuid));
         } else {
+          // Update the cart with the new quantity and recalculate total price
           setCart(prev =>
             prev.map(i =>
               i.menuid === item.menuid 
-                ? { ...i, quantity: response.data.new_quantity } 
+                ? { 
+                    ...i, 
+                    quantity: response.data.new_quantity.toString(),
+                    total_price: (parseFloat(i.menu_details.menudiscountprice || i.menu_details.menuprice) * response.data.new_quantity).toString()
+                  } 
                 : i
             )
           );
@@ -397,23 +430,23 @@ const CartPage: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-gray-900">{item.menuname}</h3>
-                      {item.vegornonveg === 'veg' ? (
+                      <h3 className="font-medium text-gray-900">{item.menu_details.menuname}</h3>
+                      {item.menu_details.vegornonveg === 'veg' ? (
                         <FaLeaf className="text-green-600 text-xs" />
                       ) : (
                         <FaFire className="text-red-600 text-xs" />
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{item.menudescription}</p>
+                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{item.menu_details.menudescription}</p>
                     
                     <div className="mt-2">
-                      {item.menudiscountprice ? (
+                      {item.menu_details.menudiscountprice ? (
                         <div className="flex items-baseline gap-1">
-                          <span className="font-bold text-gray-900">₹{item.menudiscountprice}</span>
-                          <span className="text-xs text-gray-500 line-through">₹{item.menuprice}</span>
+                          <span className="font-bold text-gray-900">₹{item.menu_details.menudiscountprice}</span>
+                          <span className="text-xs text-gray-500 line-through">₹{item.menu_details.menuprice}</span>
                         </div>
                       ) : (
-                        <span className="font-bold text-gray-900">₹{item.menuprice}</span>
+                        <span className="font-bold text-gray-900">₹{item.menu_details.menuprice}</span>
                       )}
                     </div>
                   </div>
@@ -442,7 +475,7 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-      {/* Bottom Navigation */}
+    
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
         <button 
           onClick={() => navigate('/home')}
@@ -463,7 +496,7 @@ const CartPage: React.FC = () => {
           className="text-orange-500 flex flex-col items-center"
         >
           <FaShoppingCart className="text-lg" />
-          <span className="text-xs mt-1">Cart ({cart.reduce((total, item) => total + item.quantity, 0)})</span>
+          <span className="text-xs mt-1">Cart ({cart.reduce((total, item) => total + parseInt(item.quantity), 0)})</span>
         </button>
         <button 
           onClick={() => navigate('/profile')}
@@ -474,7 +507,7 @@ const CartPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Checkout Footer */}
+     
       {cart.length > 0 && (
         <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
           <div className="flex justify-between items-center">
