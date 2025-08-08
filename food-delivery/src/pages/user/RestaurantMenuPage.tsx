@@ -28,17 +28,8 @@ const RestaurantMenuPage: React.FC = () => {
   const restaurantid = state?.restaurantId || '';
 
   useEffect(() => {
-    return () => {
-      setCart([]);
-      localStorage.removeItem('cart');
-    };
-  }, []);
-
-
-  useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
-
 
   useEffect(() => {
     if (state && state.menu) {
@@ -167,7 +158,14 @@ const RestaurantMenuPage: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    navigate('/cart', { state: { cart } });
+    // Save cart to localStorage and navigate to cart page
+    localStorage.setItem('cart', JSON.stringify(cart));
+    navigate('/cart', { 
+      state: { 
+        restaurantId: restaurantid,
+        fromMenuPage: true 
+      } 
+    });
   };
 
   const cartTotal = cart.reduce((total, item) => total + (item.menudiscountprice || item.menuprice) * item.quantity, 0);
@@ -206,7 +204,6 @@ const RestaurantMenuPage: React.FC = () => {
               key={item.menuid}
               className="bg-white rounded-xl shadow-sm overflow-hidden"
             >
-           
               <div className="relative">
                 {item.images?.length > 0 ? (
                   <Swiper
@@ -282,7 +279,6 @@ const RestaurantMenuPage: React.FC = () => {
                   </p>
                 </div>
 
-
                 <div className="mt-4">
                   {!isItemInCart ? (
                     <button
@@ -338,7 +334,6 @@ const RestaurantMenuPage: React.FC = () => {
           );
         })}
       </div>
-
 
       {cartItemCount > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg">
