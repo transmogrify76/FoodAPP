@@ -28,7 +28,7 @@ const FavoriteRestaurantsPage: React.FC = () => {
     const token = localStorage.getItem('token'); 
     if (token) {
       try {
-        const decoded: any = jwtDecode(token); 
+        const decoded: any = jwtDecode(token);  
         return decoded.userid; 
       } catch (error) {
         console.error('Failed to decode token', error);
@@ -170,11 +170,10 @@ const FavoriteRestaurantsPage: React.FC = () => {
               />
               <h1 className="text-lg font-bold">Favorite Restaurants</h1>
             </div>
-            <div className="w-6"></div> {/* For balance */}
+            <div className="w-6"></div> 
           </div>
         </div>
-
-        {/* Content */}
+ 
         <div className="p-4">
           {loading ? (
             <div className="text-center py-10">
@@ -238,7 +237,7 @@ const FavoriteRestaurantsPage: React.FC = () => {
                         >
                           View Restaurant <FaChevronRight className="ml-1 text-xs" />
                         </button>
-                        <div className="flex items-center text-yellow-500">
+                        <div className="flex items-center text-yellow-500"> 
                           <FaStar className="mr-1" />
                           <span className="text-gray-700 text-sm">4.5</span>
                         </div>
@@ -286,9 +285,9 @@ const FavoriteRestaurantsPage: React.FC = () => {
           <FaUserAlt className="text-lg" />
           <span className="text-xs mt-1">Profile</span>
         </button>
-      </div>
+      </div>      
     </div>
   );
 };
 
-export default FavoriteRestaurantsPage;
+export default FavoriteRestaurantsPage;  
