@@ -8,43 +8,36 @@ const RestaurantLogin: React.FC = () => {
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      
-      const response = await fetch('https://backend.foodapp.transev.site/users/resauthlogin_login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams(formData).toString(), 
-      });
+      const response = await fetch(
+        'https://backend.foodapp.transev.site/users/resauthlogin_login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams(formData).toString(),
+        }
+      );
 
-      
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
 
-    
       localStorage.setItem('restaurant_token', data.token);
-
-      
       navigate('/restaurant-dashboard');
     } catch (error: any) {
       setError(error.message || 'An error occurred while logging in');
@@ -52,73 +45,55 @@ const RestaurantLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex items-center justify-center">
-      <div className="bg-white rounded-xl shadow-xl p-10 max-w-md w-full min-h-[800px]">
-        <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">
-          Restaurant Login
-        </h1>
-        <p className="text-center text-lg text-gray-600 mb-8">
-          Please log in to manage your restaurant.
-        </p>
+    <div className="min-h-screen bg-orange-50 flex items-center justify-center px-4 py-8">
+      <div className="bg-white shadow-xl rounded-3xl p-6 w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/857/857681.png"
+            alt="Restaurant Logo"
+            className="w-20 mx-auto mb-2"
+          />
+          <h1 className="text-xl font-bold text-orange-600">Restaurant Login</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Login to manage your restaurant account.
+          </p>
+        </div>
 
         {error && (
-          <p className="text-center text-red-500 font-bold mb-4">{error}</p>
+          <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              <FaUserAlt className="inline-block mr-2 text-red-500" />
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              <FaLock className="inline-block mr-2 text-red-500" />
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-4 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 transition-all"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <InputField
+            icon={<FaUserAlt />}
+            placeholder="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <InputField
+            icon={<FaLock />}
+            placeholder="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
 
           <button
             type="submit"
-            className="w-full bg-red-500 text-white text-lg font-bold py-4 rounded-lg shadow-lg hover:bg-red-600 transition-all"
+            className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold text-base hover:bg-orange-600 transition"
           >
             Log In
           </button>
         </form>
 
-        <p className="text-sm text-gray-600 text-center mt-6">
+        <p className="text-xs text-center text-gray-600 mt-4">
           Don't have an account?{' '}
           <a
             href="/restaurant-signup"
-            className="text-red-600 font-semibold hover:underline"
+            className="text-orange-600 font-semibold hover:underline"
           >
             Sign Up
           </a>
@@ -127,5 +102,34 @@ const RestaurantLogin: React.FC = () => {
     </div>
   );
 };
+
+const InputField = ({
+  icon,
+  placeholder,
+  name,
+  type,
+  value,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  placeholder: string;
+  name: string;
+  type: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <div className="flex items-center border border-gray-300 rounded-xl px-3 py-2 bg-white focus-within:ring-2 focus-within:ring-orange-500 transition">
+    <span className="text-orange-500 mr-3 text-sm">{icon}</span>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full outline-none text-sm placeholder-gray-400 text-gray-800 bg-transparent"
+      required
+    />
+  </div>
+);
 
 export default RestaurantLogin;

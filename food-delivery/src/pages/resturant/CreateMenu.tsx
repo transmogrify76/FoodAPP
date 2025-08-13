@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { FaArrowLeft } from "react-icons/fa";
 
 const CreateMenu: React.FC = () => {
@@ -91,21 +91,16 @@ const CreateMenu: React.FC = () => {
     setError(null);
 
     const formData = new FormData();
-    formData.append("menuname", menuData.menuname || "");
-    formData.append("menudescription", menuData.menudescription || "");
-    formData.append("menuprice", menuData.menuprice || "");
-    formData.append("menutype", menuData.menutype || "");
-    formData.append("foodtype", menuData.foodtype || "");
-    formData.append("menuitemtype", menuData.menuitemtype || "");
-    formData.append("servingtype", menuData.servingtype || "");
-    formData.append("menudiscountpercent", menuData.menudiscountpercent || "");
-    formData.append("foodweight", menuData.foodweight || "");
-    formData.append("vegornonveg", menuData.vegornonveg || "");
-    formData.append("restaurantid", selectedRestaurantId);
-
-    menuData.images.forEach((image) => {
-      formData.append("images", image);
+    Object.entries(menuData).forEach(([key, value]) => {
+      if (key === "images") {
+        (value as File[]).forEach((image) => {
+          formData.append("images", image);
+        });
+      } else {
+        formData.append(key, value as string);
+      }
     });
+    formData.append("restaurantid", selectedRestaurantId);
 
     try {
       const response = await fetch("https://backend.foodapp.transev.site/resops/createmenu", {
@@ -142,200 +137,126 @@ const CreateMenu: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <div className="bg-red-600 text-white p-4 flex justify-between items-center">
-        <button onClick={() => navigate(-1)} className="text-white">
+    <div className="min-h-screen bg-orange-50 flex flex-col">
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center rounded-b-2xl shadow-md">
+        <button onClick={() => navigate(-1)} className="mr-3">
           <FaArrowLeft size={20} />
         </button>
-        <h1 className="text-xl font-bold">Create Menu</h1>
-        <div className="w-6"></div>
+        <h1 className="text-lg font-bold flex-1 text-center">Create Menu</h1>
       </div>
 
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 p-4 overflow-y-auto space-y-6">
         {error && (
-          <div className="bg-red-100 text-red-800 p-4 rounded-lg mb-4 max-w-xl mx-auto">
+          <div className="bg-red-100 text-red-800 p-3 rounded-lg text-sm shadow-sm">
             {error}
           </div>
         )}
 
-        {loading && <p className="text-center text-gray-700 mb-4">Loading...</p>}
+        {loading && (
+          <p className="text-center text-gray-700">Loading...</p>
+        )}
 
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Restaurants</h2>
+        {/* RESTAURANT SELECT */}
+        <div className="bg-white p-4 rounded-xl shadow-md">
+          <h2 className="text-lg font-semibold mb-3 text-gray-800">Select Restaurant</h2>
           {restaurantList.length > 0 ? (
-            <div className="mb-4">
-              <label className="block font-semibold text-gray-700 mb-2">Select Restaurant</label>
-              <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                value={selectedRestaurantId}
-                onChange={(e) => setSelectedRestaurantId(e.target.value)}
-              >
-                <option value="">Select a restaurant</option>
-                {restaurantList.map((restaurant) => (
-                  <option key={restaurant.restaurantid} value={restaurant.restaurantid}>
-                    {restaurant.restaurantname}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              value={selectedRestaurantId}
+              onChange={(e) => setSelectedRestaurantId(e.target.value)}
+            >
+              <option value="">Choose a restaurant</option>
+              {restaurantList.map((restaurant) => (
+                <option key={restaurant.restaurantid} value={restaurant.restaurantid}>
+                  {restaurant.restaurantname}
+                </option>
+              ))}
+            </select>
           ) : (
-            <p className="text-center text-gray-700">No restaurants found.</p>
+            <p className="text-gray-500 text-sm">No restaurants found.</p>
           )}
-
-          <button
-            onClick={handleSubmit}
-            className="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
-            disabled={!selectedRestaurantId || createMenuLoading}
-          >
-            {createMenuLoading ? "Creating..." : "Create Menu"}
-          </button>
         </div>
 
+        {/* MENU FORM */}
         {selectedRestaurantId && (
-          <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Menu Details</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Menu Name</label>
-                <input
-                  type="text"
-                  name="menuname"
-                  value={menuData.menuname}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-4 rounded-xl shadow-md space-y-4"
+          >
+            {[
+              { label: "Menu Name", name: "menuname", type: "text" },
+              { label: "Description", name: "menudescription", type: "textarea" },
+              { label: "Price", name: "menuprice", type: "text" },
+              { label: "Menu Type", name: "menutype", type: "text" },
+              { label: "Food Type", name: "foodtype", type: "text" },
+              { label: "Menu Item Type", name: "menuitemtype", type: "text" },
+              { label: "For how many people?", name: "servingtype", type: "text" },
+              { label: "Discount Percentage", name: "menudiscountpercent", type: "text" },
+              { label: "Food Weight (for rice items)", name: "foodweight", type: "text" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {field.label}
+                </label>
+                {field.type === "textarea" ? (
+                  <textarea
+                    name={field.name}
+                    value={(menuData as any)[field.name]}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                ) : (
+                  <input
+                    type={field.type}
+                    name={field.name}
+                    value={(menuData as any)[field.name]}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                )}
               </div>
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Description</label>
-                <textarea
-                  name="menudescription"
-                  value={menuData.menudescription}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
+            ))}
 
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Price</label>
-                <input
-                  type="text"
-                  name="menuprice"
-                  value={menuData.menuprice}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Menu Type</label>
-                <input
-                  type="text"
-                  name="menutype"
-                  value={menuData.menutype}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Food Type</label>
-                <input
-                  type="text"
-                  name="foodtype"
-                  value={menuData.foodtype}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Menu Item Type</label>
-                <input
-                  type="text"
-                  name="menuitemtype"
-                  value={menuData.menuitemtype}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">For how many people?</label>
-                <input
-                  type="text"
-                  name="servingtype"
-                  value={menuData.servingtype}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Discount Percentage</label>
-                <input
-                  type="text"
-                  name="menudiscountpercent"
-                  value={menuData.menudiscountpercent}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Food Weight (for rice items)</label>
-                <input
-                  type="text"
-                  name="foodweight"
-                  value={menuData.foodweight}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Veg or Non-Veg</label>
-                <select
-                  name="vegornonveg"
-                  value={menuData.vegornonveg}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                >
-                  <option value="">Select</option>
-                  <option value="veg">Veg</option>
-                  <option value="nonveg">Non-Veg</option>
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label className="block font-semibold text-gray-700 mb-1">Images (Minimum 3)</label>
-                <input
-                  type="file"
-                  name="images"
-                  multiple
-                  onChange={handleFileChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
-                disabled={createMenuLoading}
+            {/* Veg / Non-Veg */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Veg or Non-Veg
+              </label>
+              <select
+                name="vegornonveg"
+                value={menuData.vegornonveg}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
-                {createMenuLoading ? "Creating..." : "Create Menu"}
-              </button>
-            </form>
-          </div>
+                <option value="">Select</option>
+                <option value="veg">Veg</option>
+                <option value="nonveg">Non-Veg</option>
+              </select>
+            </div>
+
+            {/* Images */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Images (Minimum 3)
+              </label>
+              <input
+                type="file"
+                name="images"
+                multiple
+                onChange={handleFileChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-md hover:from-orange-600 hover:to-orange-700 transition-all"
+              disabled={createMenuLoading}
+            >
+              {createMenuLoading ? "Creating..." : "Create Menu"}
+            </button>
+          </form>
         )}
       </div>
     </div>
