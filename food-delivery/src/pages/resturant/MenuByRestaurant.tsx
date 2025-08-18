@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const GetMenuByOwnerId: React.FC = () => {
   const navigate = useNavigate();
@@ -116,7 +116,6 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("menuid", menuid);
     formData.append("currentstatus", "outofstock");
-
     formData.append("numberoffillups", "");
     try {
       const response = await fetch("https://backend.foodapp.transev.site/ops/fastfilling", {
@@ -167,7 +166,6 @@ const GetMenuByOwnerId: React.FC = () => {
       }
       const data = await response.json();
       setSuccessMessage(data.message || "Menu marked as in stock successfully");
-      // Update currentstatus in state.
       setMenuList((prev) =>
         prev.map((menu) =>
           menu.menuid === menuid ? { ...menu, currentstatus: "instock" } : menu
@@ -181,110 +179,127 @@ const GetMenuByOwnerId: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4">
-
-      <div className="bg-red-600 text-white p-4 flex justify-between items-center mb-4">
-        <button onClick={() => navigate(-1)} className="text-white">
+    <div className="bg-orange-50 min-h-screen flex flex-col">
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center rounded-b-2xl shadow-md">
+        <button onClick={() => navigate(-1)} className="mr-3">
           <FaArrowLeft size={20} />
         </button>
-        <h1 className="text-xl font-bold">Get Menus by Owner ID</h1>
+        <h1 className="text-lg font-bold flex-1 text-center">Manage Menus</h1>
         <div className="w-6"></div>
       </div>
 
-      {error && (
-        <div className="bg-red-100 text-red-800 p-3 rounded mb-3 max-w-xl mx-auto">
-          {error}
-        </div>
-      )}
-      {successMessage && (
-        <div className="bg-green-100 text-green-800 p-3 rounded mb-3 max-w-xl mx-auto">
-          {successMessage}
-        </div>
-      )}
-      {loading && <p className="text-center text-gray-700 mb-3">Loading...</p>}
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        {error && (
+          <div className="bg-red-100 text-red-700 p-3 rounded-xl mb-4 shadow-md">
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="bg-green-100 text-green-700 p-3 rounded-xl mb-4 shadow-md">
+            {successMessage}
+          </div>
+        )}
+        {loading && (
+          <div className="text-center text-gray-700 font-medium mb-4">Loading...</div>
+        )}
 
-      <div className="bg-white p-4 rounded shadow max-w-xl mx-auto mb-4">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">Restaurants</h2>
-        {restaurantList.length > 0 ? (
-          <div className="mb-3">
-            <label className="block font-medium text-gray-700 mb-2">Select Restaurant</label>
+        {/* RESTAURANT SELECTOR */}
+        <div className="bg-white p-4 rounded-xl shadow-md mb-4">
+          <h2 className="text-lg font-bold text-gray-800 mb-3">Select Restaurant</h2>
+          {restaurantList.length > 0 ? (
             <select
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500"
               value={selectedRestaurantId}
               onChange={(e) => setSelectedRestaurantId(e.target.value)}
             >
-              <option value="">Select a restaurant</option>
+              <option value="">-- Choose a restaurant --</option>
               {restaurantList.map((restaurant) => (
                 <option key={restaurant.restaurantid} value={restaurant.restaurantid}>
                   {restaurant.restaurantname}
                 </option>
               ))}
             </select>
-          </div>
-        ) : (
-          <p className="text-center text-gray-700">No restaurants found.</p>
-        )}
-        <button
-          onClick={fetchMenus}
-          className="w-full py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition-colors"
-          disabled={!selectedRestaurantId || loading}
-        >
-          {loading ? "Fetching..." : "Fetch Menus"}
-        </button>
-      </div>
+          ) : (
+            <p className="text-gray-600">No restaurants found.</p>
+          )}
+          <button
+            onClick={fetchMenus}
+            className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-md hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50"
+            disabled={!selectedRestaurantId || loading}
+          >
+            {loading ? "Fetching..." : "Fetch Menus"}
+          </button>
+        </div>
 
-      {menuList.length > 0 && (
-        <div className="bg-white p-4 rounded shadow max-w-xl mx-auto mt-4">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">Menu List</h2>
-          <div className="space-y-3">
+        {/* MENU LIST */}
+        {menuList.length > 0 && (
+          <div className="space-y-4">
             {menuList.map((menu) => {
               const currentStatus = menu.currentstatus || "instock";
               return (
                 <div
                   key={menu.menuid}
-                  className="p-3 border rounded flex flex-col sm:flex-row justify-between items-start"
+                  className="bg-white p-4 rounded-xl shadow-md space-y-2"
                 >
-                  <div className="mb-3 sm:mb-0">
-                    <h3 className="text-lg font-medium text-gray-900">{menu.menuname}</h3>
-                    <p className="text-gray-700">Description: {menu.menudescription}</p>
-                    <p className="text-gray-700">Price: {menu.menuprice}</p>
-                    <p className="text-gray-700">Type: {menu.menutype}</p>
-                    <p className="text-gray-700">Food Type: {menu.foodtype}</p>
-                    <p className="text-gray-700">Created At: {menu.created_at}</p>
-                    <p className="text-gray-700">
-                      Current Stock: <span className="font-semibold">{currentStatus}</span>
-                    </p>
-                  </div>
-                  <div className="flex flex-col space-y-2 w-full sm:w-auto">
+                  <h3 className="text-lg font-bold text-gray-800">{menu.menuname}</h3>
+                  <p className="text-gray-600">{menu.menudescription}</p>
+                  <p className="text-gray-700 font-medium">₹ {menu.menuprice}</p>
+                  <p className="text-sm text-gray-500">Type: {menu.menutype} | Food: {menu.foodtype}</p>
+                  <p className="text-sm text-gray-500">
+                    Created: {new Date(menu.created_at).toLocaleDateString()}
+                  </p>
+                  <p className="font-semibold text-gray-700">
+                    Stock:{" "}
+                    <span
+                      className={`${
+                        currentStatus === "instock"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {currentStatus}
+                    </span>
+                  </p>
+
+                  {/* ACTION BUTTONS */}
+                  <div className="flex flex-wrap gap-2 pt-2">
                     <button
                       onClick={() => deleteMenu(menu.menuid)}
-                      className="w-full sm:w-auto px-3 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700 transition-colors"
+                      className="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-medium flex items-center justify-center hover:from-red-600 hover:to-red-700 transition-all"
                     >
-                      Delete
+                      <FaTrash className="mr-2" /> Delete
                     </button>
-                    <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-                      <button
-                        onClick={() => markInStock(menu.menuid)}
-                        className="w-full sm:w-auto px-3 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition-colors"
-                        disabled={currentStatus === "instock"}
-                      >
-                        Set In Stock
-                      </button>
-                      <button
-                        onClick={() => markOutOfStock(menu.menuid)}
-                        className="w-full sm:w-auto px-3 py-2 bg-gray-800 text-white font-semibold rounded hover:bg-gray-900 transition-colors"
-                        disabled={currentStatus === "outofstock"}
-                      >
-                        Set Out of Stock
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => markInStock(menu.menuid)}
+                      disabled={currentStatus === "instock"}
+                      className={`flex-1 sm:flex-none px-3 py-2 rounded-xl text-white font-medium flex items-center justify-center transition-all ${
+                        currentStatus === "instock"
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                      }`}
+                    >
+                      <FaCheckCircle className="mr-2" /> In Stock
+                    </button>
+                    <button
+                      onClick={() => markOutOfStock(menu.menuid)}
+                      disabled={currentStatus === "outofstock"}
+                      className={`flex-1 sm:flex-none px-3 py-2 rounded-xl text-white font-medium flex items-center justify-center transition-all ${
+                        currentStatus === "outofstock"
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900"
+                      }`}
+                    >
+                      <FaTimesCircle className="mr-2" /> Out of Stock
+                    </button>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

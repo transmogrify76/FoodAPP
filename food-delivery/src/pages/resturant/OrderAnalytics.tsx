@@ -33,10 +33,13 @@ const AnalyticsByOwnerId: React.FC = () => {
     formData.append("ownerid", owenerid);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/owenerresturentfetch", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://backend.foodapp.transev.site/owenerresturentfetch",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -48,7 +51,9 @@ const AnalyticsByOwnerId: React.FC = () => {
       const data = await response.json();
       setRestaurantList(data.data || []);
     } catch (err) {
-      setError("Something went wrong while fetching restaurants. Please try again later.");
+      setError(
+        "Something went wrong while fetching restaurants. Please try again later."
+      );
     } finally {
       setLoading(false);
     }
@@ -64,10 +69,13 @@ const AnalyticsByOwnerId: React.FC = () => {
     formData.append("restaurantid", selectedRestaurantId);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/ops/orderanalytics", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://backend.foodapp.transev.site/ops/orderanalytics",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -79,77 +87,102 @@ const AnalyticsByOwnerId: React.FC = () => {
       const data = await response.json();
       setAnalyticsData(data);
     } catch (err) {
-      setError("Something went wrong while fetching analytics. Please try again later.");
+      setError(
+        "Something went wrong while fetching analytics. Please try again later."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
-
-      <div className="bg-red-600 text-white p-4 flex justify-between items-center">
-        <button onClick={() => navigate(-1)} className="text-white">
+    <div className="bg-orange-50 min-h-screen flex flex-col">
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center rounded-b-2xl shadow-md">
+        <button onClick={() => navigate(-1)} className="mr-3">
           <FaArrowLeft size={20} />
         </button>
-        <h1 className="text-xl font-bold">Analytics by Owner ID</h1>
-        <div className="w-6"></div>
+        <h1 className="text-lg font-bold flex-1 text-center">
+          Analytics Dashboard
+        </h1>
+        <div className="w-8"></div>
       </div>
 
+      {/* CONTENT */}
       <div className="p-4 flex-1 overflow-y-auto">
         {error && (
-          <div className="bg-red-100 text-red-800 p-4 rounded-lg mb-4 max-w-xl mx-auto">
+          <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-lg mb-4 max-w-xl mx-auto">
             {error}
           </div>
         )}
         {successMessage && (
-          <div className="bg-green-100 text-green-800 p-4 rounded-lg mb-4 max-w-xl mx-auto">
+          <div className="bg-green-100 border border-green-400 text-green-700 p-3 rounded-lg mb-4 max-w-xl mx-auto">
             {successMessage}
           </div>
         )}
-        {loading && <p className="text-center text-gray-700 mb-4">Loading...</p>}
+        {loading && (
+          <p className="text-center text-gray-700 font-medium mb-4">
+            Loading...
+          </p>
+        )}
 
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Restaurants</h2>
+        {/* Restaurant Selection */}
+        <div className="bg-white p-6 rounded-2xl shadow-md max-w-xl mx-auto">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Select Restaurant
+          </h2>
           {restaurantList.length > 0 ? (
             <div className="mb-4">
-              <label className="block font-semibold text-gray-700 mb-2">Select Restaurant</label>
               <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400"
                 value={selectedRestaurantId}
                 onChange={(e) => setSelectedRestaurantId(e.target.value)}
               >
-                <option value="">Select a restaurant</option>
+                <option value="">-- Choose a restaurant --</option>
                 {restaurantList.map((restaurant) => (
-                  <option key={restaurant.restaurantid} value={restaurant.restaurantid}>
+                  <option
+                    key={restaurant.restaurantid}
+                    value={restaurant.restaurantid}
+                  >
                     {restaurant.restaurantname}
                   </option>
                 ))}
               </select>
             </div>
           ) : (
-            <p className="text-center text-gray-700">No restaurants found.</p>
+            <p className="text-center text-gray-500">
+              No restaurants found for this owner.
+            </p>
           )}
 
           <button
             onClick={fetchAnalytics}
-            className="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-md hover:from-orange-600 hover:to-orange-700 transition-all"
             disabled={!selectedRestaurantId || loading}
           >
             {loading ? "Fetching Analytics..." : "Fetch Analytics"}
           </button>
         </div>
 
+        {/* Analytics Data */}
         {analyticsData && (
-          <div className="bg-white p-6 rounded-lg shadow-md mt-6 max-w-xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Analytics</h2>
-            <div className="space-y-4">
-              <p className="text-gray-700">
-                <strong>Total Orders:</strong> {analyticsData.total_orders}
-              </p>
-              <p className="text-gray-700">
-                <strong>Total Revenue:</strong> ₹{analyticsData.total_revenue.toFixed(2)}
-              </p>
+          <div className="bg-white p-6 rounded-2xl shadow-md mt-6 max-w-xl mx-auto">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Analytics Report
+            </h2>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="bg-orange-50 p-4 rounded-xl shadow-inner">
+                <p className="text-gray-600 text-sm">Total Orders</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {analyticsData.total_orders}
+                </p>
+              </div>
+              <div className="bg-orange-50 p-4 rounded-xl shadow-inner">
+                <p className="text-gray-600 text-sm">Total Revenue</p>
+                <p className="text-2xl font-bold text-green-600">
+                  ₹{analyticsData.total_revenue.toFixed(2)}
+                </p>
+              </div>
             </div>
           </div>
         )}
