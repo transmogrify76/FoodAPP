@@ -132,7 +132,7 @@ const AnalyticsByOwnerId: React.FC = () => {
             Select Restaurant
           </h2>
           {restaurantList.length > 0 ? (
-            <div className="mb-4">
+            <div className="mb-4"> 
               <select
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400"
                 value={selectedRestaurantId}

@@ -178,7 +178,7 @@ const CreateMenu: React.FC = () => {
           )}
         </div>
 
-        {/* MENU FORM */}
+       
         {selectedRestaurantId && (
           <form
             onSubmit={handleSubmit}
@@ -218,7 +218,7 @@ const CreateMenu: React.FC = () => {
               </div>
             ))}
 
-            {/* Veg / Non-Veg */}
+      
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Veg or Non-Veg

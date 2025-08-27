@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
 
 const badgeClasses: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200',
@@ -23,6 +24,22 @@ const RestaurantOrders: React.FC = () => {
   const [selectedRiderId, setSelectedRiderId] = useState<string>('');
   const [loadingRiders, setLoadingRiders] = useState(false);
   const [assigningRider, setAssigningRider] = useState(false);
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    // Initialize Socket.IO connection
+    const newSocket = io('https://backend.foodapp.transev.site');
+    setSocket(newSocket);
+
+    // Listen for messages from the server
+    newSocket.on('message', (data: any) => {
+      setMessage(data.message);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const storedRestaurantToken = localStorage.getItem('restaurant_token');
@@ -116,32 +133,29 @@ const RestaurantOrders: React.FC = () => {
   };
 
   const handlePreparationStatus = async (orderId: string, status: 'startedpreparing' | 'inprogress' | 'dispatch') => {
+    if (!socket) {
+      setMessage('Socket connection not established');
+      return;
+    }
+
     try {
-      const formData = new FormData();
-      formData.append('orderid', orderId);
-      formData.append('tempstatus', status);
-      formData.append('restaurantid', restaurantId);
-      formData.append('userid', ownerId);
+      const data = {
+        orderid: orderId,
+        restaurantid: restaurantId,
+        tempstatus: status,
+        preptime: status === 'inprogress' ? prompt('Enter preparation time (in minutes):') || '' : ''
+      };
 
-      if (status === 'inprogress') {
-        const preptime = prompt('Enter preparation time (in minutes):');
-        if (!preptime) {
-          setMessage('Preparation time is required for "inprogress" status.');
-          return;
-        }
-        formData.append('preptime', preptime);
-      }
+      // Emit the status change via WebSocket
+      socket.emit('temporderstatus', data);
 
-      const response = await axios.post('https://backend.foodapp.transev.site/tmporderstatus', formData);
+      // Optimistically update the UI
+      setOrders((prev) =>
+        prev.map((order) => (order.uid === orderId ? { ...order, tempstatus: status } : order))
+      );
+      
+      setMessage(`Order #${orderId} status update requested to '${status}'.`);
 
-      if (response.status === 200) {
-        setMessage(`Order #${orderId} status updated to '${status}'.`);
-        setOrders((prev) =>
-          prev.map((order) => (order.uid === orderId ? { ...order, tempstatus: status } : order))
-        );
-      } else {
-        setMessage('Failed to update preparation status.');
-      }
     } catch (error) {
       console.error('Error updating preparation status:', error);
       setMessage('Error updating preparation status.');

@@ -4,7 +4,7 @@ import {
   FaListAlt,
   FaUtensils,
   FaCog,
-  FaChartBar,
+  FaChartBar,  
   FaPlus,
   FaUserCircle,
 } from "react-icons/fa";
@@ -19,7 +19,7 @@ const RestaurantDashboard: React.FC = () => {
 
   return (
     <div className="bg-orange-50 min-h-screen flex flex-col">
-      {/* Top Header */}
+
       <div className="bg-orange-500 text-white px-5 py-4 flex justify-between items-center rounded-b-3xl shadow-md">
         <div>
           <h2 className="text-lg font-semibold">Welcome Back</h2>
@@ -28,7 +28,7 @@ const RestaurantDashboard: React.FC = () => {
         <FaUserCircle size={32} className="cursor-pointer" />
       </div>
 
-      {/* Quick Actions */}
+     
       <div className="px-5 mt-4 grid grid-cols-2 gap-4">
         <QuickAction
           icon={<FaPlus />}
@@ -44,7 +44,6 @@ const RestaurantDashboard: React.FC = () => {
         />
       </div>
 
-      {/* Dashboard Tiles */}
       <div className="px-5 mt-6 grid grid-cols-2 gap-4 flex-1 overflow-y-auto pb-20">
         <DashboardTile
           icon={<FaHome />}
@@ -73,7 +72,6 @@ const RestaurantDashboard: React.FC = () => {
         />
       </div>
 
-      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center py-3 shadow-lg">
         <NavItem icon={<FaHome />} label="Home" active onClick={() => navigateTo("/restaurant-dashboard")} />
         <NavItem icon={<FaListAlt />} label="Orders" onClick={() => navigateTo("/restaurant-orders")} />
@@ -113,5 +111,5 @@ const NavItem = ({ icon, label, active, onClick }: any) => (
     <p className="text-xs mt-1">{label}</p>
   </div>
 );
-
-export default RestaurantDashboard;
+ 
+export default RestaurantDashboard;   

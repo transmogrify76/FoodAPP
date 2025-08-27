@@ -61,7 +61,6 @@ const SettingsPage: React.FC = () => {
           />
         </div>
 
-        {/* Preferences Section */}
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Preferences</h2>
 
@@ -88,7 +87,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Actions */}
+        
         <button
           onClick={handleSave}
           className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl shadow-md hover:from-orange-600 hover:to-orange-700 transition"
@@ -106,4 +105,5 @@ const SettingsPage: React.FC = () => {
   );
 };
 
-export default SettingsPage;
+export default SettingsPage
+ 

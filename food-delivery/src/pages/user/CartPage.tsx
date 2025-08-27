@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import { 
-  FaShoppingBag, 
-  FaTruck, 
-  FaMapMarkerAlt, 
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import io from "socket.io-client";
+import {
+  FaShoppingBag,
+  FaTruck,
+  FaMapMarkerAlt,
   FaCrosshairs,
   FaEdit,
   FaPlus,
@@ -16,10 +17,28 @@ import {
   FaHome,
   FaUserAlt,
   FaHistory,
-  FaShoppingCart
-} from 'react-icons/fa';
-import { AiOutlineClose } from 'react-icons/ai';
-
+  FaShoppingCart,
+} from "react-icons/fa";
+import { AiOutlineClose } from "react-icons/ai";
+ 
+// ✅ Initialize socket connection
+const socket = io("https://backend.foodapp.transev.site", {
+  // let engine.io start with polling and upgrade when possible
+  transports: ["polling", "websocket"],
+  upgrade: true,              // default true; keep it
+  rememberUpgrade: true,      // reuse WS on subsequent connects if it worked once
+  path: "/socket.io",         // default, but set explicitly if your BE changed it
+  withCredentials: true,      // if server uses cookies / auth
+  reconnection: true,
+  reconnectionAttempts: 5,
+  timeout: 10000,
+});
+ 
+// handy logs
+socket.on("connect_error", (err) => console.warn("connect_error", err.message));
+socket.on("reconnect_attempt", (n) => console.log("reconnect attempt", n));
+ 
+ 
 interface MenuDetails {
   created_at: string;
   final_price: string;
@@ -39,7 +58,7 @@ interface MenuDetails {
   uid: string;
   vegornonveg: string;
 }
-
+ 
 interface CartItem {
   created_at: string;
   menu_details: MenuDetails;
@@ -51,25 +70,27 @@ interface CartItem {
   usercartid: string;
   userid: string;
 }
-
+ 
 const CartPage: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-  const [deliveryOption, setDeliveryOption] = useState<'takeaway' | 'delivery'>('takeaway');
-  const [deliveryLocation, setDeliveryLocation] = useState<{ 
-    address: string; 
-    coordinates?: { lat: number; lng: number } 
-  }>({ address: '' });
+  const [deliveryOption, setDeliveryOption] = useState<"takeaway" | "delivery">(
+    "takeaway"
+  );
+  const [deliveryLocation, setDeliveryLocation] = useState<{
+    address: string;
+    coordinates?: { lat: number; lng: number };
+  }>({ address: "" });
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+ 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
+ 
   // Calculate total price
   useEffect(() => {
     const total = cart.reduce((sum, item) => {
@@ -77,53 +98,53 @@ const CartPage: React.FC = () => {
     }, 0);
     setTotalPrice(total);
   }, [cart]);
-
+ 
   const getUserIdFromToken = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       const decoded: any = jwtDecode(token);
       return decoded?.userid;
     }
     return null;
   };
-
+ 
   const getusercartidFromToken = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       const decoded: any = jwtDecode(token);
       return decoded?.usercartid;
     }
     return null;
   };
-
+ 
   // New function to fetch cart items
   const fetchCartItems = async () => {
     const userid = getUserIdFromToken();
     const usercartid = getusercartidFromToken();
-    
+ 
     if (!userid && !usercartid) return;
-
+ 
     try {
       setLoading(true);
       const formData = new FormData();
-      if (userid) formData.append('userid', userid);
-      if (usercartid) formData.append('usercartid', usercartid);
-
+      if (userid) formData.append("userid", userid);
+      if (usercartid) formData.append("usercartid", usercartid);
+ 
       const response = await axios.post(
-        'https://backend.foodapp.transev.site/cart/getcartbyuserid',
+        "https://backend.foodapp.transev.site/cart/getcartbyuserid",
         formData
       );
-
+ 
       if (response.data && response.data.cart_items) {
         setCart(response.data.cart_items);
       }
     } catch (error) {
-      console.error('Error fetching cart items:', error);
+      console.error("Error fetching cart items:", error);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   // Call fetchCartItems when component mounts
   useEffect(() => {
     if (state?.cart && state.cart.length > 0) {
@@ -131,51 +152,57 @@ const CartPage: React.FC = () => {
       const formattedCart = state.cart.map((item: any) => ({
         ...item,
         quantity: item.quantity.toString(),
-        total_price: ((item.menudiscountprice || parseFloat(item.menuprice)) * item.quantity).toString()
+        total_price: (
+          (item.menudiscountprice || parseFloat(item.menuprice)) *
+          item.quantity
+        ).toString(),
       }));
       setCart(formattedCart);
     } else {
       fetchCartItems();
     }
   }, []);
-
-  const handleLocationSelection = async (type: 'current' | 'manual') => {
-    if (type === 'current') {
+ 
+  const handleLocationSelection = async (type: "current" | "manual") => {
+    if (type === "current") {
       try {
-        navigator.geolocation.getCurrentPosition(    
+        navigator.geolocation.getCurrentPosition(
           (position) => {
             setDeliveryLocation({
-              address: 'Current Location',
+              address: "Current Location",
               coordinates: {
                 lat: position.coords.latitude,
-                lng: position.coords.longitude
-              }
+                lng: position.coords.longitude,
+              },
             });
             setShowLocationInput(false);
           },
           (error) => {
-            console.error('Error getting location:', error);
-            alert('Unable to retrieve your location. Please enable location services.');
+            console.error("Error getting location:", error);
+            alert(
+              "Unable to retrieve your location. Please enable location services."
+            );
           }
         );
       } catch (error) {
-        console.error('Geolocation error:', error);
+        console.error("Geolocation error:", error);
       }
     } else {
       setShowLocationInput(true);
     }
   };
-
-  const handleQuantityChange = async (item: CartItem, action: 'inc' | 'dec') => {
+ 
+  const handleQuantityChange = async (item: CartItem, action: "inc" | "dec") => {
     const usercartid = getusercartidFromToken();
     if (!usercartid) return;
-
+ 
     try {
       setLoading(true);
-      const endpoint = action === 'inc' 
-        ? 'https://backend.foodapp.transev.site/cart/incquantity' 
-        : 'https://backend.foodapp.transev.site/cart/decquantity';
-
+      const endpoint =
+        action === "inc"
+          ? "https://backend.foodapp.transev.site/cart/incquantity"
+          : "https://backend.foodapp.transev.site/cart/decquantity";
+ 
       const response = await axios.post(
         endpoint,
         new URLSearchParams({
@@ -183,69 +210,104 @@ const CartPage: React.FC = () => {
           menuid: item.menuid,
         })
       );
-
+ 
       if (response.status === 200) {
-        if (action === 'dec' && response.data.new_quantity === undefined) {
-          setCart(prev => prev.filter(i => i.menuid !== item.menuid));
+        if (action === "dec" && response.data.new_quantity === undefined) {
+          setCart((prev) => prev.filter((i) => i.menuid !== item.menuid));
         } else {
           // Update the cart with the new quantity and recalculate total price
-          setCart(prev =>
-            prev.map(i =>
-              i.menuid === item.menuid 
-                ? { 
-                    ...i, 
+          setCart((prev) =>
+            prev.map((i) =>
+              i.menuid === item.menuid
+                ? {
+                    ...i,
                     quantity: response.data.new_quantity.toString(),
-                    total_price: (parseFloat(i.menu_details.menudiscountprice || i.menu_details.menuprice) * response.data.new_quantity).toString()
-                  } 
+                    total_price: (
+                      parseFloat(
+                        i.menu_details.menudiscountprice ||
+                          i.menu_details.menuprice
+                      ) * response.data.new_quantity
+                    ).toString(),
+                  }
                 : i
             )
           );
         }
       }
     } catch (error) {
-      console.error('Error updating quantity:', error);
+      console.error("Error updating quantity:", error);
     } finally {
       setLoading(false);
     }
   };
-
+ 
+  // ✅ Updated with backend's generic "message" reply
   const handleCheckout = async () => {
-    if (deliveryOption === 'delivery' && !deliveryLocation.address) {
-      alert('Please select a delivery location');
-      return;
-    }
+  if (deliveryOption === "delivery" && !deliveryLocation.address) {
+    alert("Please select a delivery location");
+    return;
+  }
 
-    const userId = getUserIdFromToken();
-    const usercartid = getusercartidFromToken();
-    if (!userId || !usercartid) return;
+  const userId = getUserIdFromToken();
+  const usercartid = getusercartidFromToken();
+  if (!userId || !usercartid) return;
 
-    try {
-      setLoading(true);
-      const orderData = new URLSearchParams();
-      orderData.append('usercartid', usercartid);
+  try {
+    setLoading(true);
 
-      const response = await axios.post(
-        'https://backend.foodapp.transev.site/order/createorder', 
-        orderData
-      );
-
-      if (response.status === 200) {
-        navigate('/payment', { 
-          state: { 
-            cart, 
-            totalPrice,
-            deliveryOption,
-            deliveryLocation 
-          } 
-        });
-      }
-    } catch (error) {
-      console.error('Error creating order:', error);
-    } finally {
+    // 🔁 listen ONCE for the backend's "message" response
+    const onReply = (response: any) => {
+      socket.off("message", onReply);
       setLoading(false);
-    }
-  };
 
+      if (response?.error) {
+        console.error("Order creation failed:", response.error);
+        alert(response.error);
+        return;
+      }
+
+      console.log("Order created successfully:", response);
+      navigate("/payment", {
+        state: {
+          cart,
+          totalPrice,
+          deliveryOption,
+          deliveryLocation,
+        },
+      });
+    };
+
+    socket.once("message", onReply);
+
+    // ✅ Emit the request on the event the server listens to
+    // ADDED userid to the payload as requested
+    socket.emit("createorder", {
+      usercartid,
+      userid: userId, // Added userid to the payload
+      temporarylocation:
+        deliveryOption === "delivery"
+          ? deliveryLocation.address ||
+            (deliveryLocation.coordinates
+              ? `${deliveryLocation.coordinates.lat},${deliveryLocation.coordinates.lng}`
+              : "delivery")
+          : "takeaway",
+    });
+
+    // Timeout for safety
+    setTimeout(() => {
+      const stillListening = socket.hasListeners?.("message");
+      if (stillListening) {
+        socket.off("message", onReply);
+        setLoading(false);
+        alert("Order creation timed out. Please try again.");
+      }
+    }, 15000);
+  } catch (error) {
+    console.error("Error creating order:", error);
+    setLoading(false);
+  }
+};
+ 
   return (
     <div className="min-h-screen bg-orange-50 pb-24">
       {/* Sidebar */}
@@ -256,9 +318,9 @@ const CartPage: React.FC = () => {
       >
         <div className="flex justify-between items-center p-4 bg-orange-500 text-white">
           <div className="flex items-center">
-            <img 
-              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-              alt="Logo" 
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+              alt="Logo"
               className="w-8 h-8 mr-2"
             />
             <h3 className="text-lg font-bold">Foodie Heaven</h3>
@@ -299,15 +361,15 @@ const CartPage: React.FC = () => {
           </ul>
         </div>
       </div>
-      
+     
       {/* Overlay */}
       {isSidebarOpen && (
-        <div 
-          onClick={toggleSidebar} 
+        <div
+          onClick={toggleSidebar}
           className="fixed inset-0 bg-black opacity-50 z-40"
         ></div>
       )}
-
+ 
       {/* Header */}
       <div className="bg-orange-500 text-white p-4 sticky top-0 z-30 shadow-md">
         <div className="flex justify-between items-center">
@@ -315,9 +377,9 @@ const CartPage: React.FC = () => {
             <FaArrowLeft />
           </button>
           <div className="flex items-center">
-            <img 
-              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-              alt="Logo" 
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+              alt="Logo"
               className="w-6 h-6 mr-2"
             />
             <h1 className="text-lg font-bold">Your Cart</h1>
@@ -325,14 +387,14 @@ const CartPage: React.FC = () => {
           <div className="w-6"></div>
         </div>
       </div>
-
+ 
       {/* Delivery Options */}
       <div className="p-4 bg-white border-b border-gray-100">
         <div className="flex gap-3 mb-4">
           <button
             onClick={() => setDeliveryOption('takeaway')}
             className={`flex-1 p-3 rounded-lg flex flex-col items-center justify-center gap-1 ${
-              deliveryOption === 'takeaway' 
+              deliveryOption === 'takeaway'
                 ? 'bg-orange-100 border border-orange-300 text-orange-700'
                 : 'bg-gray-50 border border-gray-200 text-gray-700'
             }`}
@@ -340,11 +402,11 @@ const CartPage: React.FC = () => {
             <FaShoppingBag className="text-xl" />
             <span className="text-sm font-medium">Takeaway</span>
           </button>
-          
+         
           <button
             onClick={() => setDeliveryOption('delivery')}
             className={`flex-1 p-3 rounded-lg flex flex-col items-center justify-center gap-1 ${
-              deliveryOption === 'delivery' 
+              deliveryOption === 'delivery'
                 ? 'bg-orange-100 border border-orange-300 text-orange-700'
                 : 'bg-gray-50 border border-gray-200 text-gray-700'
             }`}
@@ -353,7 +415,7 @@ const CartPage: React.FC = () => {
             <span className="text-sm font-medium">Delivery</span>
           </button>
         </div>
-
+ 
         {deliveryOption === 'delivery' && (
           <div className="space-y-3">
             {!deliveryLocation.address ? (
@@ -390,7 +452,7 @@ const CartPage: React.FC = () => {
                 </button>
               </div>
             )}
-
+ 
             {showLocationInput && (
               <div className="relative">
                 <FaMapMarkerAlt className="absolute left-3 top-3 text-gray-500" />
@@ -406,8 +468,8 @@ const CartPage: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Cart Items */}
+ 
+   
       <div className="p-4">
         {cart.length === 0 ? (
           <div className="text-center py-10">
@@ -420,7 +482,7 @@ const CartPage: React.FC = () => {
               onClick={() => navigate('/home')}
               className="mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600"
             >
-              Browse Menu 
+              Browse Menu
             </button>
           </div>
         ) : (
@@ -438,7 +500,7 @@ const CartPage: React.FC = () => {
                       )}
                     </div>
                     <p className="text-xs text-gray-600 mt-1 line-clamp-2">{item.menu_details.menudescription}</p>
-                    
+                   
                     <div className="mt-2">
                       {item.menu_details.menudiscountprice ? (
                         <div className="flex items-baseline gap-1">
@@ -450,7 +512,7 @@ const CartPage: React.FC = () => {
                       )}
                     </div>
                   </div>
-
+ 
                   <div className="flex items-center bg-orange-50 rounded-lg border border-orange-100">
                     <button
                       onClick={() => handleQuantityChange(item, 'dec')}
@@ -474,39 +536,39 @@ const CartPage: React.FC = () => {
           </div>
         )}
       </div>
-
-    
+ 
+   
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
-        <button 
+        <button
           onClick={() => navigate('/home')}
           className="text-gray-500 flex flex-col items-center"
         >
           <FaHome className="text-lg" />
           <span className="text-xs mt-1">Home</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/history')}
           className="text-gray-500 flex flex-col items-center"
         >
           <FaHistory className="text-lg" />
           <span className="text-xs mt-1">Orders</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/cart')}
           className="text-orange-500 flex flex-col items-center"
         >
           <FaShoppingCart className="text-lg" />
           <span className="text-xs mt-1">Cart ({cart.reduce((total, item) => total + parseInt(item.quantity), 0)})</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/profile')}
           className="text-gray-500 flex flex-col items-center"
         >
           <FaUserAlt className="text-lg" />
           <span className="text-xs mt-1">Profile</span>
-        </button>
+        </button>  
       </div>
-
+ 
      
       {cart.length > 0 && (
         <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
@@ -528,5 +590,5 @@ const CartPage: React.FC = () => {
     </div>
   );
 };
-
+ 
 export default CartPage;
