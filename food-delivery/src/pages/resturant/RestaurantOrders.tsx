@@ -27,11 +27,9 @@ const RestaurantOrders: React.FC = () => {
   const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
-    // Initialize Socket.IO connection
     const newSocket = io('https://backend.foodapp.transev.site');
     setSocket(newSocket);
 
-    // Listen for messages from the server
     newSocket.on('message', (data: any) => {
       setMessage(data.message);
     });
@@ -146,16 +144,13 @@ const RestaurantOrders: React.FC = () => {
         preptime: status === 'inprogress' ? prompt('Enter preparation time (in minutes):') || '' : ''
       };
 
-      // Emit the status change via WebSocket
       socket.emit('temporderstatus', data);
 
-      // Optimistically update the UI
       setOrders((prev) =>
         prev.map((order) => (order.uid === orderId ? { ...order, tempstatus: status } : order))
       );
       
       setMessage(`Order #${orderId} status update requested to '${status}'.`);
-
     } catch (error) {
       console.error('Error updating preparation status:', error);
       setMessage('Error updating preparation status.');
@@ -228,147 +223,116 @@ const RestaurantOrders: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 via-white to-orange-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-orange-50 via-white to-orange-100">
       {/* Top Bar */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center rounded-b-2xl shadow-md">
-        <button onClick={() => navigate(-1)} className="mr-3">
-          <FaArrowLeft size={20} />
+      <div className="sticky top-0 z-20 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center shadow-lg">
+        <button onClick={() => navigate(-1)} className="mr-3 rounded-full bg-white/20 p-2">
+          <FaArrowLeft size={18} />
         </button>
-        <h1 className="text-lg font-bold flex-1 text-center">Restaurant Orders</h1>
+        <h1 className="text-lg font-bold flex-1 text-center">Orders</h1>
         <div className="w-8"></div>
       </div>
 
       {/* Content */}
       <div className="flex-1 w-full">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          {/* Message / Toast */}
+          {/* Toast */}
           {message && (
-            <div className="mb-4">
-              <div className="rounded-xl border border-orange-200 bg-orange-50 text-orange-800 px-4 py-3 shadow-sm">
+            <div className="mb-4 animate-fadeIn">
+              <div className="rounded-xl border border-orange-300 bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 px-4 py-3 shadow-md">
                 {message}
               </div>
             </div>
           )}
 
-          {/* Orders List */}
+          {/* Orders */}
           {orders.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {orders.map((order) => (
                 <div
                   key={order.uid}
-                  className="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100"
+                  className="relative overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-100"
                 >
-                  {/* Accent strip */}
+                  {/* Accent bar */}
                   <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-orange-500 to-orange-600" />
 
-                  <div className="p-4 sm:p-5">
-                    {/* Header row */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="p-5">
+                    {/* Header */}
+                    <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
                         <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 ring-1 ring-orange-100">
                           <FaShoppingCart className="text-orange-600" />
                         </div>
                         <div>
-                          <h2 className="text-base sm:text-lg font-semibold text-gray-800">
+                          <h2 className="text-base font-semibold text-gray-800">
                             {order.items[0]?.menu?.menuname || 'N/A'}
                           </h2>
-                          <p className="text-xs text-gray-500">
-                            #{order.uid}
-                          </p>
+                          <p className="text-xs text-gray-500">#{order.uid}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${getBadgeClass(
-                            order.orderstatus
-                          )}`}
-                        >
-                          {order.orderstatus || 'N/A'}
-                        </span>
-                      </div>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getBadgeClass(
+                          order.orderstatus
+                        )}`}
+                      >
+                        {order.orderstatus || 'N/A'}
+                      </span>
                     </div>
 
-                    {/* Details grid */}
-                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
-                        <p className="text-xs text-gray-500">Description</p>
-                        <p className="text-sm text-gray-800 line-clamp-2">
-                          {order.items[0]?.menu?.menudescription || 'N/A'}
-                        </p>
-                      </div>
-
+                    {/* Details */}
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
                         <p className="text-xs text-gray-500">Quantity</p>
-                        <p className="text-sm font-medium text-gray-900">
-                          {order.items[0]?.quantity || 0}
-                        </p>
+                        <p className="font-medium">{order.items[0]?.quantity || 0}</p>
                       </div>
-
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
-                        <p className="text-xs text-gray-500">Total Price</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          ₹{order.totalprice || 0}
-                        </p>
+                        <p className="text-xs text-gray-500">Total</p>
+                        <p className="font-semibold text-green-600">₹{order.totalprice || 0}</p>
                       </div>
-
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
-                        <p className="text-xs text-gray-500">Contact</p>
-                        <p className="text-sm text-gray-800">{order.usercontact}</p>
-                      </div>
-
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100 sm:col-span-2">
+                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100 col-span-2">
                         <p className="text-xs text-gray-500">Address</p>
-                        <p className="text-sm text-gray-800">{order.useraddress}</p>
+                        <p className="text-gray-800">{order.useraddress}</p>
                       </div>
-
+                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100 col-span-2">
+                        <p className="text-xs text-gray-500">Contact</p>
+                        <p className="text-gray-800">{order.usercontact}</p>
+                      </div>
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
-                        <p className="text-xs text-gray-500">Order Time</p>
-                        <p className="text-sm text-gray-800">
-                          {new Date(order.created_at).toLocaleString()}
-                        </p>
+                        <p className="text-xs text-gray-500">Ordered On</p>
+                        <p className="text-gray-800" >{new Date(order.created_at).toLocaleString()}</p>
                       </div>
                     </div>
 
                     {/* Accept / Reject */}
-                    <div className="mt-4 flex flex-col sm:flex-row sm:justify-end gap-2">
-                      <button
-                        onClick={() => handleOrderAction(order.uid, 'accept')}
-                        className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition
-                          ${
-                            order.orderstatus !== 'pending'
-                              ? 'bg-green-100 text-green-800 cursor-not-allowed opacity-60'
-                              : 'bg-green-600 text-white hover:brightness-110'
-                          }`}
-                        disabled={order.orderstatus !== 'pending'}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => handleOrderAction(order.uid, 'reject')}
-                        className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition
-                          ${
-                            order.orderstatus !== 'pending'
-                              ? 'bg-red-100 text-red-800 cursor-not-allowed opacity-60'
-                              : 'bg-red-600 text-white hover:brightness-110'
-                          }`}
-                        disabled={order.orderstatus !== 'pending'}
-                      >
-                        Reject
-                      </button>
-                    </div>
+                    {order.orderstatus === 'pending' && (
+                      <div className="mt-5 flex gap-3">
+                        <button
+                          onClick={() => handleOrderAction(order.uid, 'accept')}
+                          className="flex-1 rounded-full bg-green-600 text-white px-4 py-2 text-sm font-medium shadow hover:brightness-110 transition"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleOrderAction(order.uid, 'reject')}
+                          className="flex-1 rounded-full bg-red-600 text-white px-4 py-2 text-sm font-medium shadow hover:brightness-110 transition"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
 
-                    {/* Accepted flow */}
+                    {/* After Accept */}
                     {order.orderstatus === 'accepted' && (
-                      <>
-                        {/* Delivery options */}
-                        <div className="mt-5 rounded-2xl bg-gradient-to-br from-orange-50 to-white p-4 ring-1 ring-orange-100">
+                      <div className="mt-6 space-y-5">
+                        {/* Delivery Options */}
+                        <div className="rounded-2xl bg-gradient-to-br from-orange-50 to-white p-4 ring-1 ring-orange-100">
                           <h3 className="text-sm font-semibold text-gray-800 mb-3">Delivery Method</h3>
-                          <div className="flex flex-col sm:flex-row gap-2">
+                          <div className="flex gap-3">
                             {order.assignedRaider ? (
                               <div className="flex-1 rounded-xl bg-green-50 ring-1 ring-green-100 p-3">
                                 <p className="text-sm text-green-800">
-                                  Rider Assigned:&nbsp;
+                                  Rider:&nbsp;
                                   <span className="font-semibold">
                                     {order.assignedRaider.raiderfullname}
                                   </span>
@@ -378,10 +342,10 @@ const RestaurantOrders: React.FC = () => {
                               <>
                                 <button
                                   onClick={() => handleDeliveryOption(order.uid, 'self')}
-                                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition
+                                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition shadow
                                     ${
                                       order.deliveryOption === 'self'
-                                        ? 'bg-green-600 text-white ring-2 ring-green-300'
+                                        ? 'bg-green-600 text-white'
                                         : 'bg-green-500 text-white hover:brightness-110'
                                     }`}
                                 >
@@ -389,10 +353,10 @@ const RestaurantOrders: React.FC = () => {
                                 </button>
                                 <button
                                   onClick={() => handleRiderSelection(order.uid)}
-                                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition
+                                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition shadow
                                     ${
                                       order.deliveryOption === 'rider'
-                                        ? 'bg-blue-600 text-white ring-2 ring-blue-300'
+                                        ? 'bg-blue-600 text-white'
                                         : 'bg-blue-500 text-white hover:brightness-110'
                                     }`}
                                 >
@@ -403,120 +367,46 @@ const RestaurantOrders: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Rider modal */}
-                        {showRiderModal && selectedOrderId === order.uid && (
-                          <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                            <div className="w-full max-w-md rounded-2xl bg-white shadow-xl ring-1 ring-gray-200">
-                              <div className="border-b border-gray-100 px-5 py-4">
-                                <h3 className="text-base font-semibold text-gray-900">Select Rider</h3>
-                              </div>
-
-                              <div className="max-h-[55vh] overflow-y-auto px-5 py-4">
-                                {loadingRiders ? (
-                                  <p className="text-sm text-gray-600">Loading available riders...</p>
-                                ) : riders.length > 0 ? (
-                                  <div className="space-y-2">
-                                    {riders.map((rider) => (
-                                      <button
-                                        key={rider.uid}
-                                        type="button"
-                                        onClick={() => setSelectedRiderId(rider.uid)}
-                                        className={`w-full text-left rounded-xl p-3 transition ring-1 
-                                          ${
-                                            selectedRiderId === rider.uid
-                                              ? 'bg-blue-50 ring-blue-200'
-                                              : 'bg-white hover:bg-gray-50 ring-gray-200'
-                                          }`}
-                                      >
-                                        <div className="flex items-center justify-between">
-                                          <div>
-                                            <p className="font-medium text-gray-900">{rider.fullname}</p>
-                                            <p className="text-xs text-gray-600">
-                                              {rider.preferreddelivelrylocation}
-                                            </p>
-                                          </div>
-                                          <span
-                                            className={`inline-block w-3 h-3 rounded-full ${
-                                              rider.raiderstatus === 'on' ? 'bg-green-500' : 'bg-red-500'
-                                            }`}
-                                          />
-                                        </div>
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <p className="text-sm text-gray-600">No available riders found</p>
-                                )}
-                              </div>
-
-                              <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100">
-                                <button
-                                  onClick={() => {
-                                    setShowRiderModal(false);
-                                    setSelectedRiderId('');
-                                  }}
-                                  className="rounded-xl px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 ring-1 ring-gray-200"
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  onClick={() => assignRiderToOrder(order.uid)}
-                                  disabled={!selectedRiderId || assigningRider}
-                                  className={`rounded-xl px-4 py-2 text-sm font-semibold text-white transition
-                                    ${
-                                      !selectedRiderId || assigningRider
-                                        ? 'bg-blue-300 cursor-not-allowed'
-                                        : 'bg-blue-600 hover:brightness-110'
-                                    }`}
-                                >
-                                  {assigningRider ? 'Assigning...' : 'Assign Rider'}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Preparation steps */}
-                        <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-gray-100 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-800 mb-3">Preparation Progress</h3>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {/* Preparation Steps */}
+                        <div className="rounded-2xl bg-white p-4 ring-1 ring-gray-100 shadow">
+                          <h3 className="text-sm font-semibold text-gray-800 mb-3">Preparation</h3>
+                          <div className="grid grid-cols-3 gap-2">
                             <button
                               onClick={() => handlePreparationStatus(order.uid, 'startedpreparing')}
-                              className="rounded-xl bg-orange-600 text-white px-4 py-2 text-sm font-medium hover:brightness-110 transition"
+                              className="rounded-full bg-orange-600 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
                             >
-                              Started Preparing
+                              Started
                             </button>
                             <button
                               onClick={() => handlePreparationStatus(order.uid, 'inprogress')}
-                              className="rounded-xl bg-amber-500 text-white px-4 py-2 text-sm font-medium hover:brightness-110 transition"
+                              className="rounded-full bg-amber-500 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
                             >
                               In Progress
                             </button>
                             <button
                               onClick={() => handlePreparationStatus(order.uid, 'dispatch')}
-                              className="rounded-xl bg-purple-600 text-white px-4 py-2 text-sm font-medium hover:brightness-110 transition"
+                              className="rounded-full bg-purple-600 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
                             >
                               Dispatch
                             </button>
                           </div>
 
-                          {/* Temp status pill */}
                           {order.tempstatus && (
                             <div className="mt-3">
                               <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200">
-                                Current stage: {order.tempstatus}
+                                Current: {order.tempstatus}
                               </span>
                             </div>
                           )}
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/40 text-center py-14">
+            <div className="rounded-2xl border border-dashed border-orange-300 bg-orange-50 text-center py-14 shadow-inner">
               <p className="text-gray-600">No orders found</p>
             </div>
           )}
