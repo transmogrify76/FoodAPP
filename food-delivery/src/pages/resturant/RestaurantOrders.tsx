@@ -16,7 +16,7 @@ const RestaurantOrders: React.FC = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [message, setMessage] = useState<string>('');
-  const [restaurantId, setRestaurantId] = useState<string>('');
+  const [restaurantIds, setRestaurantIds] = useState<string[]>([]);
   const [ownerId, setOwnerId] = useState<string>('');
   const [riders, setRiders] = useState<any[]>([]);
   const [showRiderModal, setShowRiderModal] = useState(false);
@@ -45,7 +45,7 @@ const RestaurantOrders: React.FC = () => {
       try {
         const decodedToken: any = jwtDecode(storedRestaurantToken);
         setOwnerId(decodedToken.owenerid);
-        fetchRestaurantId(decodedToken.owenerid);
+        fetchRestaurantIds(decodedToken.owenerid);
       } catch (error) {
         console.error('Error decoding token:', error);
         setMessage('Invalid token.');
@@ -55,7 +55,7 @@ const RestaurantOrders: React.FC = () => {
     }
   }, []);
 
-  const fetchRestaurantId = async (ownerId: string) => {
+  const fetchRestaurantIds = async (ownerId: string) => {
     try {
       const formData = new FormData();
       formData.append('ownerid', ownerId);
@@ -67,33 +67,49 @@ const RestaurantOrders: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setMessage(errorData.error || 'Failed to fetch restaurant ID');
+        setMessage(errorData.error || 'Failed to fetch restaurant IDs');
         return;
       }
 
       const data = await response.json();
-      const restaurantIdFromResponse = data.data[0]?.restaurantid;
-      if (restaurantIdFromResponse) {
-        setRestaurantId(restaurantIdFromResponse);
+      const restaurantIdsFromResponse = data.data.map((restaurant: any) => restaurant.restaurantid);
+      if (restaurantIdsFromResponse && restaurantIdsFromResponse.length > 0) {
+        setRestaurantIds(restaurantIdsFromResponse);
       } else {
-        setMessage('No restaurant found for this owner.');
+        setMessage('No restaurants found for this owner.');
       }
     } catch (error) {
-      console.error('Error fetching restaurant ID:', error);
+      console.error('Error fetching restaurant IDs:', error);
       setMessage('Error fetching restaurant data.');
     }
   };
 
   useEffect(() => {
-    if (!restaurantId) return;
+    if (restaurantIds.length === 0) return;
 
     const fetchOrders = async () => {
       try {
-        const formData = new FormData();
-        formData.append('restaurantid', restaurantId);
+        // Fetch orders for all restaurants
+        const allOrders = [];
 
-        const response = await axios.post('https://backend.foodapp.transev.site/order/orderhistory', formData);
-        setOrders(response.data.order_list);
+        for (const restaurantId of restaurantIds) {
+          const formData = new FormData();
+          formData.append('restaurantid', restaurantId);
+
+          const response = await axios.post('https://backend.foodapp.transev.site/order/orderhistory', formData);
+
+          if (response.data && response.data.order_list) {
+            // Add restaurant ID to each order for reference
+            const ordersWithRestaurant = response.data.order_list.map((order: any) => ({
+              ...order,
+              restaurantId: restaurantId
+            }));
+
+            allOrders.push(...ordersWithRestaurant);
+          }
+        }
+
+        setOrders(allOrders);
       } catch (error) {
         if (axios.isAxiosError(error)) {
           setMessage(error.response?.data?.error || 'Error fetching orders!');
@@ -104,7 +120,7 @@ const RestaurantOrders: React.FC = () => {
     };
 
     fetchOrders();
-  }, [restaurantId]);
+  }, [restaurantIds]);
 
   const handleOrderAction = async (orderId: string, action: 'accept' | 'reject') => {
     try {
@@ -130,12 +146,42 @@ const RestaurantOrders: React.FC = () => {
     }
   };
 
-  const handlePreparationStatus = async (orderId: string, status: 'startedpreparing' | 'inprogress' | 'dispatch') => {
-    if (!socket) {
-      setMessage('Socket connection not established');
-      return;
-    }
+  const handlePreparationStatus = async (orderId: string, restaurantId: string, status: 'startedpreparing' | 'inprogress' | 'dispatch') => {
+  if (!socket) {
+    setMessage('Socket connection not established');
+    return;
+  }
 
+  // If status is dispatch, mark the order as completed
+  if (status === 'dispatch') {
+    try {
+      const data = {
+        orderid: orderId,
+        restaurantid: restaurantId,
+        tempstatus: status,
+        preptime: '' // No prep time needed for dispatch
+      };
+
+      socket.emit('temporderstatus', data);
+
+      // Update the order status to mark it as completed
+      setOrders((prev) =>
+        prev.map((order) => 
+          order.uid === orderId ? { 
+            ...order, 
+            tempstatus: status,
+            orderstatus: 'completed' // Mark as completed
+          } : order
+        )
+      );
+      
+      setMessage(`Order #${orderId} has been dispatched and marked as completed.`);
+    } catch (error) {
+      console.error('Error updating preparation status:', error);
+      setMessage('Error updating preparation status.');
+    }
+  } else {
+    // For other statuses (startedpreparing, inprogress)
     try {
       const data = {
         orderid: orderId,
@@ -155,7 +201,8 @@ const RestaurantOrders: React.FC = () => {
       console.error('Error updating preparation status:', error);
       setMessage('Error updating preparation status.');
     }
-  };
+  }
+};
 
   const fetchAllRiders = async () => {
     try {
@@ -268,6 +315,7 @@ const RestaurantOrders: React.FC = () => {
                             {order.items[0]?.menu?.menuname || 'N/A'}
                           </h2>
                           <p className="text-xs text-gray-500">#{order.uid}</p>
+                          <p className="text-xs text-gray-400">Restaurant ID: {order.restaurantId}</p>
                         </div>
                       </div>
 
@@ -284,7 +332,7 @@ const RestaurantOrders: React.FC = () => {
                     <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
                         <p className="text-xs text-gray-500">Quantity</p>
-                        <p className="font-medium">{order.items[0]?.quantity || 0}</p>
+                        <p className="font-medium text-black">{order.items[0]?.quantity || 0}</p>
                       </div>
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
                         <p className="text-xs text-gray-500">Total</p>
@@ -292,11 +340,12 @@ const RestaurantOrders: React.FC = () => {
                       </div>
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100 col-span-2">
                         <p className="text-xs text-gray-500">Address</p>
-                        <p className="text-gray-800">{order.useraddress}</p>
+                        <p className="text-black">{order.useraddress || 'No address provided'}</p>
                       </div>
+
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100 col-span-2">
                         <p className="text-xs text-gray-500">Contact</p>
-                        <p className="text-gray-800">{order.usercontact}</p>
+                        <p className="text-black">{order.usercontact || 'No contact provided'}</p>
                       </div>
                       <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
                         <p className="text-xs text-gray-500">Ordered On</p>
@@ -343,10 +392,9 @@ const RestaurantOrders: React.FC = () => {
                                 <button
                                   onClick={() => handleDeliveryOption(order.uid, 'self')}
                                   className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition shadow
-                                    ${
-                                      order.deliveryOption === 'self'
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-green-500 text-white hover:brightness-110'
+                                    ${order.deliveryOption === 'self'
+                                      ? 'bg-green-600 text-white'
+                                      : 'bg-green-500 text-white hover:brightness-110'
                                     }`}
                                 >
                                   Self Delivery
@@ -354,10 +402,9 @@ const RestaurantOrders: React.FC = () => {
                                 <button
                                   onClick={() => handleRiderSelection(order.uid)}
                                   className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition shadow
-                                    ${
-                                      order.deliveryOption === 'rider'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-blue-500 text-white hover:brightness-110'
+                                    ${order.deliveryOption === 'rider'
+                                      ? 'bg-blue-600 text-white'
+                                      : 'bg-blue-500 text-white hover:brightness-110'
                                     }`}
                                 >
                                   {order.deliveryOption === 'rider' ? 'Change Rider' : 'Choose Rider'}
@@ -372,19 +419,19 @@ const RestaurantOrders: React.FC = () => {
                           <h3 className="text-sm font-semibold text-gray-800 mb-3">Preparation</h3>
                           <div className="grid grid-cols-3 gap-2">
                             <button
-                              onClick={() => handlePreparationStatus(order.uid, 'startedpreparing')}
+                              onClick={() => handlePreparationStatus(order.uid, order.restaurantId, 'startedpreparing')}
                               className="rounded-full bg-orange-600 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
                             >
                               Started
                             </button>
                             <button
-                              onClick={() => handlePreparationStatus(order.uid, 'inprogress')}
+                              onClick={() => handlePreparationStatus(order.uid, order.restaurantId, 'inprogress')}
                               className="rounded-full bg-amber-500 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
                             >
                               In Progress
                             </button>
                             <button
-                              onClick={() => handlePreparationStatus(order.uid, 'dispatch')}
+                              onClick={() => handlePreparationStatus(order.uid, order.restaurantId, 'dispatch')}
                               className="rounded-full bg-purple-600 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
                             >
                               Dispatch

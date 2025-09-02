@@ -193,53 +193,55 @@ const CartPage: React.FC = () => {
   };
  
   const handleQuantityChange = async (item: CartItem, action: "inc" | "dec") => {
-    const usercartid = getusercartidFromToken();
-    if (!usercartid) return;
- 
-    try {
-      setLoading(true);
-      const endpoint =
-        action === "inc"
-          ? "https://backend.foodapp.transev.site/cart/incquantity"
-          : "https://backend.foodapp.transev.site/cart/decquantity";
- 
-      const response = await axios.post(
-        endpoint,
-        new URLSearchParams({
-          usercartid,
-          menuid: item.menuid,
-        })
-      );
- 
-      if (response.status === 200) {
-        if (action === "dec" && response.data.new_quantity === undefined) {
-          setCart((prev) => prev.filter((i) => i.menuid !== item.menuid));
-        } else {
-          // Update the cart with the new quantity and recalculate total price
-          setCart((prev) =>
-            prev.map((i) =>
-              i.menuid === item.menuid
-                ? {
-                    ...i,
-                    quantity: response.data.new_quantity.toString(),
-                    total_price: (
-                      parseFloat(
-                        i.menu_details.menudiscountprice ||
-                          i.menu_details.menuprice
-                      ) * response.data.new_quantity
-                    ).toString(),
-                  }
-                : i
-            )
-          );
-        }
+  const usercartid = getusercartidFromToken();
+  if (!usercartid) return;
+
+  try {
+    setLoading(true);
+    const endpoint =
+      action === "inc"
+        ? "https://backend.foodapp.transev.site/cart/incquantity"
+        : "https://backend.foodapp.transev.site/cart/decquantity";
+
+    const response = await axios.post(
+      endpoint,
+      new URLSearchParams({
+        usercartid,
+        menuid: item.menuid,
+      })
+    );
+
+    if (response.status === 200) {
+      if (action === "dec" && response.data.new_quantity === 0) {
+        // Remove item if quantity becomes 0
+        setCart((prev) => prev.filter((i) => i.menuid !== item.menuid));
+      } else {
+        // Update only the specific item's quantity and total price
+        setCart((prev) =>
+          prev.map((i) =>
+            i.menuid === item.menuid
+              ? {
+                  ...i,
+                  quantity: response.data.new_quantity.toString(),
+                  total_price: (
+                    parseFloat(
+                      i.menu_details.menudiscountprice ||
+                        i.menu_details.menuprice
+                    ) * response.data.new_quantity
+                  ).toString(),
+                }
+              : i
+          )
+        );
       }
-    } catch (error) {
-      console.error("Error updating quantity:", error);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error updating quantity:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
  
   // ✅ Updated with backend's generic "message" reply
   const handleCheckout = async () => {
