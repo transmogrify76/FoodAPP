@@ -10,7 +10,7 @@ import {
   FaCog,
   FaFile,
   FaShoppingCart,
-  FaUtensils,
+  FaUtensils,FaSignOutAlt,
   FaChevronRight
 ,FaUserAlt} from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
@@ -23,6 +23,11 @@ const HomePage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.clear(); // Clear all stored data
+    navigate('/login');   // Redirect to login page
+  };
+
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -186,6 +191,14 @@ const HomePage: React.FC = () => {
                 <FaShoppingCart className="text-orange-500 mr-3 text-lg" />
                 <span className="font-medium">View Cart</span>
               </button>
+                        <button
+            onClick={handleLogout}
+            className="flex items-center w-full p-3 rounded-lg hover:bg-red-100 text-red-600 mt-6"
+          >
+            <FaSignOutAlt className="mr-3 text-lg" />
+            <span className="font-medium">Logout</span>
+          </button>
+
             </li>
           </ul>
         </div>
