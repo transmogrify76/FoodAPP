@@ -35,6 +35,8 @@ import SettingsPage from '../pages/resturant/SettingsPage';
 import SettingsPageUser from '../pages/user/SettingsPageUser';
 import TermsAndConditions from '../pages/user/TermsAndConditions';
 import NotificationsPage from '../pages/user/NotificationsPage';
+import ForgetPassword from '../pages/user/ForgetPassword';
+import RestaurantForgotPassword from '../pages/resturant/RestaurantForgotPassword';
 
 
 const AppRoutes: React.FC = () => (
@@ -75,7 +77,8 @@ const AppRoutes: React.FC = () => (
     <Route path="/rider-review" element={<RatingsReviews />} />
     <Route path="/settings/terms" element={<TermsAndConditions />} />
     <Route path="/notification-user" element={<NotificationsPage />} />
-
+    <Route path="/forget-password" element={<ForgetPassword />} />
+    <Route path="/restaurant-forget-password" element={<RestaurantForgotPassword />} />
 
 
 

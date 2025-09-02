@@ -100,13 +100,13 @@ const NotificationsPage: React.FC = () => {
         return notification.note || "Order update received.";
     }
   };
-
+   
   // Timeline-like grouping
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
     const diff = today.getDate() - date.getDate();
-
+ 
     if (diff === 0) return "Today";
     if (diff === 1) return "Yesterday";
     return date.toLocaleDateString();
@@ -186,4 +186,4 @@ const NotificationsPage: React.FC = () => {
   );
 };
 
-export default NotificationsPage;
+export default NotificationsPage; 

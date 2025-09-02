@@ -81,6 +81,16 @@ const RestaurantLogin: React.FC = () => {
             onChange={handleChange}
           />
 
+          {/* Forgot Password Link */}
+          <div className="text-right">
+            <a
+              href="/restaurant-forget-password"
+              className="text-xs text-orange-600 font-semibold hover:underline"
+            >
+              Forgot Password?
+            </a>
+          </div>
+
           <button
             type="submit"
             className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold text-base hover:bg-orange-600 transition"
