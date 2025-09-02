@@ -30,7 +30,6 @@ const SettingsPage: React.FC = () => {
         <div className="w-8"></div>
       </div>
 
-      {/* CONTENT */}
       <div className="p-4 flex-1 overflow-y-auto max-w-lg mx-auto w-full space-y-5">
         {/* Profile Section */}
         <div className="bg-white p-6 rounded-2xl shadow-md">

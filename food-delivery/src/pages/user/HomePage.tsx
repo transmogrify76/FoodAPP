@@ -12,6 +12,7 @@ import {
   FaShoppingCart,
   FaUtensils,FaSignOutAlt,
   FaChevronRight
+,FaBell
 ,FaUserAlt} from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
@@ -332,26 +333,46 @@ const HomePage: React.FC = () => {
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
-        <button className="text-orange-500 flex flex-col items-center">
-          <FaHome className="text-lg" />
-          <span className="text-xs mt-1">Home</span>
-        </button>
-        <button className="text-gray-500 flex flex-col items-center">
-          <FaSearch className="text-lg" />
-          <span className="text-xs mt-1">Search</span>
-        </button>
-        <button className="text-gray-500 flex flex-col items-center">
-          <FaShoppingCart className="text-lg" />
-          <span className="text-xs mt-1">Cart</span>
-        </button>
-        <button className="text-gray-500 flex flex-col items-center">
-          <FaHistory className="text-lg" />
-          <span className="text-xs mt-1">Orders</span>
-        </button>
-        <button className="text-gray-500 flex flex-col items-center">
-          <FaUserAlt className="text-lg" />
-          <span className="text-xs mt-1">Profile</span>
-        </button>
+<button
+        className="text-orange-500 flex flex-col items-center"
+        onClick={() => navigate("/home")}
+      >
+        <FaHome className="text-lg" />
+        <span className="text-xs mt-1">Home</span>
+      </button>
+
+      <button
+        className="text-gray-500 flex flex-col items-center"
+        onClick={() => navigate("/notification-user")}
+      >
+        <FaBell className="text-lg" />
+        <span className="text-xs mt-1">Notifications</span>
+      </button>
+
+      <button
+        className="text-gray-500 flex flex-col items-center"
+        onClick={() => navigate("/cart")}
+      >
+        <FaShoppingCart className="text-lg" />
+        <span className="text-xs mt-1">Cart</span>
+      </button>
+
+      <button
+        className="text-gray-500 flex flex-col items-center"
+        onClick={() => navigate("/orders")}
+      >
+        <FaHistory className="text-lg" />
+        <span className="text-xs mt-1">Orders</span>
+      </button>
+
+      <button
+        className="text-gray-500 flex flex-col items-center"
+        onClick={() => navigate("/profile")}
+      >
+        <FaUserAlt className="text-lg" />
+        <span className="text-xs mt-1">Profile</span>
+      </button>
+
       </div>
     </div>
   );
