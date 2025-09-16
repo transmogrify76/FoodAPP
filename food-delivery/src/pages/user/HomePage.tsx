@@ -359,7 +359,7 @@ const HomePage: React.FC = () => {
 
       <button
         className="text-gray-500 flex flex-col items-center"
-        onClick={() => navigate("/orders")}
+        onClick={() => navigate("/history")}
       >
         <FaHistory className="text-lg" />
         <span className="text-xs mt-1">Orders</span>

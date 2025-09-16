@@ -318,7 +318,7 @@ const OrderHistoryPage: React.FC = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-semibold text-gray-900">
-                              ₹{Number(item.menu?.menuprice || 0).toFixed(2)}
+                              ₹{Number(item.menu?.menudiscountprice || 0).toFixed(2)}
                             </p>
                             <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                           </div>
