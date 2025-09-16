@@ -18,27 +18,26 @@ import {
   FaUserAlt,
   FaHistory,
   FaShoppingCart,
+  FaReceipt,
 } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
- 
+
 // ✅ Initialize socket connection
 const socket = io("https://backend.foodapp.transev.site", {
-  // let engine.io start with polling and upgrade when possible
   transports: ["polling", "websocket"],
-  upgrade: true,              // default true; keep it
-  rememberUpgrade: true,      // reuse WS on subsequent connects if it worked once
-  path: "/socket.io",         // default, but set explicitly if your BE changed it
-  withCredentials: true,      // if server uses cookies / auth
+  upgrade: true,
+  rememberUpgrade: true,
+  path: "/socket.io",
+  withCredentials: true,
   reconnection: true,
   reconnectionAttempts: 5,
   timeout: 10000,
 });
- 
+
 // handy logs
 socket.on("connect_error", (err) => console.warn("connect_error", err.message));
 socket.on("reconnect_attempt", (n) => console.log("reconnect attempt", n));
- 
- 
+
 interface MenuDetails {
   created_at: string;
   final_price: string;
@@ -58,7 +57,7 @@ interface MenuDetails {
   uid: string;
   vegornonveg: string;
 }
- 
+
 interface CartItem {
   created_at: string;
   menu_details: MenuDetails;
@@ -69,13 +68,26 @@ interface CartItem {
   uid: string;
   usercartid: string;
   userid: string;
+  gst_amount?: string;
+  gst_percentage?: string;
+  line_total_amount?: string;
 }
- 
+
+interface CartResponse {
+  cart_items: CartItem[];
+  cart_total_amount: string;
+  cart_total_gst_amount: string;
+  usercartid: string;
+  userid: string;
+}
+
 const CartPage: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [totalGst, setTotalGst] = useState<number>(0);
+  const [subtotal, setSubtotal] = useState<number>(0);
   const [deliveryOption, setDeliveryOption] = useState<"takeaway" | "delivery">(
     "takeaway"
   );
@@ -86,19 +98,32 @@ const CartPage: React.FC = () => {
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
- 
+  const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
- 
-  // Calculate total price
+
+  // Calculate prices based on cart data
   useEffect(() => {
-    const total = cart.reduce((sum, item) => {
-      return sum + parseFloat(item.total_price);
+    const subtotal = cart.reduce((sum, item) => {
+      const itemPrice = parseFloat(
+        item.menu_details.menudiscountprice || item.menu_details.menuprice
+      );
+      return sum + itemPrice * parseInt(item.quantity);
     }, 0);
+    
+    const gst = cart.reduce((sum, item) => {
+      return sum + (parseFloat(item.gst_amount || "0") * parseInt(item.quantity));
+    }, 0);
+    
+    const total = subtotal + gst;
+    
+    setSubtotal(subtotal);
+    setTotalGst(gst);
     setTotalPrice(total);
   }, [cart]);
- 
+
   const getUserIdFromToken = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -107,7 +132,7 @@ const CartPage: React.FC = () => {
     }
     return null;
   };
- 
+
   const getusercartidFromToken = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -116,25 +141,25 @@ const CartPage: React.FC = () => {
     }
     return null;
   };
- 
+
   // New function to fetch cart items
   const fetchCartItems = async () => {
     const userid = getUserIdFromToken();
     const usercartid = getusercartidFromToken();
- 
+
     if (!userid && !usercartid) return;
- 
+
     try {
       setLoading(true);
       const formData = new FormData();
       if (userid) formData.append("userid", userid);
       if (usercartid) formData.append("usercartid", usercartid);
- 
-      const response = await axios.post(
+
+      const response = await axios.post<CartResponse>(
         "https://backend.foodapp.transev.site/cart/getcartbyuserid",
         formData
       );
- 
+
       if (response.data && response.data.cart_items) {
         setCart(response.data.cart_items);
       }
@@ -144,7 +169,7 @@ const CartPage: React.FC = () => {
       setLoading(false);
     }
   };
- 
+
   // Call fetchCartItems when component mounts
   useEffect(() => {
     if (state?.cart && state.cart.length > 0) {
@@ -162,7 +187,7 @@ const CartPage: React.FC = () => {
       fetchCartItems();
     }
   }, []);
- 
+
   const handleLocationSelection = async (type: "current" | "manual") => {
     if (type === "current") {
       try {
@@ -191,125 +216,122 @@ const CartPage: React.FC = () => {
       setShowLocationInput(true);
     }
   };
- 
+
   const handleQuantityChange = async (item: CartItem, action: "inc" | "dec") => {
-  const usercartid = getusercartidFromToken();
-  if (!usercartid) return;
+    const usercartid = getusercartidFromToken();
+    if (!usercartid) return;
 
-  try {
-    setLoading(true);
-    const endpoint =
-      action === "inc"
-        ? "https://backend.foodapp.transev.site/cart/incquantity"
-        : "https://backend.foodapp.transev.site/cart/decquantity";
+    try {
+      setLoading(true);
+      const endpoint =
+        action === "inc"
+          ? "https://backend.foodapp.transev.site/cart/incquantity"
+          : "https://backend.foodapp.transev.site/cart/decquantity";
 
-    const response = await axios.post(
-      endpoint,
-      new URLSearchParams({
-        usercartid,
-        menuid: item.menuid,
-      })
-    );
+      const response = await axios.post(
+        endpoint,
+        new URLSearchParams({
+          usercartid,
+          menuid: item.menuid,
+        })
+      );
 
-    if (response.status === 200) {
-      if (action === "dec" && response.data.new_quantity === 0) {
-        // Remove item if quantity becomes 0
-        setCart((prev) => prev.filter((i) => i.menuid !== item.menuid));
-      } else {
-        // Update only the specific item's quantity and total price
-        setCart((prev) =>
-          prev.map((i) =>
-            i.menuid === item.menuid
-              ? {
-                  ...i,
-                  quantity: response.data.new_quantity.toString(),
-                  total_price: (
-                    parseFloat(
-                      i.menu_details.menudiscountprice ||
-                        i.menu_details.menuprice
-                    ) * response.data.new_quantity
-                  ).toString(),
-                }
-              : i
-          )
-        );
+      if (response.status === 200) {
+        if (action === "dec" && response.data.new_quantity === 0) {
+          // Remove item if quantity becomes 0
+          setCart((prev) => prev.filter((i) => i.menuid !== item.menuid));
+        } else {
+          // Update only the specific item's quantity and total price
+          setCart((prev) =>
+            prev.map((i) =>
+              i.menuid === item.menuid
+                ? {
+                    ...i,
+                    quantity: response.data.new_quantity.toString(),
+                    total_price: (
+                      parseFloat(
+                        i.menu_details.menudiscountprice ||
+                          i.menu_details.menuprice
+                      ) * response.data.new_quantity
+                    ).toString(),
+                  }
+                : i
+            )
+          );
+        }
       }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error updating quantity:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
- 
   // ✅ Updated with backend's generic "message" reply
   const handleCheckout = async () => {
-  if (deliveryOption === "delivery" && !deliveryLocation.address) {
-    alert("Please select a delivery location");
-    return;
-  }
+    if (deliveryOption === "delivery" && !deliveryLocation.address) {
+      alert("Please select a delivery location");
+      return;
+    }
 
-  const userId = getUserIdFromToken();
-  const usercartid = getusercartidFromToken();
-  if (!userId || !usercartid) return;
+    const userId = getUserIdFromToken();
+    const usercartid = getusercartidFromToken();
+    if (!userId || !usercartid) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // 🔁 listen ONCE for the backend's "message" response
-    const onReply = (response: any) => {
-      socket.off("message", onReply);
-      setLoading(false);
-
-      if (response?.error) {
-        console.error("Order creation failed:", response.error);
-        alert(response.error);
-        return;
-      }
-
-      console.log("Order created successfully:", response);
-      navigate("/payment", {
-        state: {
-          cart,
-          totalPrice,
-          deliveryOption,
-          deliveryLocation,
-        },
-      });
-    };
-
-    socket.once("message", onReply);
-
-    // ✅ Emit the request on the event the server listens to
-    // ADDED userid to the payload as requested
-    socket.emit("createorder", {
-      usercartid,
-      userid: userId, // Added userid to the payload
-      temporarylocation:
-        deliveryOption === "delivery"
-          ? deliveryLocation.address ||
-            (deliveryLocation.coordinates
-              ? `${deliveryLocation.coordinates.lat},${deliveryLocation.coordinates.lng}`
-              : "delivery")
-          : "takeaway",
-    });
-
-    // Timeout for safety
-    setTimeout(() => {
-      const stillListening = socket.hasListeners?.("message");
-      if (stillListening) {
+      // 🔁 listen ONCE for the backend's "message" response
+      const onReply = (response: any) => {
         socket.off("message", onReply);
         setLoading(false);
-        alert("Order creation timed out. Please try again.");
-      }
-    }, 15000);
-  } catch (error) {
-    console.error("Error creating order:", error);
-    setLoading(false);
-  }
-};
- 
+
+        if (response?.error) {
+          console.error("Order creation failed:", response.error);
+          alert(response.error);
+          return;
+        }
+
+        console.log("Order created successfully:", response);
+        navigate("/payment", {
+          state: {
+            cart,
+            totalPrice,
+            deliveryOption,
+            deliveryLocation,
+          },
+        });
+      };
+
+      socket.once("message", onReply);
+
+      socket.emit("createorder", {
+        usercartid,
+        userid: userId, // Added userid to the payload
+        temporarylocation:
+          deliveryOption === "delivery"
+            ? deliveryLocation.address ||
+              (deliveryLocation.coordinates
+                ? `${deliveryLocation.coordinates.lat},${deliveryLocation.coordinates.lng}`
+                : "delivery")
+            : "takeaway",
+      });
+
+      // Timeout for safety
+      setTimeout(() => {
+        const stillListening = socket.hasListeners?.("message");
+        if (stillListening) {
+          socket.off("message", onReply);
+          setLoading(false);
+          alert("Order creation timed out. Please try again.");
+        }
+      }, 15000);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-orange-50 pb-24">
       {/* Sidebar */}
@@ -371,7 +393,7 @@ const CartPage: React.FC = () => {
           className="fixed inset-0 bg-black opacity-50 z-40"
         ></div>
       )}
- 
+
       {/* Header */}
       <div className="bg-orange-500 text-white p-4 sticky top-0 z-30 shadow-md">
         <div className="flex justify-between items-center">
@@ -389,7 +411,7 @@ const CartPage: React.FC = () => {
           <div className="w-6"></div>
         </div>
       </div>
- 
+
       {/* Delivery Options */}
       <div className="p-4 bg-white border-b border-gray-100">
         <div className="flex gap-3 mb-4">
@@ -417,7 +439,7 @@ const CartPage: React.FC = () => {
             <span className="text-sm font-medium">Delivery</span>
           </button>
         </div>
- 
+
         {deliveryOption === 'delivery' && (
           <div className="space-y-3">
             {!deliveryLocation.address ? (
@@ -454,7 +476,7 @@ const CartPage: React.FC = () => {
                 </button>
               </div>
             )}
- 
+
             {showLocationInput && (
               <div className="relative">
                 <FaMapMarkerAlt className="absolute left-3 top-3 text-gray-500" />
@@ -470,8 +492,7 @@ const CartPage: React.FC = () => {
           </div>
         )}
       </div>
- 
-   
+
       <div className="p-4">
         {cart.length === 0 ? (
           <div className="text-center py-10">
@@ -514,7 +535,7 @@ const CartPage: React.FC = () => {
                       )}
                     </div>
                   </div>
- 
+
                   <div className="flex items-center bg-orange-50 rounded-lg border border-orange-100">
                     <button
                       onClick={() => handleQuantityChange(item, 'dec')}
@@ -533,13 +554,20 @@ const CartPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                
+                {/* GST information for each item */}
+                {item.gst_percentage && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Includes {item.gst_percentage}% GST: ₹{(parseFloat(item.gst_amount || "0") * parseInt(item.quantity)).toFixed(2)}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
- 
-   
+
+      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
         <button
           onClick={() => navigate('/home')}
@@ -570,27 +598,54 @@ const CartPage: React.FC = () => {
           <span className="text-xs mt-1">Profile</span>
         </button>  
       </div>
- 
-     
+
+      {/* Price Breakdown and Checkout */}
       {cart.length > 0 && (
         <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex justify-between items-center mb-2">
+            <button 
+              onClick={() => setShowPriceBreakdown(!showPriceBreakdown)}
+              className="flex items-center text-sm text-orange-600 font-medium"
+            >
+              <FaReceipt className="mr-1" />
+              {showPriceBreakdown ? 'Hide' : 'Show'} Price Breakdown
+            </button>
+            
+            <div className="text-right">
               <p className="text-xs text-gray-600">Total Amount</p>
               <p className="font-bold text-gray-900">₹{totalPrice.toFixed(2)}</p>
             </div>
-            <button
-              onClick={handleCheckout}
-              disabled={loading}
-              className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 disabled:opacity-70"
-            >
-              {loading ? 'Processing...' : 'Proceed to Pay'}
-            </button>
           </div>
+          
+          {/* Price Breakdown Details */}
+          {showPriceBreakdown && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="flex justify-between text-xs text-gray-600 mb-1">
+                <span>Subtotal</span>
+                <span>₹{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-600 mb-1">
+                <span>GST</span>
+                <span>₹{totalGst.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-600 mb-2">
+                <span>Delivery Fee</span>
+                <span>{deliveryOption === 'delivery' ? 'To be calculated' : 'Free'}</span>
+              </div>
+            </div>
+          )}
+          
+          <button
+            onClick={handleCheckout}
+            disabled={loading}
+            className="w-full mt-3 px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 disabled:opacity-70"
+          >
+            {loading ? 'Processing...' : 'Proceed to Pay'}
+          </button>
         </div>
       )}
     </div>
   );
 };
- 
+
 export default CartPage;

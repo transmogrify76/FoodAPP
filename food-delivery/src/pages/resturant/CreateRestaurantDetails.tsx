@@ -71,7 +71,7 @@ const CreateRestaurant: React.FC = () => {
     try {
       const response = await axios.post(
         "https://backend.foodapp.transev.site/resown/createresurantdetails",
-        data,
+        data, 
         {
           headers: {
             "Content-Type": "multipart/form-data",

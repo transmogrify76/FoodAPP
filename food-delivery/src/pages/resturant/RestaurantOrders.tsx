@@ -152,7 +152,7 @@ const RestaurantOrders: React.FC = () => {
     return;
   }
 
-  // If status is dispatch, mark the order as completed
+ 
   if (status === 'dispatch') {
     try {
       const data = {
@@ -164,7 +164,7 @@ const RestaurantOrders: React.FC = () => {
 
       socket.emit('temporderstatus', data);
 
-      // Update the order status to mark it as completed
+      
       setOrders((prev) =>
         prev.map((order) => 
           order.uid === orderId ? { 
@@ -236,7 +236,7 @@ const RestaurantOrders: React.FC = () => {
 
       if (response.status === 200) {
         setMessage('Rider assigned successfully');
-        setOrders((prev) =>
+        setOrders((prev) =>    
           prev.map((order) =>
             order.uid === orderId ? { ...order, assignedRaider: response.data.data } : order
           )
@@ -271,7 +271,7 @@ const RestaurantOrders: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-orange-50 via-white to-orange-100">
-      {/* Top Bar */}
+      
       <div className="sticky top-0 z-20 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center shadow-lg">
         <button onClick={() => navigate(-1)} className="mr-3 rounded-full bg-white/20 p-2">
           <FaArrowLeft size={18} />
@@ -353,7 +353,6 @@ const RestaurantOrders: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Accept / Reject */}
                     {order.orderstatus === 'pending' && (
                       <div className="mt-5 flex gap-3">
                         <button
@@ -371,7 +370,7 @@ const RestaurantOrders: React.FC = () => {
                       </div>
                     )}
 
-                    {/* After Accept */}
+  
                     {order.orderstatus === 'accepted' && (
                       <div className="mt-6 space-y-5">
                         {/* Delivery Options */}

@@ -297,11 +297,11 @@ const MenuPage: React.FC = () => {
 
                 <div className="mt-4">
                   <p className="text-sm text-gray-600 line-clamp-2">{item.menudescription}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  {/* <p className="text-xs text-gray-500 mt-1">
                     {item.servingtype === "1" 
                       ? "Serves 1 person" 
                       : `Serves ${item.servingtype} people`}
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="mt-2">
@@ -401,4 +401,5 @@ const MenuPage: React.FC = () => {
   );
 };
 
-export default MenuPage;
+export default MenuPage;   
+ 

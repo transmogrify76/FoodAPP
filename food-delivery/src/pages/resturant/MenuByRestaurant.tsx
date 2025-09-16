@@ -89,7 +89,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("menuid", menuid);
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/resops/deletemenu", {
+      const response = await fetch("https://backend.foodapp.transev.site/resops/deletemenu",  {
         method: "POST",
         body: formData,
       });

@@ -79,7 +79,8 @@ const AppRoutes: React.FC = () => (
     <Route path="/notification-user" element={<NotificationsPage />} />
     <Route path="/forget-password" element={<ForgetPassword />} />
     <Route path="/restaurant-forget-password" element={<RestaurantForgotPassword />} />
-
+    
+ 
 
 
   </Routes>
