@@ -558,7 +558,7 @@ const CartPage: React.FC = () => {
                 {/* GST information for each item */}
                 {item.gst_percentage && (
                   <div className="mt-2 text-xs text-gray-500">
-                    Includes {item.gst_percentage}% GST: ₹{(parseFloat(item.gst_amount || "0") * parseInt(item.quantity)).toFixed(2)}
+                    {/* Includes {item.gst_percentage}% GST: ₹{(parseFloat(item.gst_amount || "0") * parseInt(item.quantity)).toFixed(2)} */}
                   </div>
                 )}
               </div>
