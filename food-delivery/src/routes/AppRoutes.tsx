@@ -37,7 +37,7 @@ import TermsAndConditions from '../pages/user/TermsAndConditions';
 import NotificationsPage from '../pages/user/NotificationsPage';
 import ForgetPassword from '../pages/user/ForgetPassword';
 import RestaurantForgotPassword from '../pages/resturant/RestaurantForgotPassword';
-
+import DeleteRestaurant from '../pages/resturant/DeleteRestaurant';
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -79,6 +79,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/notification-user" element={<NotificationsPage />} />
     <Route path="/forget-password" element={<ForgetPassword />} />
     <Route path="/restaurant-forget-password" element={<RestaurantForgotPassword />} />
+    <Route path="/delete-restaurant" element={<DeleteRestaurant />} />  
     
  
 

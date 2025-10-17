@@ -152,11 +152,11 @@ const CreateRestaurant: React.FC = () => {
             onChange={handleThumbnailChange}
             required
           />
-          <FileInput
+          {/* <FileInput
             label="Images"
             onChange={handleImagesChange}
             multiple
-          />
+          /> */}      
 
           <button
             type="submit"
@@ -169,7 +169,7 @@ const CreateRestaurant: React.FC = () => {
     </div>
   );
 };
-
+ 
 const InputField = ({
   label,
   type = "text",

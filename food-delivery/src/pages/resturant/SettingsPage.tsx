@@ -32,7 +32,7 @@ const SettingsPage: React.FC = () => {
 
       <div className="p-4 flex-1 overflow-y-auto max-w-lg mx-auto w-full space-y-5">
         {/* Profile Section */}
-        <div className="bg-white p-6 rounded-2xl shadow-md">
+        {/* <div className="bg-white p-6 rounded-2xl shadow-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Profile</h2>
 
           <label className="block text-sm font-medium text-gray-600 mb-1">Name</label>
@@ -58,7 +58,7 @@ const SettingsPage: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
+        </div> */}
 
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Preferences</h2>

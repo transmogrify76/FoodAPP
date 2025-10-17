@@ -104,7 +104,7 @@ const CartPage: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Calculate prices based on cart data
+
   useEffect(() => {
     const subtotal = cart.reduce((sum, item) => {
       const itemPrice = parseFloat(
@@ -142,7 +142,7 @@ const CartPage: React.FC = () => {
     return null;
   };
 
-  // New function to fetch cart items
+  
   const fetchCartItems = async () => {
     const userid = getUserIdFromToken();
     const usercartid = getusercartidFromToken();
@@ -170,7 +170,7 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // Call fetchCartItems when component mounts
+ 
   useEffect(() => {
     if (state?.cart && state.cart.length > 0) {
       // Convert the state cart items to match the new interface if needed
@@ -281,7 +281,7 @@ const CartPage: React.FC = () => {
     try {
       setLoading(true);
 
-      // 🔁 listen ONCE for the backend's "message" response
+     
       const onReply = (response: any) => {
         socket.off("message", onReply);
         setLoading(false);
@@ -317,7 +317,6 @@ const CartPage: React.FC = () => {
             : "takeaway",
       });
 
-      // Timeout for safety
       setTimeout(() => {
         const stillListening = socket.hasListeners?.("message");
         if (stillListening) {
@@ -334,7 +333,7 @@ const CartPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-orange-50 pb-24">
-      {/* Sidebar */}
+
       <div
         className={`fixed top-0 left-0 w-64 h-full bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -555,10 +554,10 @@ const CartPage: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* GST information for each item */}
+
                 {item.gst_percentage && (
                   <div className="mt-2 text-xs text-gray-500">
-                    {/* Includes {item.gst_percentage}% GST: ₹{(parseFloat(item.gst_amount || "0") * parseInt(item.quantity)).toFixed(2)} */}
+
                   </div>
                 )}
               </div>
@@ -567,7 +566,7 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-      {/* Bottom Navigation */}
+      
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
         <button
           onClick={() => navigate('/home')}
@@ -599,7 +598,7 @@ const CartPage: React.FC = () => {
         </button>  
       </div>
 
-      {/* Price Breakdown and Checkout */}
+      
       {cart.length > 0 && (
         <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
           <div className="flex justify-between items-center mb-2">
@@ -617,7 +616,6 @@ const CartPage: React.FC = () => {
             </div>
           </div>
           
-          {/* Price Breakdown Details */}
           {showPriceBreakdown && (
             <div className="mt-3 pt-3 border-t border-gray-100">
               <div className="flex justify-between text-xs text-gray-600 mb-1">

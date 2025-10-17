@@ -19,6 +19,7 @@ const CreateMenu: React.FC = () => {
     menudiscountpercent: "",
     foodweight: "",
     vegornonveg: "",
+    gst: "", // ✅ Added GST field here
     images: [] as File[],
   });
   const [loading, setLoading] = useState<boolean>(false);
@@ -127,6 +128,7 @@ const CreateMenu: React.FC = () => {
         menudiscountpercent: "",
         foodweight: "",
         vegornonveg: "",
+        gst: "", // ✅ reset GST
         images: [],
       });
     } catch (error) {
@@ -178,13 +180,13 @@ const CreateMenu: React.FC = () => {
           )}
         </div>
 
-       
+        {/* MENU FORM */}
         {selectedRestaurantId && (
           <form
             onSubmit={handleSubmit}
             className="bg-white p-4 rounded-xl shadow-md space-y-4"
           >
-            {[
+            {[ 
               { label: "Menu Name", name: "menuname", type: "text" },
               { label: "Description", name: "menudescription", type: "textarea" },
               { label: "Price", name: "menuprice", type: "text" },
@@ -218,7 +220,7 @@ const CreateMenu: React.FC = () => {
               </div>
             ))}
 
-      
+            {/* Veg or Non-Veg */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Veg or Non-Veg
@@ -232,6 +234,26 @@ const CreateMenu: React.FC = () => {
                 <option value="">Select</option>
                 <option value="veg">Veg</option>
                 <option value="nonveg">Non-Veg</option>
+              </select>
+            </div>
+
+            {/* ✅ GST Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                GST
+              </label>
+              <select
+                name="gst"
+                value={menuData.gst}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="">Select GST %</option>
+                <option value="5%">5%</option>
+                <option value="12%">12%</option>
+                <option value="18%">18%</option>
+                <option value="28%">28%</option>
+                <option value="40%">40%</option>
               </select>
             </div>
 

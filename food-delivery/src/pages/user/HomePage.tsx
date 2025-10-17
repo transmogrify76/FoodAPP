@@ -266,7 +266,6 @@ const HomePage: React.FC = () => {
           </div>
         )}
 
-        {/* Featured Section */}
         <div className="px-4 mb-6">
           <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 text-white">
             <h2 className="font-bold text-lg mb-1">Special Offer!</h2>
@@ -319,7 +318,7 @@ const HomePage: React.FC = () => {
                     </span>
                   </div>
                   <div className="mt-2 flex justify-between items-center">
-                    <span className="text-xs text-gray-500">30-45 min  </span>
+                    <span className="text-xs text-gray-500">30-45 min</span>
                     <button className="text-orange-500 text-xs font-semibold flex items-center">
                       View <FaChevronRight className="ml-1 text-xs" />
                     </button>
@@ -331,7 +330,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
+     
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
 <button
         className="text-orange-500 flex flex-col items-center"

@@ -25,47 +25,53 @@ const NotificationsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const newSocket = io("https://backend.foodapp.transev.site", {
+    const userId = getUserIdFromToken();
+    if (!userId) {
+      setMessage("User not authenticated");
+      setLoading(false);
+      return;
+    }
+
+    // Connect with userId in URL directly
+    const newSocket = io(`https://backend.foodapp.transev.site/notify.v1?userId=${userId}`, {
       transports: ["polling", "websocket"],
       withCredentials: true,
       reconnection: true,
       timeout: 10000,
     });
 
-    newSocket.on("connect_error", (err) => console.warn("connect_error", err.message));
-    setSocket(newSocket);
+    newSocket.on("connect", () => {
+      console.log("✅ Socket connected");
+      setLoading(false);
+    });
 
-    newSocket.on('message', (data: any) => {
+    newSocket.on("connect_error", (err) => {
+      console.warn("❌ connect_error", err.message);
+      setMessage("Connection failed");
+      setLoading(false);
+    });
+
+    newSocket.on("message", (data: any) => {
+      console.log("📩 Incoming socket data:", data);
+
       if (data.notifications) {
         setNotifications(data.notifications);
-        setLoading(false);
       }
       if (data.message) {
         setMessage(data.message);
-        setLoading(false);
       }
       if (data.error) {
         setMessage(data.error);
-        setLoading(false);
       }
+      setLoading(false);
     });
+
+    setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
     };
   }, []);
-
-  useEffect(() => {
-    if (socket) {
-      const userId = getUserIdFromToken();
-      if (userId) {
-        socket.emit('fetchnotificationsforuserid', { userid: userId });
-      } else {
-        setMessage("User not authenticated");
-        setLoading(false);
-      }
-    }
-  }, [socket]);
 
   // Icon mapping
   const getNotificationIcon = (status: string) => {
@@ -99,7 +105,7 @@ const NotificationsPage: React.FC = () => {
       default:
         return notification.note || "Order update received.";
     }
-  };
+  };   
    
   // Timeline-like grouping
   const formatDate = (dateString: string) => {
@@ -186,4 +192,4 @@ const NotificationsPage: React.FC = () => {
   );
 };
 
-export default NotificationsPage; 
+export default NotificationsPage;
