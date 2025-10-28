@@ -3,11 +3,12 @@ import {
   FaHome,
   FaListAlt,
   FaUtensils,
-  FaCog,
   FaChartBar,
   FaPlus,
   FaUserCircle,
-  FaTrash, // ✅ Added delete icon
+  FaTrash,
+  FaEdit, // ✅ Added edit icon
+  FaCog,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -44,8 +45,6 @@ const RestaurantDashboard: React.FC = () => {
           color="bg-gradient-to-r from-yellow-400 to-orange-500"
           onClick={() => navigateTo("/create-menu")}
         />
-     
-      
       </div>
 
       {/* DASHBOARD TILES */}
@@ -70,12 +69,13 @@ const RestaurantDashboard: React.FC = () => {
           title="Existing Menus"
           onClick={() => navigateTo("/existingmenu")}
         />
+        {/* ✅ Changed Settings to Edit Menu */}
         <DashboardTile
-          icon={<FaCog />}
-          title="Settings"
-          onClick={() => navigateTo("/restaurant-settings")}
+          icon={<FaEdit />}
+          title="Edit Menu"
+          onClick={() => navigateTo("/edit-menu")}
         />
-        {/* ✅ New Dashboard Tile for Delete Restaurant */}
+        {/* ✅ Delete Restaurant */}
         <DashboardTile
           icon={<FaTrash />}
           title="Delete Restaurant"
@@ -83,7 +83,7 @@ const RestaurantDashboard: React.FC = () => {
         />
       </div>
 
-      {/* BOTTOM NAVIGATION BAR */}
+      {/* ✅ BOTTOM NAVIGATION BAR - Settings kept same */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center py-3 shadow-lg">
         <NavItem
           icon={<FaHome />}

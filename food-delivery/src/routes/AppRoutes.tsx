@@ -38,6 +38,7 @@ import NotificationsPage from '../pages/user/NotificationsPage';
 import ForgetPassword from '../pages/user/ForgetPassword';
 import RestaurantForgotPassword from '../pages/resturant/RestaurantForgotPassword';
 import DeleteRestaurant from '../pages/resturant/DeleteRestaurant';
+import EditMenu from '../pages/resturant/EditMenu';
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -80,7 +81,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/forget-password" element={<ForgetPassword />} />
     <Route path="/restaurant-forget-password" element={<RestaurantForgotPassword />} />
     <Route path="/delete-restaurant" element={<DeleteRestaurant />} />  
-    
+    <Route path="/edit-menu" element={<EditMenu />} />  
  
 
 

@@ -28,7 +28,7 @@ const UserTransactionHistoryPage: React.FC = () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          throw new Error('token not found.');
+          throw new Error('token not found.');  
         }
 
         const decoded: DecodedToken = jwtDecode(token);
@@ -123,7 +123,7 @@ const UserTransactionHistoryPage: React.FC = () => {
         )}
       </div>
     </div>
-  );
+  ); 
 };
 
 export default UserTransactionHistoryPage;

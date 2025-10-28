@@ -5,12 +5,16 @@ import { FaArrowLeft } from "react-icons/fa";
 
 const CreateRestaurant: React.FC = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     resturantname: "",
     location: "",
     cuisin_type: "",
     address: "",
     totalseats: "",
+    restaurantphone: "",
+    gst: "False", // Default False
+    resprocchrg: "",
   });
 
   const [thumbnail, setThumbnail] = useState<File | null>(null);
@@ -57,9 +61,12 @@ const CreateRestaurant: React.FC = () => {
     data.append("owenerid", owenerid);
     data.append("resturantname", formData.resturantname);
     data.append("location", formData.location);
-    data.append("cuisintype", formData.cuisin_type);
+    data.append("cuisintype", formData.cuisin_type); // backend expects 'cuisintype'
     data.append("address", formData.address);
     data.append("totalseats", formData.totalseats);
+    data.append("restaurantphone", formData.restaurantphone);
+    data.append("gst", formData.gst); // "True" or "False"
+    data.append("resprocchrg", formData.resprocchrg);
     data.append("thumbnail", thumbnail);
 
     if (images) {
@@ -71,7 +78,7 @@ const CreateRestaurant: React.FC = () => {
     try {
       const response = await axios.post(
         "https://backend.foodapp.transev.site/resown/createresurantdetails",
-        data, 
+        data,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -81,6 +88,7 @@ const CreateRestaurant: React.FC = () => {
 
       if (response.status === 200) {
         alert("Restaurant details created successfully!");
+        navigate(-1);
       } else {
         alert("Failed to create restaurant details.");
       }
@@ -146,17 +154,34 @@ const CreateRestaurant: React.FC = () => {
             onChange={handleInputChange}
             required
           />
-
-          <FileInput
-            label="Thumbnail"
-            onChange={handleThumbnailChange}
+          <InputField
+            label="Restaurant Phone"
+            name="restaurantphone"
+            value={formData.restaurantphone}
+            onChange={handleInputChange}
             required
           />
-          {/* <FileInput
-            label="Images"
-            onChange={handleImagesChange}
-            multiple
-          /> */}      
+          <SelectField
+            label="GST Applied?"
+            name="gst"
+            value={formData.gst}
+            onChange={handleInputChange}
+            options={[
+              { value: "True", label: "True" },
+              { value: "False", label: "False" },
+            ]}
+          />
+          <InputField
+            label="Restaurant Processing Charge"
+            type="number"
+            name="resprocchrg"
+            value={formData.resprocchrg}
+            onChange={handleInputChange}
+            required
+          />
+
+          <FileInput label="Thumbnail" onChange={handleThumbnailChange} required />
+          <FileInput label="Images" onChange={handleImagesChange} multiple />
 
           <button
             type="submit"
@@ -169,7 +194,7 @@ const CreateRestaurant: React.FC = () => {
     </div>
   );
 };
- 
+
 const InputField = ({
   label,
   type = "text",
@@ -201,6 +226,24 @@ const FileInput = ({ label, onChange, multiple = false, required = false }: any)
       required={required}
       className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none"
     />
+  </div>
+);
+
+const SelectField = ({ label, name, value, onChange, options }: any) => (
+  <div>
+    <label className="block text-gray-700 font-medium mb-1">{label}</label>
+    <select
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none"
+    >
+      {options.map((opt: any) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
   </div>
 );
 

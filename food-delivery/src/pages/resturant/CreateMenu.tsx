@@ -8,6 +8,7 @@ const CreateMenu: React.FC = () => {
   const [ownerId, setOwnerId] = useState<string>("");
   const [restaurantList, setRestaurantList] = useState<any[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
+
   const [menuData, setMenuData] = useState({
     menuname: "",
     menudescription: "",
@@ -19,12 +20,55 @@ const CreateMenu: React.FC = () => {
     menudiscountpercent: "",
     foodweight: "",
     vegornonveg: "",
-    gst: "", // ✅ Added GST field here
+    gst_rate: "", // ✅ changed to match backend
     images: [] as File[],
   });
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [createMenuLoading, setCreateMenuLoading] = useState<boolean>(false);
+
+  const menuTypeOptions = [
+    "Main Course",
+    "Starter",
+    "Dessert",
+    "Soup",
+    "Salad",
+    "Snacks",
+    "Beverage",
+    "Combo",
+    "Side Dish",
+  ];
+
+  const foodTypeOptions = [
+    "Indian",
+    "South Indian",
+    "North Indian",
+    "Chinese",
+    "Continental",
+    "Thai",
+    "Italian",
+    "Mexican",
+    "Chinese and Continental",
+  ];
+
+  const menuItemTypeOptions = [
+    "Rice",
+    "Rice Items",
+    "Biriyani",
+    "Fried Rice",
+    "Pulao",
+    "Jeera Rice",
+    "Lemon Rice",
+    "Tomato Rice",
+    "Curd Rice",
+    "Steamed Rice",
+    "Veg Biryani",
+    "Egg Biryani",
+    "Chicken Biryani",
+    "Mutton Biryani",
+    "Sea Food Biryani",
+  ];
 
   useEffect(() => {
     const token = localStorage.getItem("restaurant_token");
@@ -128,7 +172,7 @@ const CreateMenu: React.FC = () => {
         menudiscountpercent: "",
         foodweight: "",
         vegornonveg: "",
-        gst: "", // ✅ reset GST
+        gst_rate: "", // ✅ cleared properly
         images: [],
       });
     } catch (error) {
@@ -155,9 +199,7 @@ const CreateMenu: React.FC = () => {
           </div>
         )}
 
-        {loading && (
-          <p className="text-center text-gray-700">Loading...</p>
-        )}
+        {loading && <p className="text-center text-gray-700">Loading...</p>}
 
         {/* RESTAURANT SELECT */}
         <div className="bg-white p-4 rounded-xl shadow-md">
@@ -186,41 +228,138 @@ const CreateMenu: React.FC = () => {
             onSubmit={handleSubmit}
             className="bg-white p-4 rounded-xl shadow-md space-y-4"
           >
-            {[ 
-              { label: "Menu Name", name: "menuname", type: "text" },
-              { label: "Description", name: "menudescription", type: "textarea" },
-              { label: "Price", name: "menuprice", type: "text" },
-              { label: "Menu Type", name: "menutype", type: "text" },
-              { label: "Food Type", name: "foodtype", type: "text" },
-              { label: "Menu Item Type", name: "menuitemtype", type: "text" },
-              { label: "For how many people?", name: "servingtype", type: "text" },
-              { label: "Discount Percentage", name: "menudiscountpercent", type: "text" },
-              { label: "Food Weight (for rice items)", name: "foodweight", type: "text" },
-            ].map((field) => (
-              <div key={field.name}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {field.label}
-                </label>
-                {field.type === "textarea" ? (
-                  <textarea
-                    name={field.name}
-                    value={(menuData as any)[field.name]}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                ) : (
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    value={(menuData as any)[field.name]}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                )}
-              </div>
-            ))}
+            {/* Menu Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Menu Name</label>
+              <input
+                type="text"
+                name="menuname"
+                value={menuData.menuname}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
 
-            {/* Veg or Non-Veg */}
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                name="menudescription"
+                value={menuData.menudescription}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            {/* Price */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+              <input
+                type="text"
+                name="menuprice"
+                value={menuData.menuprice}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            {/* Menu Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Menu Type</label>
+              <select
+                name="menutype"
+                value={menuData.menutype}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="">Select Menu Type</option>
+                {menuTypeOptions.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Food Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Food Type</label>
+              <select
+                name="foodtype"
+                value={menuData.foodtype}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="">Select Food Type</option>
+                {foodTypeOptions.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Menu Item Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Menu Item Type</label>
+              <select
+                name="menuitemtype"
+                value={menuData.menuitemtype}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="">Select Item Type</option>
+                {menuItemTypeOptions.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Serving Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                For how many people?
+              </label>
+              <input
+                type="text"
+                name="servingtype"
+                value={menuData.servingtype}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            {/* Discount */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Discount Percentage
+              </label>
+              <input
+                type="text"
+                name="menudiscountpercent"
+                value={menuData.menudiscountpercent}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            {/* Food Weight */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Food Weight (for rice items)
+              </label>
+              <input
+                type="text"
+                name="foodweight"
+                value={menuData.foodweight}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            {/* Veg/Non-Veg */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Veg or Non-Veg
@@ -237,14 +376,12 @@ const CreateMenu: React.FC = () => {
               </select>
             </div>
 
-            {/* ✅ GST Dropdown */}
+            {/* GST Rate */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                GST
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">GST Rate</label>
               <select
-                name="gst"
-                value={menuData.gst}
+                name="gst_rate" // ✅ corrected field
+                value={menuData.gst_rate}
                 onChange={handleChange}
                 className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
@@ -271,6 +408,7 @@ const CreateMenu: React.FC = () => {
               />
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-md hover:from-orange-600 hover:to-orange-700 transition-all"
