@@ -23,6 +23,10 @@ const socket = io("https://backend.foodapp.transev.site", {
   timeout: 10000,
 });
 
+// handy logs
+socket.on("connect_error", (err) => console.warn("connect_error", err.message));
+socket.on("reconnect_attempt", (n) => console.log("reconnect attempt", n));
+
 interface MenuDetails {
   created_at: string;
   final_price: string;
@@ -230,16 +234,19 @@ const CartPage: React.FC = () => {
       };
 
       socket.once("message", onReply);
+      
+      // ✅ Socket integration for createorder - exactly matches backend expectations
       socket.emit("createorder", {
-        usercartid,
-        userid: userId,
+        usercartid,        // matches: data.get("usercartid")
+        userid: userId,    // matches: data.get("userid")  
         temporarylocation: deliveryOption === "delivery" 
           ? deliveryLocation.address || (deliveryLocation.coordinates 
               ? `${deliveryLocation.coordinates.lat},${deliveryLocation.coordinates.lng}` 
               : "delivery")
-          : "takeaway",
+          : "takeaway",    // matches: data.get("temporarylocation", "takeaway")
       });
 
+      // Timeout handling
       setTimeout(() => {
         const stillListening = socket.hasListeners?.("message");
         if (stillListening) {

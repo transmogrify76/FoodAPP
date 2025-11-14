@@ -300,11 +300,9 @@ const RestaurantOrders: React.FC = () => {
                   key={order.uid}
                   className="relative overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-100"
                 >
-                  {/* Accent bar */}
                   <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-orange-500 to-orange-600" />
 
                   <div className="p-5">
-                    {/* Header */}
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
                         <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 ring-1 ring-orange-100">
