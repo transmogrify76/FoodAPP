@@ -11,7 +11,7 @@ const RiderSignup: React.FC = () => {
     vehicleRegNo: "",
   });
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState(1); // 1: Signup form, 2: OTP verification
+  const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -28,23 +28,23 @@ const RiderSignup: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/raiderops/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          ...formData,
-          fullname: formData.name,
-          confirm_password: formData.password,
-        }),
-      });
+      const response = await fetch(
+        "https://backend.foodapp.transev.site/raiderops/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            ...formData,
+            fullname: formData.name,
+            confirm_password: formData.password,
+          }),
+        }
+      );
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Signup failed");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Signup failed");
-      }
-
-      setStep(2); // Move to OTP verification step
+      setStep(2);
     } catch (error: any) {
       setError(error.message);
     }
@@ -55,25 +55,25 @@ const RiderSignup: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/raiderops/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          email: formData.email,
-          otp: otp,
-          fullname: formData.name,
-          password: formData.password,
-          confirm_password: formData.password,
-          drivinglicense: formData.drivingLicense,
-          vehicleregno: formData.vehicleRegNo,
-        }),
-      });
+      const response = await fetch(
+        "https://backend.foodapp.transev.site/raiderops/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            email: formData.email,
+            otp: otp,
+            fullname: formData.name,
+            password: formData.password,
+            confirm_password: formData.password,
+            drivinglicense: formData.drivingLicense,
+            vehicleregno: formData.vehicleRegNo,
+          }),
+        }
+      );
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "OTP verification failed");
-      }
+      if (!response.ok) throw new Error(data.error || "OTP verification failed");
 
       alert("Signup Successful!");
       navigate("/rider-login");
@@ -83,90 +83,152 @@ const RiderSignup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex items-center justify-center">
-      <div className="bg-white rounded-xl shadow-xl p-10 max-w-md w-full min-h-[850px]">
-        <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">
-          Create Your Account
-        </h1>
-        <p className="text-center text-lg text-gray-600 mb-8">
-          Join us and start your journey as a rider!
-        </p>
-        {error && <p className="text-center text-red-500 font-bold mb-4">{error}</p>}
-        {step === 1 ? (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <FaUserAlt className="inline-block mr-2 text-red-500" />
-                Full Name
-              </label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange}
-                className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-                placeholder="Enter your full name" required />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <FaUserAlt className="inline-block mr-2 text-red-500" />
-                Email Address
-              </label>
-              <input type="email" name="email" value={formData.email} onChange={handleChange}
-                className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-                placeholder="Enter your email" required />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <FaLock className="inline-block mr-2 text-red-500" />
-                Password
-              </label>
-              <input type="password" name="password" value={formData.password} onChange={handleChange}
-                className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-                placeholder="Enter your password" required />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <FaIdCard className="inline-block mr-2 text-red-500" />
-                Driving License No
-              </label>
-              <input type="text" name="drivingLicense" value={formData.drivingLicense} onChange={handleChange}
-                className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-                placeholder="Enter your driving license number" required />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <FaCar className="inline-block mr-2 text-red-500" />
-                Vehicle Registration No
-              </label>
-              <input type="text" name="vehicleRegNo" value={formData.vehicleRegNo} onChange={handleChange}
-                className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-                placeholder="Enter your vehicle registration number" required />
-            </div>
-            <button type="submit"
-              className="w-full bg-red-500 text-white text-lg font-bold py-4 rounded-lg shadow-lg hover:bg-red-600 transition-all">
+    <div className="min-h-screen bg-orange-50 flex items-center justify-center px-4 py-10">
+      <div className="bg-white shadow-xl rounded-3xl p-6 w-full max-w-sm">
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png"
+            alt="Rider Logo"
+            className="w-20 mx-auto mb-2"
+          />
+          <h1 className="text-xl font-bold text-orange-600">Rider Signup</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Join us and start delivering with ease.
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+        )}
+
+        {/* Step 1: Signup Form */}
+        {step === 1 && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <InputField
+              icon={<FaUserAlt />}
+              placeholder="Full Name"
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={handleChange}
+            />
+
+            <InputField
+              icon={<FaUserAlt />}
+              placeholder="Email Address"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+
+            <InputField
+              icon={<FaLock />}
+              placeholder="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+
+            <InputField
+              icon={<FaIdCard />}
+              placeholder="Driving License Number"
+              name="drivingLicense"
+              type="text"
+              value={formData.drivingLicense}
+              onChange={handleChange}
+            />
+
+            <InputField
+              icon={<FaCar />}
+              placeholder="Vehicle Registration Number"
+              name="vehicleRegNo"
+              type="text"
+              value={formData.vehicleRegNo}
+              onChange={handleChange}
+            />
+
+            <button
+              type="submit"
+              className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition"
+            >
               Sign Up
             </button>
           </form>
-        ) : (
-          <form onSubmit={handleOtpSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                OTP
-              </label>
-              <input type="text" name="otp" value={otp} onChange={handleOtpChange}
-                className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-                placeholder="Enter the OTP sent to your email" required />
+        )}
+
+        {/* Step 2: OTP Verification */}
+        {step === 2 && (
+          <form onSubmit={handleOtpSubmit} className="space-y-4">
+            <div className="text-center mb-3">
+              <p className="text-sm text-gray-600">
+                Enter the OTP sent to <span className="font-semibold">{formData.email}</span>
+              </p>
             </div>
-            <button type="submit"
-              className="w-full bg-red-500 text-white text-lg font-bold py-4 rounded-lg shadow-lg hover:bg-red-600 transition-all">
+
+            <InputField
+              icon={<FaLock />}
+              placeholder="Enter OTP"
+              name="otp"
+              type="text"
+              value={otp}
+              onChange={handleOtpChange}
+            />
+
+            <button
+              type="submit"
+              className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition"
+            >
               Verify OTP
             </button>
           </form>
         )}
-        <p className="text-sm text-gray-600 text-center mt-6">
+
+        {/* Footer */}
+        <p className="text-xs text-center text-gray-600 mt-4">
           Already have an account?{" "}
-          <a href="/rider-login" className="text-red-600 font-semibold hover:underline">Log In</a>
+          <a
+            href="/rider-login"
+            className="text-orange-600 font-semibold hover:underline"
+          >
+            Log In
+          </a>
         </p>
       </div>
     </div>
   );
 };
+
+// Reusable Input Component
+const InputField = ({
+  icon,
+  placeholder,
+  name,
+  type,
+  value,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  placeholder: string;
+  name: string;
+  type: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <div className="flex items-center border border-gray-300 rounded-xl px-3 py-3 bg-white focus-within:ring-2 focus-within:ring-orange-500 transition">
+    <span className="text-orange-500 mr-3 text-sm">{icon}</span>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full outline-none text-sm text-gray-800 placeholder-gray-400 bg-transparent"
+      required
+    />
+  </div>
+);
 
 export default RiderSignup;

@@ -173,7 +173,7 @@ const GetMenuByOwnerId: React.FC = () => {
       );
     } catch (err) {
       setError("Something went wrong while updating stock status. Please try again later.");
-    } finally {
+    } finally { 
       setLoading(false);
     }
   };
@@ -261,7 +261,7 @@ const GetMenuByOwnerId: React.FC = () => {
                     >
                       {currentStatus}
                     </span>
-                  </p>
+                  </p> 
 
                   {/* ACTION BUTTONS */}
                   <div className="flex flex-wrap gap-2 pt-2">

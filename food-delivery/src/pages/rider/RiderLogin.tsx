@@ -16,11 +16,14 @@ const RiderLogin: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/raider/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formData),
-      });
+      const response = await fetch(
+        "https://backend.foodapp.transev.site/raider/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams(formData).toString(),
+        }
+      );
 
       const data = await response.json();
 
@@ -36,42 +39,105 @@ const RiderLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 flex items-center justify-center">
-      <div className="bg-white rounded-xl shadow-xl p-11 max-w-md w-full min-h-[650px]">
-        <h1 className="text-4xl font-extrabold text-center text-red-600 mb-6">
-          Welcome Back!
-        </h1>
-        <p className="text-center text-lg text-gray-600 mb-8">
-          Please log in to continue!
-        </p>
-        {error && <p className="text-center text-red-500 font-bold mb-4">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <FaUserAlt className="inline-block mr-2 text-red-500" />
-              Email Address
-            </label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange}
-              className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-              placeholder="Enter your email" required />
+    <div className="min-h-screen bg-orange-50 flex items-center justify-center px-4 py-8">
+      <div className="bg-white shadow-xl rounded-3xl p-6 w-full max-w-sm">
+        {/* Logo + Title */}
+        <div className="mb-6 text-center">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png"
+            alt="Rider Logo"
+            className="w-20 mx-auto mb-2"
+          />
+          <h1 className="text-xl font-bold text-orange-600">Rider Login</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Login to access your rider dashboard.
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <InputField
+            icon={<FaUserAlt />}
+            placeholder="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+
+          <InputField
+            icon={<FaLock />}
+            placeholder="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+
+          {/* Forget Password */}
+          <div className="text-right">
+            <a
+              href="/rider-forget-password"
+              className="text-xs text-orange-600 font-semibold hover:underline"
+            >
+              Forgot Password?
+            </a>
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <FaLock className="inline-block mr-2 text-red-500" />
-              Password
-            </label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange}
-              className="w-full p-4 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 hover:bg-red-50"
-              placeholder="Enter your password" required />
-          </div>
-          <button type="submit"
-            className="w-full bg-red-500 text-white text-lg font-bold py-4 rounded-lg shadow-lg hover:bg-red-600 transition-all">
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold text-base hover:bg-orange-600 transition"
+          >
             Log In
           </button>
         </form>
+
+        {/* Sign Up */}
+        <p className="text-xs text-center text-gray-600 mt-4">
+          Don’t have an account?{" "}
+          <a
+            href="/rider-signup"
+            className="text-orange-600 font-semibold hover:underline"
+          >
+            Sign Up
+          </a>
+        </p>
       </div>
     </div>
   );
 };
+
+const InputField = ({
+  icon,
+  placeholder,
+  name,
+  type,
+  value,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  placeholder: string;
+  name: string;
+  type: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <div className="flex items-center border border-gray-300 rounded-xl px-3 py-2 bg-white focus-within:ring-2 focus-within:ring-orange-500 transition">
+    <span className="text-orange-500 mr-3 text-sm">{icon}</span>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full outline-none text-sm placeholder-gray-400 text-gray-800 bg-transparent"
+      required
+    />
+  </div>
+);
 
 export default RiderLogin;

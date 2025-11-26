@@ -1,165 +1,190 @@
-import React, { useState } from 'react';
-import { FaMotorcycle, FaClipboardList, FaUser, FaBell, FaWallet } from 'react-icons/fa';
-import * as Switch from '@radix-ui/react-switch';
-import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import React, { useState } from "react";
+import {
+  FaMotorcycle,
+  FaClipboardList,
+  FaUser,
+  FaBell,
+  FaWallet,
+  FaUserCircle,
+  FaMapMarkerAlt,
+  FaChartBar,
+  FaClock,
+  FaRoad,
+} from "react-icons/fa";
+import * as Switch from "@radix-ui/react-switch";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
-// Define the interface for the decoded token payload
 interface DecodedToken {
   raiderid: string;
-  // include additional fields from the token payload if needed
 }
 
 const RiderDashboard: React.FC = () => {
-  const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<string>('home');
+  const [isOnline, setIsOnline] = useState(true);
+  const [activeTab, setActiveTab] = useState("home");
   const navigate = useNavigate();
 
   const toggleStatus = async () => {
-    // Retrieve the token from localStorage
-    const token = localStorage.getItem('raider_token');
-    if (!token) {
-      console.error('No token found in localStorage');
-      return;
-    }
-    
-    // Decode the token to extract the raiderid
+    const token = localStorage.getItem("raider_token");
+    if (!token) return;
+
     let raiderid: string;
     try {
-      const decodedToken = jwtDecode<DecodedToken>(token);
-      raiderid = decodedToken.raiderid;
-    } catch (error) {
-      console.error('Error decoding token:', error);
+      const decoded = jwtDecode<DecodedToken>(token);
+      raiderid = decoded.raiderid;
+    } catch {
       return;
     }
 
-    // Prepare form data with the extracted raiderid
     const formData = new FormData();
-    formData.append('raiderid', raiderid);
+    formData.append("raiderid", raiderid);
 
     try {
-      // Replace the URL below with your actual API endpoint
-      const response = await fetch('https://backend.foodapp.transev.site/ops/raiderstatus', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        "https://backend.foodapp.transev.site/ops/raiderstatus",
+        { method: "POST", body: formData }
+      );
       const result = await response.json();
-
       if (response.ok) {
-        // Update UI based on the new status returned by the API
-        setIsOnline(result.online_status === 'on');
-        console.log(result.message);
-      } else {
-        console.error(result.message);
+        setIsOnline(result.online_status === "on");
       }
-    } catch (error) {
-      console.error("Error updating raider status:", error);
-    }
+    } catch {}
   };
 
-  const handleNavigation = (tab: string, route: string): void => {
+  const goTo = (route: string, tab: string) => {
     setActiveTab(tab);
     navigate(route);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      <div className="w-full p-4">
-        <div className="w-full bg-white shadow-2xl rounded-2xl p-4">
-          <h1 className="text-2xl font-extrabold text-gray-800 text-center mb-4">Rider Dashboard</h1>
-          
-          <div className="flex items-center justify-between p-3 bg-red-100 border border-red-300 rounded-xl mb-4 shadow-md">
-            <span className="text-base font-semibold">
-              Status:
-              <span className={isOnline ? 'text-green-600' : 'text-gray-500'}>
-                {isOnline ? ' Online' : ' Offline'}
-              </span>
-            </span>
-            <Switch.Root
-              checked={isOnline}
-              onCheckedChange={toggleStatus}
-              className="w-12 h-6 bg-gray-300 rounded-full relative"
+    <div className="bg-gray-50 min-h-screen flex flex-col">
+
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-7 
+      flex justify-between items-center shadow-lg rounded-b-3xl backdrop-blur-md">
+        <div>
+          <h2 className="text-xl font-bold">Hi Rider 👋</h2>
+          <p className="text-sm opacity-90">Stay online to receive more orders</p>
+        </div>
+        <FaUserCircle size={42} className="cursor-pointer drop-shadow-lg" />
+      </div>
+
+      {/* STATUS CARD */}
+      <div className="px-5 mt-5">
+        <div className="bg-white p-5 rounded-2xl shadow-md flex justify-between items-center border
+        transition-all duration-300 hover:shadow-xl hover:border-orange-400">
+          <div>
+            <p className="text-sm font-semibold text-gray-600">CURRENT STATUS</p>
+            <p
+              className={`text-lg font-bold ${
+                isOnline ? "text-green-600" : "text-gray-500"
+              }`}
             >
-              <Switch.Thumb className={`block w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${isOnline ? 'translate-x-6' : 'translate-x-1'}`} />
-            </Switch.Root>
+              {isOnline ? "Online" : "Offline"}
+            </p>
           </div>
 
-          <div className="space-y-3 mb-4">
-            <div className="p-3 bg-red-50 border border-red-300 rounded-xl flex items-center shadow-md">
-              <FaClipboardList className="text-red-500 text-3xl mr-3" />
-              <div>
-                <p className="text-sm font-semibold">Active Orders</p>
-                <span className="text-2xl font-extrabold">3</span>
-              </div>
-            </div>
-            <div className="p-3 bg-orange-50 border border-orange-300 rounded-xl flex items-center shadow-md">
-              <FaMotorcycle className="text-orange-500 text-3xl mr-3" />
-              <div>
-                <p className="text-sm font-semibold">Pending Orders</p>
-                <span className="text-2xl font-extrabold">5</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl shadow-md">
-            <h2 className="text-lg font-semibold mb-3 text-center text-gray-800">Earnings Summary</h2>
-            <div className="space-y-3">
-              {[
-                { label: 'Today', amount: '50' },
-                { label: 'This Week', amount: '350' },
-                { label: 'This Month', amount: '1200' }
-              ].map((item, index) => (
-                <div key={index} className="text-center bg-white p-2 rounded-xl shadow-md border">
-                  <p className="text-gray-600 font-medium text-xs">{item.label}</p>
-                  <span className="text-xl font-extrabold text-gray-800">{item.amount}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Switch.Root
+            checked={isOnline}
+            onCheckedChange={toggleStatus}
+            className={`w-16 h-8 rounded-full transition-all relative duration-300 
+            ${isOnline ? "bg-green-500 shadow-lg" : "bg-gray-400"}`}
+          >
+            <Switch.Thumb
+              className={`block w-7 h-7 bg-white rounded-full shadow-md transition-transform duration-300
+              ${isOnline ? "translate-x-8" : "translate-x-1"}`}
+            />
+          </Switch.Root>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white shadow-2xl">
-        <div className="grid grid-cols-5 gap-2 p-2">
-          <button
-            onClick={() => handleNavigation('home', '/rider-dashboard')}
-            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'home' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
-          >
-            <FaMotorcycle className="text-xl mb-1" />
-            <span className="text-xs">Home</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('earnings', '/rider-earnings')}
-            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'earnings' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
-          >
-            <FaWallet className="text-xl mb-1" />
-            <span className="text-xs">Earnings</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('orders', '/rider-ordermanagement')}
-            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'orders' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
-          >
-            <FaClipboardList className="text-xl mb-1" />
-            <span className="text-xs">Orders</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('alerts', '/rider-notification')}
-            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'alerts' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
-          >
-            <FaBell className="text-xl mb-1" />
-            <span className="text-xs">Alerts</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('profile', '/rider-profile')}
-            className={`flex flex-col items-center p-2 rounded-xl ${activeTab === 'profile' ? 'bg-red-100 text-red-600' : 'text-gray-600'}`}
-          >
-            <FaUser className="text-xl mb-1" />
-            <span className="text-xs">Profile</span>
-          </button>
-        </div>
+      {/* QUICK STATS */}
+      <div className="px-5 mt-6 grid grid-cols-3 gap-4">
+        <QuickStat icon={<FaClipboardList />} label="Today Orders" value="7" />
+        <QuickStat icon={<FaRoad />} label="Distance" value="22 km" />
+        <QuickStat icon={<FaWallet />} label="Incentive" value="₹80" />
+      </div>
+
+      {/* MAIN TILES */}
+      <div className="px-5 mt-7 grid grid-cols-2 gap-5 pb-28 flex-1 overflow-y-auto">
+
+        <Tile icon={<FaMotorcycle />} title="Ongoing Orders" count="2" />
+        <Tile icon={<FaClipboardList />} title="Order History" />
+        <Tile icon={<FaChartBar />} title="Earnings Summary" />
+        <Tile icon={<FaClock />} title="Shift Time" count="3 hrs" />
+        <Tile icon={<FaMapMarkerAlt />} title="Delivery Zones" />
+        <Tile icon={<FaBell />} title="Alerts & Updates" />
+
+      </div>
+
+      {/* BOTTOM NAV */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-xl 
+      py-3 flex justify-around items-center rounded-t-2xl">
+        <NavItem
+          icon={<FaMotorcycle />}
+          label="Home"
+          active={activeTab === "home"}
+          onClick={() => goTo("/rider-dashboard", "home")}
+        />
+        <NavItem
+          icon={<FaWallet />}
+          label="Earnings"
+          active={activeTab === "earnings"}
+          onClick={() => goTo("/rider-earnings", "earnings")}
+        />
+        <NavItem
+          icon={<FaClipboardList />}
+          label="Orders"
+          active={activeTab === "orders"}
+          onClick={() => goTo("/rider-ordermanagement", "orders")}
+        />
+        <NavItem
+          icon={<FaBell />}
+          label="Alerts"
+          active={activeTab === "alerts"}
+          onClick={() => goTo("/rider-notification", "alerts")}
+        />
+        <NavItem
+          icon={<FaUser />}
+          label="Profile"
+          active={activeTab === "profile"}
+          onClick={() => goTo("/rider-profile", "profile")}
+        />
       </div>
     </div>
   );
 };
+
+/* COMPONENTS */
+const QuickStat = ({ icon, label, value }: any) => (
+  <div className="bg-white rounded-2xl p-4 shadow-md border flex flex-col items-center 
+    transition-all duration-300 hover:shadow-xl hover:scale-[1.03] hover:border-orange-400">
+    <div className="text-orange-500 text-xl mb-1">{icon}</div>
+    <p className="text-xs text-gray-500">{label}</p>
+    <h3 className="text-lg font-bold text-gray-800 mt-1">{value}</h3>
+  </div>
+);
+
+const Tile = ({ icon, title, count }: any) => (
+  <div className="bg-white p-6 rounded-2xl shadow-md border flex flex-col items-center 
+    transition-all duration-300 hover:shadow-xl hover:scale-[1.03] hover:border-orange-400">
+    <div className="text-orange-500 text-4xl mb-2">{icon}</div>
+    <p className="text-sm text-gray-600 font-medium">{title}</p>
+    {count && (
+      <h3 className="text-2xl font-extrabold text-gray-800 mt-1">{count}</h3>
+    )}
+  </div>
+);
+
+const NavItem = ({ icon, label, active, onClick }: any) => (
+  <div
+    className={`flex flex-col items-center cursor-pointer transition-all duration-300 
+      ${active ? "text-orange-500 scale-110" : "text-gray-500 hover:text-orange-400 hover:scale-105"}`}
+    onClick={onClick}
+  >
+    <div className="text-lg">{icon}</div>
+    <p className="text-xs mt-1">{label}</p>
+  </div>
+);
 
 export default RiderDashboard;
