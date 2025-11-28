@@ -8,7 +8,9 @@ import {
   FaBell,
   FaMapMarkerAlt,
   FaLock,
-  FaMotorcycle
+  FaMotorcycle,
+  FaSave,
+  FaEdit
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -50,7 +52,6 @@ const ProfileSettings = () => {
     confirm_password: '',
   });
 
- 
   const getRaiderIdFromraider_token = () => {
     const raider_token = localStorage.getItem('raider_token');
     if (raider_token) {
@@ -60,7 +61,6 @@ const ProfileSettings = () => {
     return null;
   };
 
-  
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -97,7 +97,6 @@ const ProfileSettings = () => {
 
     fetchProfileData();
   }, []);
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -156,7 +155,6 @@ const ProfileSettings = () => {
     }
   };
 
-  // Update password
   const handleUpdatePassword = async () => {
     try {
       const raiderid = getRaiderIdFromraider_token();
@@ -191,6 +189,7 @@ const ProfileSettings = () => {
       alert('Failed to update password.');
     }
   };
+
   const supportData = {
     contact: "+91 8084281810",
     email: "support@riderapp.com",
@@ -205,43 +204,55 @@ const ProfileSettings = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center text-red-600">{error}</div>;
-  }
-
-  if (loading) {
-    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 p-4 flex items-center justify-center text-red-600">{error}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center text-red-600 bg-white p-6 rounded-2xl shadow-md">
+          <p className="text-lg font-semibold">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 to-red-300 pb-16">
-      {/* Header */}
-      <div className="w-full p-4 bg-white shadow-md">
-        <div className="flex items-center space-x-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-red-50">
-            <FaArrowLeft className="text-xl text-gray-800" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-800">Profile & Settings</h1>
-        </div>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-6 shadow-lg rounded-b-3xl flex items-center space-x-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition"
+        >
+          <FaArrowLeft className="text-xl" />
+        </button>
+        <h1 className="text-2xl font-bold">Profile & Settings</h1>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex space-x-2 p-4">
-        {['profile', 'settings', 'support'].map(tab => (
+      {/* TABS */}
+      <div className="px-5 mt-5 flex space-x-3">
+        {['profile', 'settings', 'support'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 px-4 rounded-full font-medium ${
+            className={`flex-1 py-2 rounded-full font-semibold transition-all ${
               activeTab === tab
-                ? 'bg-red-500 text-white'
-                : 'bg-white text-gray-800 border'
+                ? "bg-orange-500 text-white shadow-md"
+                : "bg-white border text-gray-700 hover:bg-orange-50"
             }`}
           >
             {tab === 'profile' ? 'Profile' : tab === 'settings' ? 'Settings' : 'Support'}
@@ -249,126 +260,175 @@ const ProfileSettings = () => {
         ))}
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-4">
+      {/* MAIN CONTENT */}
+      <div className="p-5 space-y-5">
         {activeTab === 'profile' && profileData && (
           <>
-            {/* Profile Section */}
-            <div className="bg-white rounded-xl shadow-md p-4">
+            {/* PROFILE CARD */}
+            <div className="bg-white p-5 rounded-2xl shadow-md border hover:shadow-lg transition">
               <div className="flex flex-col items-center space-y-4">
-                <img
-                  src={profileData.profilepicture 
-                    ? `data:image/png;base64,${profileData.profilepicture}`
-                    : "https://st3.depositphotos.com/15648834/17930/v/450/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-red-100"
-                />
-                {editMode ? (
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="mt-2"
+                <div className="relative">
+                  <img
+                    src={profileData.profilepicture 
+                      ? `data:image/png;base64,${profileData.profilepicture}`
+                      : "https://st3.depositphotos.com/15648834/17930/v/450/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-orange-100"
                   />
-                ) : null}
-                <h2 className="text-2xl font-bold text-gray-800">
+                  {editMode && (
+                    <div className="mt-3 text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="w-full text-center">
                   {editMode ? (
                     <input
                       type="text"
                       name="fullname"
                       value={formData.fullname}
                       onChange={handleInputChange}
-                      className="border rounded-lg p-2"
+                      className="w-full text-2xl font-bold text-center border-b-2 border-orange-200 focus:border-orange-500 focus:outline-none py-1"
                     />
                   ) : (
-                    profileData.fullname
+                    <h2 className="text-2xl font-bold text-gray-800">{profileData.fullname}</h2>
                   )}
-                </h2>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <FaPhone />
+                </div>
+
+                <div className="w-full space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <FaUser className="text-orange-500" />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500">Email</p>
+                      {editMode ? (
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="w-full font-medium border-b border-gray-300 focus:border-orange-500 focus:outline-none py-1"
+                        />
+                      ) : (
+                        <p className="font-medium  text-gray-500">{profileData.email}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <FaPhone className="text-orange-500" />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500">Phone</p>
+                      {editMode ? (
+                        <input
+                          type="text"
+                          name="phonenumber"
+                          value={formData.phonenumber}
+                          onChange={handleInputChange}
+                          className="w-full font-medium border-b  border-gray-300 focus:border-orange-500 focus:outline-none py-1"
+                        />
+                      ) : (
+                        <p className="font-medium  text-gray-500">{profileData.phonenumber || 'N/A'}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <FaUser className="text-orange-500" />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500">Status</p>
+                      <p className="font-medium text-green-600">{profileData.raiderstatus}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-3 w-full">
                   {editMode ? (
-                    <input
-                      type="text"
-                      name="phonenumber"
-                      value={formData.phonenumber}
-                      onChange={handleInputChange}
-                      className="border rounded-lg p-2"
-                    />
+                    <>
+                      <button
+                        onClick={() => setEditMode(false)}
+                        className="flex-1 py-3 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleUpdateProfile}
+                        className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition flex items-center justify-center space-x-2"
+                      >
+                        <FaSave />
+                        <span>Save</span>
+                      </button>
+                    </>
                   ) : (
-                    <span>{profileData.phonenumber || 'N/A'}</span>
+                    <button
+                      onClick={() => setEditMode(true)}
+                      className="w-full py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition flex items-center justify-center space-x-2"
+                    >
+                      <FaEdit />
+                      <span>Edit Profile</span>
+                    </button>
                   )}
                 </div>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <FaUser />
-                  <span>Status: {profileData.raiderstatus}</span>
-                </div>
-                {editMode ? (
-                  <button
-                    onClick={handleUpdateProfile}
-                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
-                  >
-                    Save Changes
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setEditMode(true)}
-                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
-                  >
-                    Edit Profile
-                  </button>
-                )}
               </div>
             </div>
 
-            {/* Vehicle Details Section */}
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <FaMotorcycle className="text-red-500 text-xl" />
-                <h2 className="text-lg font-semibold">Vehicle Details</h2>
+            {/* VEHICLE DETAILS */}
+            <div className="bg-white rounded-2xl shadow-md border hover:shadow-lg transition">
+              <div className="p-4 border-b flex items-center space-x-3">
+                <FaMotorcycle className="text-orange-500 text-xl" />
+                <h2 className="font-semibold text-gray-900 text-lg">Vehicle Details</h2>
               </div>
-              <div className="space-y-2">
-                <p>
-                  <span className="font-medium">Registration:</span>
+              
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="text-sm text-gray-500 font-medium">Vehicle Registration</label>
                   {editMode ? (
                     <input
                       type="text"
                       name="vehicleregno"
                       value={formData.vehicleregno}
                       onChange={handleInputChange}
-                      className="border rounded-lg p-2"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
                     />
                   ) : (
-                    profileData.vehicleregno
+                    <p className="font-medium text-gray-800">{profileData.vehicleregno}</p>
                   )}
-                </p>
-                <p>
-                  <span className="font-medium">License:</span>
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-500 font-medium">Driving License</label>
                   {editMode ? (
                     <input
                       type="text"
                       name="drivinglicense"
                       value={formData.drivinglicense}
                       onChange={handleInputChange}
-                      className="border rounded-lg p-2"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
                     />
                   ) : (
-                    profileData.drivinglicense
+                    <p className="font-medium text-gray-800">{profileData.drivinglicense}</p>
                   )}
-                </p>
-                <p>
-                  <span className="font-medium">Preferred Areas:</span>
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-500 font-medium">Preferred Delivery Areas</label>
                   {editMode ? (
                     <input
                       type="text"
                       name="preferreddelivelrylocation"
                       value={formData.preferreddelivelrylocation}
                       onChange={handleInputChange}
-                      className="border rounded-lg p-2"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
                     />
                   ) : (
-                    profileData.preferreddelivelrylocation
+                    <p className="font-medium text-gray-800">{profileData.preferreddelivelrylocation}</p>
                   )}
-                </p>
+                </div>
               </div>
             </div>
           </>
@@ -376,66 +436,79 @@ const ProfileSettings = () => {
 
         {activeTab === 'settings' && (
           <>
-            {/* Change Password Section */}
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <FaLock className="text-red-500 text-xl" />
-                <h2 className="text-lg font-semibold">Change Password</h2>
+            {/* CHANGE PASSWORD */}
+            <div className="bg-white rounded-2xl shadow-md border hover:shadow-lg transition">
+              <div className="p-4 border-b flex items-center space-x-3">
+                <FaLock className="text-orange-500 text-xl" />
+                <h2 className="font-semibold text-gray-900 text-lg">Change Password</h2>
               </div>
-              <div className="space-y-3">
-                <input
-                  type="password"
-                  name="old_password"
-                  placeholder="Current Password"
-                  value={passwordData.old_password}
-                  onChange={handlePasswordChange}
-                  className="w-full p-2 border rounded-lg"
-                />
-                <input
-                  type="password"
-                  name="new_password"
-                  placeholder="New Password"
-                  value={passwordData.new_password}
-                  onChange={handlePasswordChange}
-                  className="w-full p-2 border rounded-lg"
-                />
-                <input
-                  type="password"
-                  name="confirm_password"
-                  placeholder="Confirm New Password"
-                  value={passwordData.confirm_password}
-                  onChange={handlePasswordChange}
-                  className="w-full p-2 border rounded-lg"
-                />
+              
+              <div className="p-4 space-y-4">
+                <div>
+                  <input
+                    type="password"
+                    name="old_password"
+                    placeholder="Current Password"
+                    value={passwordData.old_password}
+                    onChange={handlePasswordChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    name="new_password"
+                    placeholder="New Password"
+                    value={passwordData.new_password}
+                    onChange={handlePasswordChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    name="confirm_password"
+                    placeholder="Confirm New Password"
+                    value={passwordData.confirm_password}
+                    onChange={handlePasswordChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+                  />
+                </div>
                 <button
                   onClick={handleUpdatePassword}
-                  className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+                  className="w-full py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition"
                 >
                   Update Password
                 </button>
               </div>
             </div>
 
-            {/* Notification Settings Section */}
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <FaBell className="text-red-500 text-xl" />
-                <h2 className="text-lg font-semibold">Notification Settings</h2>
+            {/* NOTIFICATION SETTINGS */}
+            <div className="bg-white rounded-2xl shadow-md border hover:shadow-lg transition">
+              <div className="p-4 border-b flex items-center space-x-3">
+                <FaBell className="text-orange-500 text-xl" />
+                <h2 className="font-semibold text-gray-900 text-lg">Notification Settings</h2>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Enable Notifications</span>
-                <button
-                  onClick={() => setNotificationEnabled(!notificationEnabled)}
-                  className={`w-12 h-6 rounded-full p-1 transition-colors ${
-                    notificationEnabled ? 'bg-red-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                      notificationEnabled ? 'translate-x-6' : 'translate-x-0'
+              
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-800">Enable Notifications</p>
+                    <p className="text-sm text-gray-600">Receive order updates and alerts</p>
+                  </div>
+                  <button
+                    onClick={() => setNotificationEnabled(!notificationEnabled)}
+                    className={`w-12 h-6 rounded-full p-1 transition-colors ${
+                      notificationEnabled ? 'bg-orange-500' : 'bg-gray-300'
                     }`}
-                  />
-                </button>
+                  >
+                    <div
+                      className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                        notificationEnabled ? 'translate-x-6' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
           </>
@@ -443,48 +516,74 @@ const ProfileSettings = () => {
 
         {activeTab === 'support' && (
           <>
-            {/* Contact Support Section */}
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <FaPhone className="text-red-500 text-xl" />
-                <h2 className="text-lg font-semibold">Contact Support</h2>
+            {/* CONTACT SUPPORT */}
+            <div className="bg-white rounded-2xl shadow-md border hover:shadow-lg transition">
+              <div className="p-4 border-b flex items-center space-x-3">
+                <FaPhone className="text-orange-500 text-xl" />
+                <h2 className="font-semibold text-gray-900 text-lg">Contact Support</h2>
               </div>
-              <div className="space-y-2">
-                <p>Phone: {supportData.contact}</p>
-                <p>Email: {supportData.email}</p>
-                <button className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">
-                  Call Now
-                </button>
+              
+              <div className="p-4 space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-800">Phone</p>
+                    <p className="text-gray-600">{supportData.contact}</p>
+                  </div>
+                  <a 
+                    href={`tel:${supportData.contact}`}
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+                  >
+                    Call
+                  </a>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-800">Email</p>
+                    <p className="text-gray-600">{supportData.email}</p>
+                  </div>
+                  <a 
+                    href={`mailto:${supportData.email}`}
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+                  >
+                    Email
+                  </a>
+                </div>
               </div>
             </div>
 
-            {/* FAQs Section */}
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <FaQuestionCircle className="text-red-500 text-xl" />
-                <h2 className="text-lg font-semibold">FAQs</h2>
+            {/* FAQS */}
+            <div className="bg-white rounded-2xl shadow-md border hover:shadow-lg transition">
+              <div className="p-4 border-b flex items-center space-x-3">
+                <FaQuestionCircle className="text-orange-500 text-xl" />
+                <h2 className="font-semibold text-gray-900 text-lg">FAQs</h2>
               </div>
-              <div className="space-y-3">
+              
+              <div className="divide-y">
                 {supportData.faqs.map(faq => (
-                  <div key={faq.id} className="border-b pb-3">
-                    <p className="font-medium">{faq.question}</p>
+                  <div key={faq.id} className="p-4 hover:bg-orange-50 transition">
+                    <p className="font-medium text-gray-800 mb-2">{faq.question}</p>
                     <p className="text-sm text-gray-600">{faq.answer}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Emergency Contacts Section */}
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <FaPhone className="text-red-500 text-xl" />
-                <h2 className="text-lg font-semibold">Emergency Contacts</h2>
+            {/* EMERGENCY CONTACTS */}
+            <div className="bg-white rounded-2xl shadow-md border hover:shadow-lg transition">
+              <div className="p-4 border-b flex items-center space-x-3">
+                <FaPhone className="text-orange-500 text-xl" />
+                <h2 className="font-semibold text-gray-900 text-lg">Emergency Contacts</h2>
               </div>
-              <div className="space-y-2">
+              
+              <div className="p-4 space-y-3">
                 {supportData.emergencyContacts.map(contact => (
-                  <div key={contact.id} className="flex justify-between items-center">
-                    <span>{contact.name}</span>
-                    <a href={`tel:${contact.number}`} className="text-red-500 hover:underline">
+                  <div key={contact.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <span className="font-medium text-gray-800">{contact.name}</span>
+                    <a 
+                      href={`tel:${contact.number}`}
+                      className="text-red-600 font-semibold hover:underline"
+                    >
                       {contact.number}
                     </a>
                   </div>
