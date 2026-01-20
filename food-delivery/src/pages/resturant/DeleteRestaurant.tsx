@@ -38,7 +38,7 @@ const DeleteRestaurant: React.FC = () => {
     formData.append("ownerid", ownerid);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/owenerresturentfetch", {
+      const response = await fetch("http://192.168.0.200:5020/owenerresturentfetch", {
         method: "POST",
         body: formData,
       });
@@ -78,7 +78,7 @@ const DeleteRestaurant: React.FC = () => {
     formData.append("restaurantid", selectedRestaurantId);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/restaurant/delete_cascade", {
+      const response = await fetch("http://192.168.0.200:5020/restaurant/delete_cascade", {
         method: "POST",
         body: formData,
       });

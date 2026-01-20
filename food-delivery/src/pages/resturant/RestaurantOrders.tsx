@@ -27,7 +27,7 @@ const RestaurantOrders: React.FC = () => {
   const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
-    const newSocket = io('https://backend.foodapp.transev.site');
+    const newSocket = io('http://192.168.0.200:5020');
     setSocket(newSocket);
 
     newSocket.on('message', (data: any) => {
@@ -60,7 +60,7 @@ const RestaurantOrders: React.FC = () => {
       const formData = new FormData();
       formData.append('ownerid', ownerId);
 
-      const response = await fetch('https://backend.foodapp.transev.site/owenerresturentfetch', {
+      const response = await fetch('http://192.168.0.200:5020/owenerresturentfetch', {
         method: 'POST',
         body: formData,
       });
@@ -96,7 +96,7 @@ const RestaurantOrders: React.FC = () => {
           const formData = new FormData();
           formData.append('restaurantid', restaurantId);
 
-          const response = await axios.post('https://backend.foodapp.transev.site/order/orderhistory', formData);
+          const response = await axios.post('http://192.168.0.200:5020/order/orderhistory', formData);
 
           if (response.data && response.data.order_list) {
             // Add restaurant ID to each order for reference
@@ -128,7 +128,7 @@ const RestaurantOrders: React.FC = () => {
       formData.append('orderid', orderId);
       formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected');
 
-      const response = await axios.post('https://backend.foodapp.transev.site/ops/updateorder', formData);
+      const response = await axios.post('http://192.168.0.200:5020/ops/updateorder', formData);
 
       if (response.data.message === 'Data update success') {
         setMessage(`Order #${orderId} has been ${action}ed.`);
@@ -207,7 +207,7 @@ const RestaurantOrders: React.FC = () => {
   const fetchAllRiders = async () => {
     try {
       setLoadingRiders(true);
-      const response = await axios.get('https://backend.foodapp.transev.site/ops/getallraiders');
+      const response = await axios.get('http://192.168.0.200:5020/ops/getallraiders');
       setRiders(response.data.data);
     } catch (error) {
       console.error('Error fetching riders:', error);
@@ -230,7 +230,7 @@ const RestaurantOrders: React.FC = () => {
       formData.append('orderid', orderId);
 
       const response = await axios.post(
-        'https://backend.foodapp.transev.site/order/assignorderraider',
+        'http://192.168.0.200:5020/order/assignorderraider',
         formData
       );
 

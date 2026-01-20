@@ -48,7 +48,7 @@ const EditMenu: React.FC = () => {
     const formData = new FormData();
     formData.append("ownerid", ownerid);
     try {
-      const res = await fetch("https://backend.foodapp.transev.site/owenerresturentfetch", {
+      const res = await fetch("http://192.168.0.200:5020/owenerresturentfetch", {
         method: "POST",
         body: formData,
       });
@@ -65,7 +65,7 @@ const EditMenu: React.FC = () => {
     const formData = new FormData();
     formData.append("resturnatid", restaurantId);
     try {
-      const res = await fetch("https://backend.foodapp.transev.site/menu/getmenubyresturantid", {
+      const res = await fetch("http://192.168.0.200:5020/menu/getmenubyresturantid", {
         method: "POST",
         body: formData,
       });
@@ -99,7 +99,7 @@ const EditMenu: React.FC = () => {
         images: [],
       });
       const imageUrls = (selected.images || []).map(
-        (img: any) => `https://backend.foodapp.transev.site/${img.image_path}`
+        (img: any) => `http://192.168.0.200:5020/${img.image_path}`
       );
       setPreviewImages(imageUrls);
     }
@@ -139,7 +139,7 @@ const EditMenu: React.FC = () => {
     formData.append("restaurantid", selectedRestaurantId);
 
     try {
-      const res = await fetch("https://backend.foodapp.transev.site/menuops/updatemenuops", {
+      const res = await fetch("http://192.168.0.200:5020/menuops/updatemenuops", {
         method: "POST",
         body: formData,
       });

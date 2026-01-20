@@ -43,7 +43,7 @@ const RestaurantDetails: React.FC = () => {
       formData.append("ownerid", owenerid);
 
       const response = await fetch(
-        "https://backend.foodapp.transev.site/owenerresturentfetch",
+        "http://192.168.0.200:5020/owenerresturentfetch",
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -107,7 +107,7 @@ const RestaurantDetails: React.FC = () => {
       data.append("resprocchrg", editData.resprocchrg);
 
       const response = await fetch(
-        "https://backend.foodapp.transev.site/resown/updateresturant",
+        "http://192.168.0.200:5020/resown/updateresturant",
         {
           method: "POST",
           body: data,

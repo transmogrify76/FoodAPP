@@ -34,7 +34,7 @@ const ListOfRestaurants: React.FC = () => {
       const formData = new FormData();
       formData.append('ownerid', ownerId);
 
-      const response = await fetch('https://backend.foodapp.transev.site/owenerresturentfetch', {
+      const response = await fetch('http://192.168.0.200:5020/owenerresturentfetch', {
         method: 'POST',
         headers: {
           Authorization: `Bearer {token}`,

@@ -41,7 +41,7 @@ const RiderDashboard: React.FC = () => {
 
     try {
       const response = await fetch(
-        "https://backend.foodapp.transev.site/ops/raiderstatus",
+        "http://192.168.0.200:5020/ops/raiderstatus",
         { method: "POST", body: formData }
       );
       const result = await response.json();

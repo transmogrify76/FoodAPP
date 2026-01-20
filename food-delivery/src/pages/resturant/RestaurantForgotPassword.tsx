@@ -36,7 +36,7 @@ const RestaurantForgotPassword: React.FC = () => {
         formDataToSend.append("email", formData.email);
 
         const response = await fetch(
-          "https://backend.foodapp.transev.site/resown/passwordreset",
+          "http://192.168.0.200:5020/resown/passwordreset",
           {
             method: "POST",
             body: formDataToSend,
@@ -63,7 +63,7 @@ const RestaurantForgotPassword: React.FC = () => {
         formDataToSend.append("new_password", formData.newPassword);
 
         const response = await fetch(
-          "https://backend.foodapp.transev.site/resown/passwordreset",
+          "http://192.168.0.200:5020/resown/passwordreset",
           {
             method: "POST",
             body: formDataToSend,

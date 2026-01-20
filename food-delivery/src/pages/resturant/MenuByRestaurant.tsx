@@ -33,7 +33,7 @@ const GetMenuByOwnerId: React.FC = () => {
     formData.append("ownerid", owenerid);
 
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/owenerresturentfetch", {
+      const response = await fetch("http://192.168.0.200:5020/owenerresturentfetch", {
         method: "POST",
         body: formData,
       });
@@ -59,7 +59,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("resturnatid", selectedRestaurantId);
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/menu/getmenubyresturantid", {
+      const response = await fetch("http://192.168.0.200:5020/menu/getmenubyresturantid", {
         method: "POST",
         body: formData,
       });
@@ -89,7 +89,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const formData = new FormData();
     formData.append("menuid", menuid);
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/resops/deletemenu",  {
+      const response = await fetch("http://192.168.0.200:5020/resops/deletemenu",  {
         method: "POST",
         body: formData,
       });
@@ -118,7 +118,7 @@ const GetMenuByOwnerId: React.FC = () => {
     formData.append("currentstatus", "outofstock");
     formData.append("numberoffillups", "");
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/ops/fastfilling", {
+      const response = await fetch("http://192.168.0.200:5020/ops/fastfilling", {
         method: "POST",
         body: formData,
       });
@@ -154,7 +154,7 @@ const GetMenuByOwnerId: React.FC = () => {
     const numberoffillups = window.prompt("Enter number of fill-ups (stock count):", "0") || "0";
     formData.append("numberoffillups", numberoffillups);
     try {
-      const response = await fetch("https://backend.foodapp.transev.site/ops/fastfilling", {
+      const response = await fetch("http://192.168.0.200:5020/ops/fastfilling", {
         method: "POST",
         body: formData,
       });

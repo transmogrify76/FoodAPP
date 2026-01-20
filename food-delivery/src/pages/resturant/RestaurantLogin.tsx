@@ -21,7 +21,7 @@ const RestaurantLogin: React.FC = () => {
 
     try {
       const response = await fetch(
-        'https://backend.foodapp.transev.site/users/resauthlogin_login',
+        'http://192.168.0.200:5020/users/resauthlogin_login',
         {
           method: 'POST',
           headers: {
