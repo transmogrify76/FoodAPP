@@ -33,7 +33,7 @@ const NotificationsPage: React.FC = () => {
     }
 
     // Connect with userId in URL directly
-    const newSocket = io(`http://192.168.0.200:5020/notify.v1?userId=${userId}`, {
+    const newSocket = io(`http://192.168.0.103:5020/notify.v1?userId=${userId}`, {
       transports: ["polling", "websocket"],
       withCredentials: true,
       reconnection: true,

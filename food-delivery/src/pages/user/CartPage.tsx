@@ -13,7 +13,7 @@ import {
 import { AiOutlineClose } from "react-icons/ai";
 
 // ✅ API Base URL
-const API_BASE_URL = "http://192.168.0.200:5020";
+const API_BASE_URL = "http://192.168.0.103:5020";
 
 // ✅ Initialize socket connection
 const socket = io(API_BASE_URL, {
@@ -118,6 +118,42 @@ interface OrderResponse {
   order_details?: any;
 }
 
+// ✅ Razorpay Order Interface
+interface RazorpayOrderResponse {
+  amount: number;
+  currency: string;
+  key: string;
+  order_id: string;
+  status: string;
+}
+
+// ✅ Razorpay Payment Options Interface
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: any) => void;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  notes?: Record<string, string>;
+  theme?: {
+    color: string;
+  };
+}
+
+// ✅ Declare Razorpay in window object
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 const CartPage: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -146,6 +182,7 @@ const CartPage: React.FC = () => {
     success: false,
     error: null
   });
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
 
   const cart = cartData?.cart_items || [];
   const priceBreakdown = cartData?.price_breakdown;
@@ -425,7 +462,110 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // ✅ COMPLETE ORDER CREATION WITH WEB SOCKET
+  // ✅ Create Razorpay Order
+  // Update the createRazorpayOrder function
+const createRazorpayOrder = async (amount: number): Promise<RazorpayOrderResponse> => {
+  const userid = getUserIdFromToken();
+  if (!userid) {
+    throw new Error("User not authenticated");
+  }
+
+  try {
+    console.log("🔄 Creating Razorpay order for amount:", amount);
+    
+    // Use the same API_BASE_URL
+    const response = await axios.post<RazorpayOrderResponse>(
+      `${API_BASE_URL}/wallet/recharge/create-order`,
+      {
+        userid: userid,
+        amount: Math.round(amount * 100).toString() 
+      }
+    );
+
+    if (response.data.status !== "success") {
+      throw new Error("Failed to create Razorpay order");
+    }
+
+    console.log("✅ Razorpay order created:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("❌ Razorpay order creation failed:", error);
+    throw new Error(error.response?.data?.message || "Payment initialization failed");
+  }
+};
+  // ✅ Load Razorpay Script
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        console.log("✅ Razorpay script loaded");
+        resolve(true);
+      };
+      script.onerror = () => {
+        console.error("❌ Failed to load Razorpay script");
+        resolve(false);
+      };
+      document.body.appendChild(script);
+    });
+  };
+
+  // ✅ Initialize Razorpay Payment
+  const initializeRazorpayPayment = async (razorpayOrder: RazorpayOrderResponse) => {
+    const scriptLoaded = await loadRazorpayScript();
+    if (!scriptLoaded) {
+      throw new Error("Failed to load payment gateway");
+    }
+
+    return new Promise((resolve, reject) => {
+      const options: RazorpayOptions = {
+        key: razorpayOrder.key,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        name: "Foodie Heaven",
+        description: "Order Payment",
+        order_id: razorpayOrder.order_id,
+        handler: async (response: any) => {
+          console.log("✅ Payment successful:", response);
+         
+          resolve({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature
+          });
+        },
+        prefill: {
+          name: "Customer",
+          email: "customer@example.com",
+          contact: "9999999999"
+        },
+        notes: {
+          order_type: "Food Order",
+          cart_id: cartData?.usercartid || ""
+        },
+        theme: {
+          color: "#F37254"
+        }
+      };
+
+      const razorpayInstance = new window.Razorpay(options);
+      
+      razorpayInstance.on('payment.failed', (response: any) => {
+        console.error("❌ Payment failed:", response.error);
+        reject(new Error(`Payment failed: ${response.error.description || "Unknown error"}`));
+      });
+
+      razorpayInstance.open();
+    });
+  };
+
+  // ✅ COMPLETE ORDER CREATION WITH RAZORPAY PAYMENT
   const handleCheckout = async () => {
     if (deliveryOption === "delivery" && !deliveryLocation.address) {
       alert("Please select a delivery location");
@@ -440,11 +580,6 @@ const CartPage: React.FC = () => {
       return;
     }
 
-    if (!socketConnected) {
-      alert("Cannot connect to server. Please check your connection and try again.");
-      return;
-    }
-
     // Double check eligibility before proceeding
     if (appliedOffer && !isOfferEligible()) {
       alert("You are not eligible for the first order discount. The discount has been removed.");
@@ -452,7 +587,8 @@ const CartPage: React.FC = () => {
       return;
     }
 
-    // Set order status to loading
+    // Start payment processing
+    setPaymentProcessing(true);
     setOrderStatus({
       loading: true,
       success: false,
@@ -460,78 +596,101 @@ const CartPage: React.FC = () => {
     });
 
     try {
-      // Create a promise to handle socket response
-      const createOrderPromise = new Promise<OrderResponse>((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-          reject(new Error("Order creation timed out. Please try again."));
-        }, 30000);
-
-        // Listen for order response
-        const onOrderResponse = (response: OrderResponse) => {
-          clearTimeout(timeoutId);
-          socket.off("message", onOrderResponse);
-          
-          if (response.error) {
-            reject(new Error(response.error));
-          } else if (response.message?.toLowerCase().includes("success")) {
-            resolve(response);
-          } else {
-            resolve(response); // Still resolve if no error
-          }
-        };
-
-        socket.on("message", onOrderResponse);
-
-        // Prepare order payload
-        const orderPayload: any = {
-          usercartid,
-          userid: userId,
-          temporarylocation: deliveryOption === "delivery" 
-            ? deliveryLocation.address || (deliveryLocation.coordinates 
-                ? `${deliveryLocation.coordinates.lat},${deliveryLocation.coordinates.lng}` 
-                : "delivery")
-            : "takeaway",
-        };
-
-        // Add offer data only if applied AND user is eligible AND we have offer code
-        if (appliedOffer && isOfferEligible() && offerData && 'offer_code' in offerData && offerData.offer_code) {
-          console.log("✅ Sending offer code:", offerData.offer_code);
-          orderPayload.offer_code = offerData.offer_code;
-        } else {
-          console.log("❌ Not sending offer code - Not eligible or no offer code");
-        }
-
-        console.log("📤 Emitting createorder with payload:", orderPayload);
-        socket.emit("createorder", orderPayload);
-      });
-
-      // Wait for order creation
-      const orderResponse = await createOrderPromise;
+      // 1. Create Razorpay order
+      const razorpayOrder = await createRazorpayOrder(cartTotal);
       
-      console.log("✅ Order created successfully:", orderResponse);
+      // 2. Initialize Razorpay payment
+      const paymentResult = await initializeRazorpayPayment(razorpayOrder);
+      console.log("✅ Payment completed:", paymentResult);
+
+      // 3. Create order via socket after successful payment
+      if (!socketConnected) {
+        alert("Cannot connect to server. Please check your connection and try again.");
+        return;
+      }
+
+      const orderResult = await createOrderViaSocket();
       
-      // Clear cart after successful order
-      fetchCartItems(); // This will refresh cart (should be empty now)
-      
-      // Update order status with full response
+     
       setOrderStatus({
         loading: false,
         success: true,
         error: null,
-        orderUids: orderResponse.order_uids,
-        orderDetails: orderResponse
+        orderUids: orderResult.orderUids,
+        orderDetails: orderResult.orderDetails
       });
 
-    } catch (error: any) {
-      console.error("❌ Error creating order:", error);
       
-      // Update order status with error
+      fetchCartItems();
+      
+    } catch (error: any) {
+      console.error("❌ Checkout failed:", error);
+      
       setOrderStatus({
         loading: false,
         success: false,
-        error: error.message || "Failed to create order. Please try again."
+        error: error.message || "Payment failed. Please try again."
       });
+    } finally {
+      setPaymentProcessing(false);
     }
+  };
+
+  const createOrderViaSocket = (): Promise<{ orderUids?: string[], orderDetails: OrderResponse }> => {
+    return new Promise((resolve, reject) => {
+      const userId = getUserIdFromToken();
+      const usercartid = getusercartidFromToken();
+      
+      if (!userId || !usercartid) {
+        reject(new Error("User not authenticated"));
+        return;
+      }
+
+      const timeoutId = setTimeout(() => {
+        reject(new Error("Order creation timed out. Please try again."));
+      }, 30000);
+
+      const onOrderResponse = (response: OrderResponse) => {
+        clearTimeout(timeoutId);
+        socket.off("message", onOrderResponse);
+        
+        if (response.error) {
+          reject(new Error(response.error));
+        } else if (response.message?.toLowerCase().includes("success")) {
+          resolve({
+            orderUids: response.order_uids,
+            orderDetails: response
+          });
+        } else {
+          resolve({
+            orderUids: response.order_uids,
+            orderDetails: response
+          });
+        }
+      };
+
+      socket.on("message", onOrderResponse);
+
+      const orderPayload: any = {
+        usercartid,
+        userid: userId,
+        temporarylocation: deliveryOption === "delivery" 
+          ? deliveryLocation.address || (deliveryLocation.coordinates 
+              ? `${deliveryLocation.coordinates.lat},${deliveryLocation.coordinates.lng}` 
+              : "delivery")
+          : "takeaway",
+      };
+
+      if (appliedOffer && isOfferEligible() && offerData && 'offer_code' in offerData && offerData.offer_code) {
+        console.log("✅ Sending offer code:", offerData.offer_code);
+        orderPayload.offer_code = offerData.offer_code;
+      } else {
+        console.log("❌ Not sending offer code - Not eligible or no offer code");
+      }
+
+      console.log("📤 Emitting createorder with payload:", orderPayload);
+      socket.emit("createorder", orderPayload);
+    });
   };
 
   const getDeliveryTime = () => {
@@ -540,7 +699,6 @@ const CartPage: React.FC = () => {
 
   const totalItems = cart.reduce((sum, item) => sum + parseInt(item.quantity), 0);
 
-  // ✅ SIMPLIFIED Offer display component
   const OfferSection = () => {
     if (offerLoading) {
       return (
@@ -553,9 +711,8 @@ const CartPage: React.FC = () => {
       );
     }
 
-    // If no offer data or user is not eligible
     if (!offerData || !isOfferEligible()) {
-      // Show message for existing customers
+
       if (offerData && offerData.eligible === false) {
         return (
           <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
@@ -572,7 +729,6 @@ const CartPage: React.FC = () => {
       return null;
     }
 
-    // At this point, we know offerData is NewCustomerOfferResponse and user is eligible
     const eligibleOffer = offerData as NewCustomerOfferResponse;
 
     if (appliedOffer) {
@@ -1111,18 +1267,18 @@ const CartPage: React.FC = () => {
 
           <button 
             onClick={handleCheckout}
-            disabled={loading || orderStatus.loading || !socketConnected}
+            disabled={loading || paymentProcessing || !socketConnected}
             className="w-full mt-3 px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 disabled:opacity-70 flex items-center justify-center gap-2"
           >
-            {orderStatus.loading ? (
+            {paymentProcessing || orderStatus.loading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Creating Order...
+                {paymentProcessing ? 'Processing Payment...' : 'Creating Order...'}
               </>
             ) : (
               <>
                 <FaCreditCard />
-                {!socketConnected ? 'Connecting...' : `Place Order - ₹${cartTotal.toFixed(2)}`}
+                {!socketConnected ? 'Connecting...' : `Pay Now - ₹${cartTotal.toFixed(2)}`}
               </>
             )}
           </button>

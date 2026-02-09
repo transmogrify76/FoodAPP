@@ -29,7 +29,7 @@ const RiderSignup: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://192.168.0.200:5020/raiderops/signup",
+        "http://192.168.0.103:5020/raiderops/signup",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -56,7 +56,7 @@ const RiderSignup: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://192.168.0.200:5020/raiderops/signup",
+        "http://192.168.0.103:5020/raiderops/signup",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },

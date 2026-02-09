@@ -91,7 +91,7 @@ const CreateMenu: React.FC = () => {
     formData.append("ownerid", owenerid);
 
     try {
-      const response = await fetch("http://192.168.0.200:5020/owenerresturentfetch", {
+      const response = await fetch("http://192.168.0.103:5020/owenerresturentfetch", {
         method: "POST",
         body: formData,
       });
@@ -148,7 +148,7 @@ const CreateMenu: React.FC = () => {
     formData.append("restaurantid", selectedRestaurantId);
 
     try {
-      const response = await fetch("http://192.168.0.200:5020/resops/createmenu", {
+      const response = await fetch("http://192.168.0.103:5020/resops/createmenu", {
         method: "POST",
         body: formData,
       });

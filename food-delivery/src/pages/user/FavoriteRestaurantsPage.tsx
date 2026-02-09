@@ -49,7 +49,7 @@ const FavoriteRestaurantsPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        'http://192.168.0.200:5020/ops/fetchuserfavres',
+        'http://192.168.0.103:5020/ops/fetchuserfavres',
         { userid: userid }
       );
 

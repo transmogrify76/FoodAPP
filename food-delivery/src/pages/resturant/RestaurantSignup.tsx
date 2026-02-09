@@ -59,7 +59,7 @@ const RestaurantSignup: React.FC = () => {
       if (!otp && !isOtpSent) {
         // Send OTP
         const response = await axios.post(
-          'http://192.168.0.200:5020/users/resauth_signup',
+          'http://192.168.0.103:5020/users/resauth_signup',
           formDataToSend
         );
         setMessage(response.data.message);
@@ -68,7 +68,7 @@ const RestaurantSignup: React.FC = () => {
         // Verify OTP
         formDataToSend.append('otp', otp);
         const response = await axios.post(
-          'http://192.168.0.200:5020/users/resauth_signup',
+          'http://192.168.0.103:5020/users/resauth_signup',
           formDataToSend
         );
         setMessage(response.data.message);

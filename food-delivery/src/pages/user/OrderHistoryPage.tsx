@@ -72,7 +72,7 @@ const OrderHistoryPage: React.FC = () => {
         const formData = new FormData();
         formData.append('userid', userId);
 
-        const response = await fetch('http://192.168.0.200:5020/order/orderhistory', {
+        const response = await fetch('http://192.168.0.103:5020/order/orderhistory', {
           method: 'POST',
           body: formData,
         });

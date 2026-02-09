@@ -70,7 +70,7 @@ const ProfileSettings = () => {
         }
 
         const response = await axios.post(
-          'http://192.168.0.200:5020/raiderops/getprofilebyid',
+          'http://192.168.0.103:5020/raiderops/getprofilebyid',
           new URLSearchParams({ raiderid })
         );
 
@@ -135,7 +135,7 @@ const ProfileSettings = () => {
       }
 
       const response = await axios.post(
-        'http://192.168.0.200:5020/raiderops/updateprofile',
+        'http://192.168.0.103:5020/raiderops/updateprofile',
         formDataToSend,
         {
           headers: {
@@ -168,7 +168,7 @@ const ProfileSettings = () => {
       }
 
       const response = await axios.post(
-        'http://192.168.0.200:5020/raiderops/updateprofile',
+        'http://192.168.0.103:5020/raiderops/updateprofile',
         new URLSearchParams({
           raiderid,
           old_password: passwordData.old_password,

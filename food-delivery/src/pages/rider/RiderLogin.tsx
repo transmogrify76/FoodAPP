@@ -17,7 +17,7 @@ const RiderLogin: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://192.168.0.200:5020/raider/login",
+        "http://192.168.0.103:5020/raider/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },

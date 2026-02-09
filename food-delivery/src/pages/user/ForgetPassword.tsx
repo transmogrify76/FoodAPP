@@ -37,7 +37,7 @@ const ForgetPassword: React.FC = () => {
         formDataToSend.append("email", formData.email);
 
         const response = await fetch(
-          "http://192.168.0.200:5020/auth/user/passwordreset",
+          "http://192.168.0.103:5020/auth/user/passwordreset",
           {
             method: "POST",
             body: formDataToSend,
@@ -64,7 +64,7 @@ const ForgetPassword: React.FC = () => {
         formDataToSend.append("new_password", formData.newPassword);
 
         const response = await fetch(
-          "http://192.168.0.200:5020/auth/user/passwordreset",
+          "http://192.168.0.103:5020/auth/user/passwordreset",
           {
             method: "POST",
             body: formDataToSend,

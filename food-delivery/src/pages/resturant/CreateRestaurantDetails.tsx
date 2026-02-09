@@ -13,7 +13,7 @@ const CreateRestaurant: React.FC = () => {
     address: "",
     totalseats: "",
     restaurantphone: "",
-    gst: "False", // Default False
+    gst: "False",
     resprocchrg: "",
   });
 
@@ -77,7 +77,7 @@ const CreateRestaurant: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://192.168.0.200:5020/resown/createresurantdetails",
+        "http://192.168.0.103:5020/resown/createresurantdetails",
         data,
         {
           headers: {

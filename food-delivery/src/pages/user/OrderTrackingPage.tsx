@@ -74,7 +74,7 @@ const OrderTrackingPage: React.FC = () => {
         setIsLoading(true);
         try {
           const response = await axios.post(
-            'http://192.168.0.200:5020/order/orderhistory',
+            'http://192.168.0.103:5020/order/orderhistory',
             { userid: userId },
             { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
           );

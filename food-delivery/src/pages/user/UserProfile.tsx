@@ -39,7 +39,7 @@ const UserProfile: React.FC = () => {
         formData.append('userid', userid);
 
         const response = await axios.post(
-          'http://192.168.0.200:5020/users/details',
+          'http://192.168.0.103:5020/users/details',
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
@@ -91,7 +91,7 @@ const UserProfile: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://192.168.0.200:5020/users/updateprofile',
+        'http://192.168.0.103:5020/users/updateprofile',
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );

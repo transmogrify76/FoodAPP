@@ -46,7 +46,7 @@ const SignUp: React.FC = () => {
         formDataToSend.append('password', password);
         formDataToSend.append('confirm_password', confirmPassword);
 
-        const response = await fetch('http://192.168.0.200:5020/users/signup', {
+        const response = await fetch('http://192.168.0.103:5020/users/signup', {
           method: 'POST',
           body: formDataToSend,
         });
@@ -71,7 +71,7 @@ const SignUp: React.FC = () => {
         formDataToSend.append('email', email);
         formDataToSend.append('otp', otp);
 
-        const response = await fetch('http://192.168.0.200:5020/users/signup', {
+        const response = await fetch('http://192.168.0.103:5020/users/signup', {
           method: 'POST',
           body: formDataToSend,
         });

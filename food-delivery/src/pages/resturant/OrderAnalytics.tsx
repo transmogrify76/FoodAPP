@@ -34,7 +34,7 @@ const AnalyticsByOwnerId: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://192.168.0.200:5020/owenerresturentfetch",
+        "http://192.168.0.103:5020/owenerresturentfetch",
         {
           method: "POST",
           body: formData,
@@ -70,7 +70,7 @@ const AnalyticsByOwnerId: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://192.168.0.200:5020/ops/orderanalytics",
+        "http://192.168.0.103:5020/ops/orderanalytics",
         {
           method: "POST",
           body: formData,
