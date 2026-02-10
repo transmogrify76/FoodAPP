@@ -66,7 +66,7 @@ const HomePage: React.FC = () => {
   const handleViewMenu = async (restaurantId: string) => {
     try {
       const formData = new FormData();
-      formData.append('resturnatid', restaurantId);
+      formData.append('restaurantid', restaurantId);
 
       const response = await fetch('http://192.168.0.103:5020/menu/getmenubyresturantid', {
         method: 'POST',
