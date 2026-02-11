@@ -39,6 +39,7 @@ import ForgetPassword from '../pages/user/ForgetPassword';
 import RestaurantForgotPassword from '../pages/resturant/RestaurantForgotPassword';
 import DeleteRestaurant from '../pages/resturant/DeleteRestaurant';
 import EditMenu from '../pages/resturant/EditMenu';
+import WalletPage from '../pages/user/WalletPage';
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -82,6 +83,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/restaurant-forget-password" element={<RestaurantForgotPassword />} />
     <Route path="/delete-restaurant" element={<DeleteRestaurant />} />  
     <Route path="/edit-menu" element={<EditMenu />} />  
+    <Route path="/wallet" element={<WalletPage />} />  
  
 
 
