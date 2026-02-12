@@ -25,7 +25,7 @@ const RestaurantMenuPage: React.FC = () => {
   const decodedToken: any = token ? jwtDecode(token) : null;
   const userid = decodedToken?.userid || '';
   const usercartid = decodedToken?.usercartid || '';
-  const restaurantid = state?.restaurantId || '';
+  const restaurantid = state?.restaurantid || '';
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -162,7 +162,7 @@ const RestaurantMenuPage: React.FC = () => {
     localStorage.setItem('cart', JSON.stringify(cart));
     navigate('/cart', { 
       state: { 
-        restaurantId: restaurantid,
+        restaurantid: restaurantid,
         fromMenuPage: true 
       } 
     });
