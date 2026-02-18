@@ -609,10 +609,10 @@ const WalletPage: React.FC = () => {
             {walletId && (
               <div className="mt-4 pt-4 border-t border-orange-400 border-opacity-30">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="opacity-90">Wallet ID:</span>
+                  {/* <span className="opacity-90">Wallet ID:</span>
                   <code className="bg-white bg-opacity-10 px-2 py-1 rounded text-xs font-mono">
                     {walletId.substring(0, 8)}...
-                  </code>
+                  </code> */}
                 </div>
               </div>
             )}

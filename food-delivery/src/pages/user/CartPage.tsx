@@ -7,15 +7,13 @@ import {
   FaShoppingBag, FaTruck, FaMapMarkerAlt, FaCrosshairs, FaEdit,
   FaPlus, FaMinus, FaArrowLeft, FaLeaf, FaFire, FaHome,
   FaUserAlt, FaHistory, FaShoppingCart, FaReceipt, FaClock,
-  FaPercentage, FaCreditCard, FaShieldAlt, FaTag,
+  FaPercentage, FaShieldAlt, FaTag,
   FaCheckCircle, FaExclamationTriangle, FaListAlt, FaWallet
 } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
 
-// ✅ API Base URL
 const API_BASE_URL = "http://192.168.0.103:5020";
 
-// ✅ Initialize socket connection (kept for real-time updates)
 const socket = io(API_BASE_URL, {
   transports: ["polling", "websocket"],
   upgrade: true,
@@ -28,7 +26,6 @@ const socket = io(API_BASE_URL, {
   autoConnect: false,
 });
 
-// ---------- Interfaces (unchanged) ----------
 interface MenuDetails {
   created_at: string;
   final_price: string;
@@ -84,7 +81,6 @@ interface CartResponse {
   userid: string;
 }
 
-// Offer Response Interfaces
 interface NewCustomerOfferResponse {
   discount_amount?: number;
   discount_percent?: number;
@@ -106,7 +102,6 @@ interface ExistingCustomerOfferResponse {
 
 type FirstOrderOfferResponse = NewCustomerOfferResponse | ExistingCustomerOfferResponse;
 
-// Order creation request/response
 interface OrderCreateRequest {
   userid: string;
   usercartid: string;
@@ -131,7 +126,6 @@ interface OrderCreateResponse {
   status: string;
 }
 
-// Wallet payment request/response
 interface WalletPayRequest {
   userid: string;
   master_order_id: string;
@@ -166,7 +160,6 @@ interface WalletPayResponse {
   userid: string;
 }
 
-// Wallet balance response
 interface WalletBalanceResponse {
   balance: number;
   status: string;
@@ -175,7 +168,6 @@ interface WalletBalanceResponse {
   walletid: string;
 }
 
-// Order status check (optional)
 interface OrderStatusResponse {
   order: {
     _id: string;
@@ -200,8 +192,6 @@ interface OrderStatusResponse {
   status: string;
 }
 
-// ---------- Custom Component: MenuItemImage ----------
-// Fetches the image via POST /menu/media/serve and provides a blob URL
 interface MenuItemImageProps {
   imagePath: string;
   alt: string;
@@ -253,7 +243,6 @@ const MenuItemImage: React.FC<MenuItemImageProps> = ({ imagePath, alt, className
 
     fetchImage();
 
-    // Cleanup: revoke object URL to avoid memory leaks
     return () => {
       if (objectUrl) {
         URL.revokeObjectURL(objectUrl);
@@ -280,7 +269,6 @@ const MenuItemImage: React.FC<MenuItemImageProps> = ({ imagePath, alt, className
   return <img src={imageUrl} alt={alt} className={`w-full h-full object-cover ${className}`} />;
 };
 
-// ---------- Component ----------
 const CartPage: React.FC = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -296,7 +284,6 @@ const CartPage: React.FC = () => {
   const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
   const [offerData, setOfferData] = useState<FirstOrderOfferResponse | null>(null);
   const [offerLoading, setOfferLoading] = useState(false);
-  const [appliedOffer, setAppliedOffer] = useState<boolean>(false);
   const [socketConnected, setSocketConnected] = useState(false);
   const [orderStatus, setOrderStatus] = useState<{
     loading: boolean;
@@ -318,7 +305,7 @@ const CartPage: React.FC = () => {
   const subtotal = priceBreakdown?.subtotal || 0;
   const totalDiscount = priceBreakdown?.total_discount || 0;
 
-  // ---------- WebSocket Setup ----------
+  // ---------- Socket connection ----------
   useEffect(() => {
     const onConnect = () => {
       console.log("✅ Socket connected:", socket.id);
@@ -352,7 +339,7 @@ const CartPage: React.FC = () => {
     };
   }, []);
 
-  // ---------- Helper: Get user ID from token ----------
+  // ---------- Token helpers ----------
   const getUserIdFromToken = (): string | null => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -381,7 +368,7 @@ const CartPage: React.FC = () => {
     return null;
   };
 
-  // ---------- Fetch Cart ----------
+  // ---------- Data fetching ----------
   const fetchCartItems = async () => {
     const userid = getUserIdFromToken();
     const usercartid = getusercartidFromToken();
@@ -405,7 +392,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // ---------- Fetch Wallet Balance ----------
   const fetchWalletBalance = async (): Promise<number | null> => {
     const userid = getUserIdFromToken();
     if (!userid) return null;
@@ -429,7 +415,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // ---------- First Order Offer ----------
   const fetchFirstOrderOffer = async () => {
     const userid = getUserIdFromToken();
     if (!userid) return;
@@ -442,12 +427,10 @@ const CartPage: React.FC = () => {
       );
       const responseData = response.data;
       console.log("📊 Offer API Response:", responseData);
-      setAppliedOffer(false);
       setOfferData(responseData);
     } catch (error: any) {
       console.error("Error fetching offer:", error);
       setOfferData(null);
-      setAppliedOffer(false);
     } finally {
       setOfferLoading(false);
     }
@@ -456,10 +439,10 @@ const CartPage: React.FC = () => {
   useEffect(() => {
     fetchCartItems();
     fetchFirstOrderOffer();
-    fetchWalletBalance(); // Pre-load wallet balance
+    fetchWalletBalance();
   }, []);
 
-  // ---------- Offer Eligibility ----------
+  // ---------- Helper functions ----------
   const isOfferEligible = (): boolean => {
     if (!offerData) return false;
     if ("status" in offerData && offerData.status === "success") {
@@ -477,38 +460,21 @@ const CartPage: React.FC = () => {
     return false;
   };
 
+  // Used for per‑item savings display (optional)
   const getItemDiscountAmount = (item: CartItem) => {
-    const originalPrice = parseFloat(item.menu_details.menuprice);
-    const discountPrice = parseFloat(item.menu_details.menudiscountprice);
-    const quantity = parseInt(item.quantity);
+    if (!item.menu_details) return 0;
+    const originalPrice = parseFloat(item.menu_details.menuprice || '0');
+    const discountPrice = parseFloat(item.menu_details.menudiscountprice || '0');
+    const quantity = parseInt(item.quantity || '0');
     if (originalPrice > discountPrice) {
       return (originalPrice - discountPrice) * quantity;
     }
     return 0;
   };
 
-  const totalItemDiscount = cart.reduce((sum, item) => sum + getItemDiscountAmount(item), 0);
+  // ---------- Handlers ----------
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  const handleApplyOffer = () => {
-    if (isOfferEligible()) {
-      setAppliedOffer(true);
-      alert("First order discount applied successfully!");
-    } else {
-      alert("You are not eligible for the first order discount.");
-      setAppliedOffer(false);
-    }
-  };
-
-  const handleRemoveOffer = () => {
-    setAppliedOffer(false);
-  };
-
-  // ---------- Sidebar Toggle ----------
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  // ---------- Delivery Location ----------
   const handleLocationSelection = async (type: "current" | "manual") => {
     if (type === "current") {
       try {
@@ -536,7 +502,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // ---------- Quantity Change ----------
   const handleQuantityChange = async (item: CartItem, action: "inc" | "dec") => {
     const usercartid = getusercartidFromToken();
     if (!usercartid) return;
@@ -557,7 +522,7 @@ const CartPage: React.FC = () => {
 
       if (response.status === 200) {
         fetchCartItems();
-        fetchWalletBalance(); // Refresh wallet balance
+        fetchWalletBalance();
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
@@ -566,7 +531,6 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // ---------- Create Order (REST) ----------
   const createOrder = async (): Promise<OrderCreateResponse["data"]> => {
     const userid = getUserIdFromToken();
     const usercartid = getusercartidFromToken();
@@ -610,7 +574,6 @@ const CartPage: React.FC = () => {
     return response.data.data;
   };
 
-  // ---------- Pay via Wallet ----------
   const payViaWallet = async (masterOrderId: string): Promise<WalletPayResponse["data"]> => {
     const userid = getUserIdFromToken();
     if (!userid) throw new Error("User not authenticated");
@@ -637,7 +600,6 @@ const CartPage: React.FC = () => {
     return response.data.data;
   };
 
-  // ---------- Check Order Status (optional) ----------
   const checkOrderStatus = async (masterOrderId: string): Promise<OrderStatusResponse["order"]> => {
     const response = await axios.post<OrderStatusResponse>(
       `${API_BASE_URL}/order/status/check`,
@@ -647,9 +609,7 @@ const CartPage: React.FC = () => {
     return response.data.order;
   };
 
-  // ---------- Main Checkout Handler ----------
   const handleCheckout = async () => {
-    // Validate delivery
     if (deliveryOption === "delivery" && !deliveryLocation.address) {
       alert("Please select a delivery location");
       return;
@@ -667,7 +627,6 @@ const CartPage: React.FC = () => {
       return;
     }
 
-    // Check wallet balance
     let currentBalance = walletBalance;
     if (currentBalance === null) {
       currentBalance = await fetchWalletBalance();
@@ -686,23 +645,15 @@ const CartPage: React.FC = () => {
     setOrderStatus({ loading: true, success: false, error: null });
 
     try {
-      // 1. Create Order
       const orderData = await createOrder();
       const masterOrderId = orderData.master_order_id;
-
-      // 2. Pay via Wallet
       const paymentData = await payViaWallet(masterOrderId);
-
-      // 3. (Optional) Check order status for confirmation
-      const orderStatusData = await checkOrderStatus(masterOrderId).catch(err => {
+      // Optional: check order status (may fail, but order is already paid)
+      await checkOrderStatus(masterOrderId).catch(err => {
         console.warn("Status check failed, but order is already paid:", err);
-        return null;
       });
 
-      // 4. Update wallet balance locally
       setWalletBalance(paymentData.wallet.balance);
-
-      // 5. Show success
       setOrderStatus({
         loading: false,
         success: true,
@@ -711,9 +662,7 @@ const CartPage: React.FC = () => {
         orderDetails: orderData
       });
 
-      // 6. Refresh cart (should be empty now)
-      fetchCartItems();
-
+      fetchCartItems(); // refresh cart after successful payment
     } catch (error: any) {
       console.error("❌ Checkout failed:", error);
       setOrderStatus({
@@ -724,15 +673,19 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // ---------- UI Helpers ----------
   const getDeliveryTime = () => {
     return deliveryOption === "delivery" ? "25-35 mins" : "15-20 mins";
   };
 
   const totalItems = cart.reduce((sum, item) => sum + parseInt(item.quantity), 0);
 
-  // ---------- Offer Section Component ----------
+  // ---------- Offer Section (now inside component to access priceBreakdown) ----------
   const OfferSection = () => {
+    // Look for a first‑order discount in the price breakdown
+    const firstOrderDiscount = priceBreakdown?.discounts?.find(d =>
+      d.label.toLowerCase().includes('first order')
+    );
+
     if (offerLoading) {
       return (
         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
@@ -744,79 +697,67 @@ const CartPage: React.FC = () => {
       );
     }
 
-    if (!offerData || !isOfferEligible()) {
-      if (offerData && offerData.eligible === false) {
-        return (
-          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-            <div className="flex items-center gap-2">
-              <FaTag className="text-gray-400" />
-              <div>
-                <p className="text-sm font-medium text-gray-700">First Order Offer</p>
-                <p className="text-xs text-gray-600">{offerData.message}</p>
-              </div>
-            </div>
-          </div>
-        );
-      }
-      return null;
-    }
-
-    const eligibleOffer = offerData as NewCustomerOfferResponse;
-
-    if (appliedOffer) {
+    // If a first‑order discount is present in the breakdown, show it as applied
+    if (firstOrderDiscount) {
       return (
         <div className="p-3 bg-green-50 rounded-lg border border-green-200 mb-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <FaTag className="text-green-600" />
-              <div>
-                <p className="text-sm font-medium text-green-800">
-                  {eligibleOffer.offer_code || "First Order Offer"} Applied
-                </p>
-                <p className="text-xs text-green-600">
-                  {eligibleOffer.discount_amount
-                    ? `₹${eligibleOffer.discount_amount} off`
-                    : `${eligibleOffer.discount_percent}% off`}
-                </p>
-              </div>
+          <div className="flex items-center gap-2">
+            <FaTag className="text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-green-800">
+                First Order Offer Applied
+              </p>
+              <p className="text-xs text-green-600">
+                {firstOrderDiscount.percentage
+                  ? `${firstOrderDiscount.percentage}% off`
+                  : `₹${firstOrderDiscount.amount.toFixed(2)} off`}
+              </p>
             </div>
-            <button
-              onClick={handleRemoveOffer}
-              className="text-red-600 text-sm font-medium hover:text-red-700"
-            >
-              Remove
-            </button>
           </div>
         </div>
       );
     }
 
-    return (
-      <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 mb-4">
-        <div className="flex justify-between items-center">
+    // No first‑order discount in breakdown → use offer API data
+    if (!offerData) return null;
+
+    // Not eligible
+    if ('eligible' in offerData && offerData.eligible === false) {
+      return (
+        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
           <div className="flex items-center gap-2">
-            <FaTag className="text-orange-600" />
+            <FaTag className="text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-orange-800">Welcome Offer Available!</p>
-              <p className="text-xs text-orange-600">
-                {eligibleOffer.discount_amount
-                  ? `Get ₹${eligibleOffer.discount_amount} off on your first order`
-                  : `Get ${eligibleOffer.discount_percent}% off on your first order${eligibleOffer.max_discount ? ` (up to ₹${eligibleOffer.max_discount})` : ""}`}
-              </p>
+              <p className="text-sm font-medium text-gray-700">First Order Offer</p>
+              <p className="text-xs text-gray-600">{offerData.message}</p>
             </div>
           </div>
-          <button
-            onClick={handleApplyOffer}
-            className="px-3 py-1 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600"
-          >
-            Apply
-          </button>
+        </div>
+      );
+    }
+
+    // Eligible but discount not yet applied? (should not happen if backend applies automatically)
+    const eligibleOffer = offerData as NewCustomerOfferResponse;
+    return (
+      <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 mb-4">
+        <div className="flex items-center gap-2">
+          <FaTag className="text-orange-600" />
+          <div>
+            <p className="text-sm font-medium text-orange-800">
+              {eligibleOffer.offer_code || "First Order Offer"} Available
+            </p>
+            <p className="text-xs text-orange-600">
+              {eligibleOffer.discount_amount
+                ? `Get ₹${eligibleOffer.discount_amount} off`
+                : `Get ${eligibleOffer.discount_percent}% off`}
+              {eligibleOffer.max_discount && ` (up to ₹${eligibleOffer.max_discount})`}
+            </p>
+          </div>
         </div>
       </div>
     );
   };
 
-  // ---------- Order Status Modal ----------
   const renderOrderStatusModal = () => {
     if (!orderStatus.loading && !orderStatus.success && !orderStatus.error) {
       return null;
@@ -901,7 +842,7 @@ const CartPage: React.FC = () => {
     );
   };
 
-  // ---------- Render ----------
+  // ---------- Main render ----------
   return (
     <div className="min-h-screen bg-orange-50 pb-80">
       {renderOrderStatusModal()}
@@ -948,8 +889,6 @@ const CartPage: React.FC = () => {
           </ul>
         </div>
       </div>
-
-      {/* Overlay */}
       {isSidebarOpen && (
         <div onClick={toggleSidebar} className="fixed inset-0 bg-black opacity-50 z-40"></div>
       )}
@@ -1067,7 +1006,7 @@ const CartPage: React.FC = () => {
         )}
       </div>
 
-      {/* Wallet Balance Indicator */}
+      {/* Wallet Balance */}
       {walletBalance !== null && (
         <div className="px-4 pt-2">
           <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center">
@@ -1105,10 +1044,10 @@ const CartPage: React.FC = () => {
           <div className="space-y-3">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold text-gray-900">Items ({totalItems})</h2>
-              {totalItemDiscount > 0 && (
+              {totalDiscount > 0 && (
                 <div className="flex items-center gap-1 text-green-600 text-sm">
                   <FaPercentage className="text-xs" />
-                  <span>Save ₹{totalItemDiscount.toFixed(2)}</span>
+                  <span>Save ₹{totalDiscount.toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -1116,13 +1055,12 @@ const CartPage: React.FC = () => {
             {cart.map((item, index) => (
               <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                 <div className="flex gap-3">
-                  {/* ---------- UPDATED IMAGE SECTION using MenuItemImage ---------- */}
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
-                      {item.menu_details.images && item.menu_details.images.length > 0 ? (
+                      {item.menu_details?.images && item.menu_details.images.length > 0 ? (
                         <MenuItemImage
                           imagePath={item.menu_details.images[0]}
-                          alt={item.menu_details.menuname}
+                          alt={item.menu_details?.menuname || 'Item'}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -1132,13 +1070,14 @@ const CartPage: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  {/* ---------- END UPDATE ---------- */}
 
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-gray-900 truncate">{item.menu_details.menuname}</h3>
-                        {item.menu_details.vegornonveg === "veg" ? (
+                        <h3 className="font-medium text-gray-900 truncate">
+                          {item.menu_details?.menuname || 'Item not available'}
+                        </h3>
+                        {item.menu_details?.vegornonveg === "veg" ? (
                           <FaLeaf className="text-green-600 text-xs flex-shrink-0" />
                         ) : (
                           <FaFire className="text-red-600 text-xs flex-shrink-0" />
@@ -1146,13 +1085,19 @@ const CartPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <p className="text-xs text-gray-600 mb-2 line-clamp-1">{item.menu_details.menudescription}</p>
+                    <p className="text-xs text-gray-600 mb-2 line-clamp-1">
+                      {item.menu_details?.menudescription || 'No description'}
+                    </p>
 
                     <div className="flex justify-between items-center">
                       <div className="flex items-baseline gap-1">
-                        <span className="font-bold text-gray-900">₹{item.menu_details.menudiscountprice}</span>
-                        {item.menu_details.menudiscountpercent !== "0" && (
-                          <span className="text-xs text-gray-500 line-through">₹{item.menu_details.menuprice}</span>
+                        <span className="font-bold text-gray-900">
+                          ₹{item.menu_details?.menudiscountprice || '0'}
+                        </span>
+                        {item.menu_details?.menudiscountpercent !== "0" && item.menu_details?.menuprice && (
+                          <span className="text-xs text-gray-500 line-through">
+                            ₹{item.menu_details.menuprice}
+                          </span>
                         )}
                       </div>
 
@@ -1177,13 +1122,13 @@ const CartPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {item.menu_details.menudiscountpercent !== "0" && (
+                    {item.menu_details?.menudiscountpercent !== "0" && item.menu_details && (
                       <div className="mt-1 flex justify-between items-center">
                         <span className="text-xs text-green-600 font-medium">
                           Save ₹{getItemDiscountAmount(item).toFixed(2)}
                         </span>
                         <span className="text-xs font-semibold text-gray-900">
-                          ₹{(parseFloat(item.menu_details.menudiscountprice) * parseInt(item.quantity)).toFixed(2)}
+                          ₹{(parseFloat(item.menu_details?.menudiscountprice || '0') * parseInt(item.quantity)).toFixed(2)}
                         </span>
                       </div>
                     )}
@@ -1219,10 +1164,9 @@ const CartPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Checkout Section */}
+      {/* Checkout Footer */}
       {cart.length > 0 && cartData && (
         <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
-          {/* Security Badge */}
           <div className="flex items-center justify-center gap-2 text-xs text-gray-600 mb-3">
             <FaShieldAlt className="text-green-500" />
             <span>Secure checkout • Pay with Wallet</span>
@@ -1249,43 +1193,21 @@ const CartPage: React.FC = () => {
                 <span>₹{subtotal.toFixed(2)}</span>
               </div>
 
-              {totalItemDiscount > 0 && (
-                <div className="flex justify-between text-xs text-green-600">
-                  <span>Item Discount</span>
-                  <span>-₹{totalItemDiscount.toFixed(2)}</span>
-                </div>
-              )}
-
               {priceBreakdown.discounts && priceBreakdown.discounts.length > 0 && (
-                priceBreakdown.discounts
-                  .filter(discount => {
-                    if (discount.label.toLowerCase().includes("first order")) {
-                      return isOfferEligible();
-                    }
-                    return true;
-                  })
-                  .map((discount, index) => (
-                    <div key={index} className="flex justify-between text-xs text-green-600">
+                <>
+                  {priceBreakdown.discounts.map((discount, idx) => (
+                    <div key={idx} className="flex justify-between text-xs text-green-600">
                       <span>{discount.label}</span>
-                      <span>-₹{discount.amount.toFixed(2)}</span>
+                      <span>-₹{discount.amount?.toFixed(2) || '0.00'}</span>
                     </div>
-                  ))
-              )}
-
-              {appliedOffer && isOfferEligible() && offerData && "discount_percent" in offerData &&
-                !priceBreakdown.discounts?.some(d =>
-                  d.label.toLowerCase().includes("first order")
-                ) && (
-                  <div className="flex justify-between text-xs text-green-600">
-                    <span>
-                      First Order Discount
-                      {"discount_amount" in offerData && offerData.discount_amount
-                        ? ` (₹${offerData.discount_amount} off)`
-                        : ` (${offerData.discount_percent}% off)`}
-                    </span>
-                    <span>Will be applied at checkout</span>
+                  ))}
+                  {/* Optional total discount line */}
+                  <div className="flex justify-between text-xs text-green-600 font-medium">
+                    <span>Total Discount</span>
+                    <span>-₹{totalDiscount.toFixed(2)}</span>
                   </div>
-                )}
+                </>
+              )}
 
               {deliveryOption === "delivery" && (
                 <div className="flex justify-between text-xs text-gray-600">
@@ -1301,7 +1223,6 @@ const CartPage: React.FC = () => {
             </div>
           )}
 
-          {/* Wallet balance warning if insufficient */}
           {walletBalance !== null && walletBalance < cartTotal && (
             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-xs text-red-700">
               <FaExclamationTriangle />

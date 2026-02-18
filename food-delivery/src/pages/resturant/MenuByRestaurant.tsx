@@ -57,7 +57,7 @@ const GetMenuByOwnerId: React.FC = () => {
     setLoading(true);
     setError(null);
     const formData = new FormData();
-    formData.append("resturnatid", selectedRestaurantId);
+    formData.append("restaurantid", selectedRestaurantId);
     try {
       const response = await fetch("http://192.168.0.103:5020/menu/getmenubyresturantid", {
         method: "POST",

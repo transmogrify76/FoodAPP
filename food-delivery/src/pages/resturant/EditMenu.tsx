@@ -63,7 +63,7 @@ const EditMenu: React.FC = () => {
   // Fetch menus by restaurant id
   const fetchMenus = async (restaurantId: string) => {
     const formData = new FormData();
-    formData.append("resturnatid", restaurantId);
+    formData.append("restaurantid", restaurantId);
     try {
       const res = await fetch("http://192.168.0.103:5020/menu/getmenubyresturantid", {
         method: "POST",
