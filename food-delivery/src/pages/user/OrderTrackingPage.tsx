@@ -1,44 +1,67 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { FaShoppingBag, FaHistory, FaHome, FaUserAlt, FaShoppingCart, FaSearch, FaChevronRight, FaMapMarkerAlt, FaClock, FaMoneyBillAlt } from 'react-icons/fa';
+import {
+  FaShoppingBag,
+  FaHistory,
+  FaHome,
+  FaUserAlt,
+  FaShoppingCart,
+  FaArrowLeft,
+  FaClock,
+  FaMoneyBillAlt,
+  FaUtensils,
+  FaMapMarkerAlt,
+  FaCreditCard
+} from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-interface Menu {
-  foodtype: string;
-  menudescription: string;
-  menuname: string;
-  menuprice: string;
-  menutype: string;
-}
-
+// ---------- Interfaces matching the actual API response ----------
 interface Restaurant {
-  address: string;
-  cuisin_type: string;
-  location: string;
-  resturantname: string;
+  address: string | null;
+  location: string | null;
+  restaurant_name: string;
+  restaurant_type: string | null;
 }
 
-interface OrderItem {
-  menu: Menu | null;
-  quantity: number;
-  item_total: number;
+interface User {
+  username: string;
+  user_phone_no: string | null;
+  useraddress: string | null;
 }
 
-interface Order {
-  items: OrderItem[];
+// Raw order line item from the API
+interface ApiOrderItem {
   uid: string;
-  productid: string;
+  master_order_id: string;
+  menuid: string;
   quantity: number;
+  base_price: number;
+  final_price: number;
+  orderstatus: string;
+  payment_mode: string;
+  payment_status: string;
+  created_at: string;
+  updated_at: string;
   userid: string;
   restaurantid: string;
-  totalprice: number;
-  created_at: string;
+  menu: string | null;          // item name, can be null
+  restaurant: Restaurant;
+  user?: User;
+}
+
+// Grouped order (one logical order containing one or more items)
+interface GroupedOrder {
+  master_order_id: string;
   orderstatus: string;
-  restaurant: Restaurant | null;
-  preptime?: string | null;
-  tempstatus?: string;
+  payment_mode: string;
+  payment_status: string;
+  created_at: string;
+  updated_at: string;
+  restaurant: Restaurant;
+  items: ApiOrderItem[];
+  total_price: number;
 }
 
 interface DecodedToken {
@@ -46,66 +69,114 @@ interface DecodedToken {
 }
 
 const OrderTrackingPage: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [groupedOrders, setGroupedOrders] = useState<GroupedOrder[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token'); 
-    if (token) {
-      try {
-        const decoded: DecodedToken = jwtDecode(token);
-        setUserId(decoded.userid);
-      } catch (error) {
-        console.error('Error decoding token:', error);
-        setError('Failed to authenticate. Please login again.');
-      }
-    } else {
+    const token = localStorage.getItem('token');
+    if (!token) {
       setError('No authentication token found. Please login.');
+      return;
+    }
+
+    try {
+      const decoded: DecodedToken = jwtDecode(token);
+      const userId = decoded.userid;
+      fetchOrders(userId);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      setError('Failed to authenticate. Please login again.');
     }
   }, []);
 
-  useEffect(() => {
-    if (userId) {
-      const fetchOrders = async () => {
-        setIsLoading(true);
-        try {
-          const response = await axios.post(
-            'http://192.168.0.103:5020/order/orderhistory',
-            { userid: userId },
-            { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-          );
-          setOrders(response.data.order_list || []);
-        } catch (error) {
-          console.error('Error fetching order history:', error);
-          setError('Failed to load order history. Please try again later.');
-        } finally {
-          setIsLoading(false);
-        }
-      };
+  const fetchOrders = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('userid', userId);
 
-      fetchOrders();
+      const response = await axios.post(
+        'http://192.168.0.103:5020/order/orderhistory',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+
+      const rawOrders: ApiOrderItem[] = response.data.order_list || [];
+      const grouped = groupOrders(rawOrders);
+      setGroupedOrders(grouped);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching order history:', error);
+      setError('Failed to load order history. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [userId]);
+  };
+
+  // Helper: group raw API items by master_order_id
+  const groupOrders = (items: ApiOrderItem[]): GroupedOrder[] => {
+    const groups = new Map<string, ApiOrderItem[]>();
+
+    items.forEach((item) => {
+      const key = item.master_order_id;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(item);
+    });
+
+    const result: GroupedOrder[] = [];
+    groups.forEach((groupItems, masterId) => {
+      const first = groupItems[0];
+      const total = groupItems.reduce((sum, item) => sum + item.final_price, 0);
+
+      result.push({
+        master_order_id: masterId,
+        orderstatus: first.orderstatus,
+        payment_mode: first.payment_mode,
+        payment_status: first.payment_status,
+        created_at: first.created_at,
+        updated_at: first.updated_at,
+        restaurant: first.restaurant,
+        items: groupItems,
+        total_price: total,
+      });
+    });
+
+    // Sort by newest first
+    return result.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  };
 
   const getStatusColor = (status: string) => {
     if (!status) return 'bg-gray-100 text-gray-800';
-    
-    switch (status.toLowerCase()) {
+    const lower = status.toLowerCase();
+    switch (lower) {
       case 'pending':
+      case 'created':
         return 'bg-yellow-100 text-yellow-800';
       case 'accepted':
+      case 'confirmed':
         return 'bg-green-100 text-green-800';
       case 'inprogress':
         return 'bg-blue-100 text-blue-800';
       case 'dispatched':
         return 'bg-purple-100 text-purple-800';
       case 'delivered':
+      case 'completed':
         return 'bg-green-100 text-green-800';
       case 'rejected':
+      case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -160,9 +231,9 @@ const OrderTrackingPage: React.FC = () => {
       >
         <div className="flex justify-between items-center p-4 bg-orange-500 text-white">
           <div className="flex items-center">
-            <img 
-              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-              alt="Logo" 
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+              alt="Logo"
               className="w-8 h-8 mr-2"
             />
             <h3 className="text-lg font-bold">Foodie Heaven</h3>
@@ -212,27 +283,27 @@ const OrderTrackingPage: React.FC = () => {
           </ul>
         </div>
       </div>
-      
+
       {/* Overlay */}
       {isSidebarOpen && (
-        <div 
-          onClick={toggleSidebar} 
+        <div
+          onClick={toggleSidebar}
           className="fixed inset-0 bg-black opacity-50 z-40"
         ></div>
       )}
 
       {/* Main Content */}
       <div className="pb-20">
-        {/* Header */}
+        {/* Header - Back button added */}
         <div className="bg-orange-500 text-white p-4 sticky top-0 z-30 shadow-md">
           <div className="flex justify-between items-center">
-            <button onClick={toggleSidebar} className="text-xl">
-              <FaSearch />
+            <button onClick={() => navigate(-1)} className="text-xl">
+              <FaArrowLeft />
             </button>
             <div className="flex items-center">
-              <img 
-                src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-                alt="Logo" 
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+                alt="Logo"
                 className="w-6 h-6 mr-2"
               />
               <h1 className="text-lg font-bold">Order Tracking</h1>
@@ -245,67 +316,95 @@ const OrderTrackingPage: React.FC = () => {
         <div className="p-4">
           <h2 className="font-bold text-lg text-gray-800 mb-4">Your Orders</h2>
 
-          {orders.length === 0 ? (
+          {groupedOrders.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
               No orders found
             </div>
           ) : (
             <div className="space-y-4">
-              {orders.map((order) => (
-                <div 
-                  key={order.uid}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden"
+              {groupedOrders.map((order) => (
+                <div
+                  key={order.master_order_id}
+                  className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100"
                 >
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-800 text-lg">
-                          {order.restaurant?.resturantname || 'Unknown Restaurant'}
-                        </h3>
-                        <div className="flex items-center text-sm text-gray-500 mt-1">
-                          <FaMapMarkerAlt className="mr-1 text-orange-400" />
-                          <span>{order.restaurant?.location || 'N/A'}</span>
-                        </div>
-                      </div>
-                      <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(
-                        order.tempstatus || order.orderstatus
-                      )}`}>
-                        {order.tempstatus || order.orderstatus}
-                      </span>
-                    </div>
-                    
-                    <div className="mb-3 border-b border-gray-100 pb-3">
-                      {order.items?.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center text-sm text-gray-600 mb-2">
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2">{item.quantity}x</span>
-                            <span>{item.menu?.menuname || 'Unknown Item'}</span>
-                          </div>
-                          <span>₹{item.item_total}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="flex justify-between items-center text-sm mb-2">
-                      <div className="flex items-center text-gray-500">
-                        <FaClock className="mr-1 text-orange-400" />
+                  {/* Order Header */}
+                  <div className="p-4 border-b border-gray-100">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <FaClock className="text-orange-400" />
                         <span>{formatDate(order.created_at)}</span>
                       </div>
-                      {order.preptime && (
-                        <div className="text-gray-500">
-                          <span>Prep time: {order.preptime}</span>
+                      <span
+                        className={`text-xs px-3 py-1 rounded-full ${getStatusColor(
+                          order.orderstatus
+                        )}`}
+                      >
+                        {order.orderstatus}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Order Items */}
+                  <div className="p-4 space-y-4">
+                    {order.items.map((item) => {
+                      const unitPrice =
+                        item.quantity > 0 ? item.final_price / item.quantity : 0;
+                      return (
+                        <div
+                          key={item.uid}
+                          className="flex justify-between items-start border-b border-gray-50 pb-3 last:border-0 last:pb-0"
+                        >
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">
+                              {item.menu || 'Item not available'}
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1">
+                              ₹{unitPrice.toFixed(2)} each
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900">
+                              ₹{item.final_price.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Qty: {item.quantity}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Order Footer */}
+                  <div className="p-4 bg-gray-50 border-t border-gray-100">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-2">
+                        <FaUtensils className="text-orange-400" />
+                        <span className="text-sm text-gray-700">
+                          {order.restaurant?.restaurant_name ||
+                            'Restaurant not available'}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <FaMoneyBillAlt className="text-orange-400" />
+                        <span className="font-bold text-gray-900">
+                          ₹{order.total_price.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                      <div className="flex items-center space-x-2">
+                        <FaCreditCard className="text-orange-400" />
+                        <span>
+                          {order.payment_mode} • {order.payment_status}
+                        </span>
+                      </div>
+                      {order.restaurant?.location && (
+                        <div className="flex items-center space-x-2">
+                          <FaMapMarkerAlt className="text-orange-400" />
+                          <span>{order.restaurant.location}</span>
                         </div>
                       )}
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                      <div className="text-sm text-gray-500">
-                        Cuisine: {order.restaurant?.cuisin_type || 'N/A'}
-                      </div>
-                      <div className="flex items-center font-semibold text-orange-500">
-                        <FaMoneyBillAlt className="mr-1" />
-                        <span>₹{order.totalprice}</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -317,7 +416,7 @@ const OrderTrackingPage: React.FC = () => {
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
-        <button 
+        <button
           onClick={() => navigate('/home')}
           className="text-gray-500 flex flex-col items-center"
         >
@@ -325,24 +424,24 @@ const OrderTrackingPage: React.FC = () => {
           <span className="text-xs mt-1">Home</span>
         </button>
         <button className="text-gray-500 flex flex-col items-center">
-          <FaSearch className="text-lg" />
-          <span className="text-xs mt-1">Search</span>
+          <FaArrowLeft className="text-lg" />
+          <span className="text-xs mt-1">Back</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/cart')}
           className="text-gray-500 flex flex-col items-center"
         >
           <FaShoppingCart className="text-lg" />
           <span className="text-xs mt-1">Cart</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/track-order')}
           className="text-orange-500 flex flex-col items-center"
         >
           <FaHistory className="text-lg" />
           <span className="text-xs mt-1">Orders</span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/profile')}
           className="text-gray-500 flex flex-col items-center"
         >

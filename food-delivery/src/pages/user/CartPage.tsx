@@ -27,22 +27,11 @@ const socket = io(API_BASE_URL, {
 });
 
 interface MenuDetails {
-  created_at: string;
-  final_price: string;
   foodtype: string;
-  foodweight?: string;
-  gst_rate: string;
   images: string[];
   menudescription: string;
-  menudiscountpercent: string;
-  menudiscountprice: string;
-  menuitemtype: string;
   menuname: string;
-  menuprice: string;
-  menutype: string;
   restaurantid: string;
-  servingtype: string;
-  uid: string;
   vegornonveg: string;
 }
 
@@ -52,26 +41,20 @@ interface CartItem {
   menuid: string;
   quantity: string;
   restaurantid: string;
-  total_price: string;
-  uid: string;
-  usercartid: string;
-  userid: string;
-  gst_amount?: string;
-  gst_percentage?: string;
-  line_total_amount?: string;
 }
 
+// New price breakdown matching the actual API response
 interface PriceBreakdown {
-  currency: string;
-  discounts: Array<{
-    amount: number;
-    label: string;
-    percentage: number;
-    type: string;
-  }>;
-  subtotal: number;
-  total_discount: number;
-  total_payable: number;
+  amount_after_all_discounts: number;
+  base_subtotal: number;
+  final_payable: number;
+  first_order_discount: number;
+  food_gst_5_percent: number;
+  order_value_discount: number;
+  packaging_charge: number;
+  packaging_gst_18_percent: number;
+  restaurant_discount: number;
+  subtotal_after_restaurant_discount: number;
 }
 
 interface CartResponse {
@@ -301,9 +284,19 @@ const CartPage: React.FC = () => {
 
   const cart = cartData?.cart_items || [];
   const priceBreakdown = cartData?.price_breakdown;
-  const cartTotal = priceBreakdown?.total_payable || 0;
-  const subtotal = priceBreakdown?.subtotal || 0;
-  const totalDiscount = priceBreakdown?.total_discount || 0;
+
+  // Extract values from new price breakdown structure
+  const subtotal = priceBreakdown?.base_subtotal || 0;
+  const restaurantDiscount = priceBreakdown?.restaurant_discount || 0;
+  const orderValueDiscount = priceBreakdown?.order_value_discount || 0;
+  const firstOrderDiscount = priceBreakdown?.first_order_discount || 0;
+  const packagingCharge = priceBreakdown?.packaging_charge || 0;
+  const foodGst = priceBreakdown?.food_gst_5_percent || 0;
+  const packagingGst = priceBreakdown?.packaging_gst_18_percent || 0;
+  const amountAfterDiscounts = priceBreakdown?.amount_after_all_discounts || 0;
+  const cartTotal = priceBreakdown?.final_payable || 0;
+
+  const totalDiscount = restaurantDiscount + orderValueDiscount + firstOrderDiscount;
 
   // ---------- Socket connection ----------
   useEffect(() => {
@@ -443,6 +436,7 @@ const CartPage: React.FC = () => {
   }, []);
 
   // ---------- Helper functions ----------
+  // Check if first order offer is eligible (for informational purposes)
   const isOfferEligible = (): boolean => {
     if (!offerData) return false;
     if ("status" in offerData && offerData.status === "success") {
@@ -451,25 +445,12 @@ const CartPage: React.FC = () => {
         (newCustomerOffer.discount_percent !== undefined && newCustomerOffer.discount_percent > 0) ||
         (newCustomerOffer.discount_amount !== undefined && newCustomerOffer.discount_amount > 0);
       if (newCustomerOffer.min_order_amount && cartData) {
-        const cartSubtotal = priceBreakdown?.subtotal || 0;
-        if (cartSubtotal < newCustomerOffer.min_order_amount) return false;
+        if (subtotal < newCustomerOffer.min_order_amount) return false;
       }
       return hasDiscount;
     }
     if ("eligible" in offerData && offerData.eligible === true) return true;
     return false;
-  };
-
-  // Used for per‑item savings display (optional)
-  const getItemDiscountAmount = (item: CartItem) => {
-    if (!item.menu_details) return 0;
-    const originalPrice = parseFloat(item.menu_details.menuprice || '0');
-    const discountPrice = parseFloat(item.menu_details.menudiscountprice || '0');
-    const quantity = parseInt(item.quantity || '0');
-    if (originalPrice > discountPrice) {
-      return (originalPrice - discountPrice) * quantity;
-    }
-    return 0;
   };
 
   // ---------- Handlers ----------
@@ -679,13 +660,8 @@ const CartPage: React.FC = () => {
 
   const totalItems = cart.reduce((sum, item) => sum + parseInt(item.quantity), 0);
 
-  // ---------- Offer Section (now inside component to access priceBreakdown) ----------
+  // ---------- Offer Section (uses firstOrderDiscount directly) ----------
   const OfferSection = () => {
-    // Look for a first‑order discount in the price breakdown
-    const firstOrderDiscount = priceBreakdown?.discounts?.find(d =>
-      d.label.toLowerCase().includes('first order')
-    );
-
     if (offerLoading) {
       return (
         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
@@ -697,8 +673,8 @@ const CartPage: React.FC = () => {
       );
     }
 
-    // If a first‑order discount is present in the breakdown, show it as applied
-    if (firstOrderDiscount) {
+    // If first order discount is applied (value > 0)
+    if (firstOrderDiscount > 0) {
       return (
         <div className="p-3 bg-green-50 rounded-lg border border-green-200 mb-4">
           <div className="flex items-center gap-2">
@@ -708,9 +684,7 @@ const CartPage: React.FC = () => {
                 First Order Offer Applied
               </p>
               <p className="text-xs text-green-600">
-                {firstOrderDiscount.percentage
-                  ? `${firstOrderDiscount.percentage}% off`
-                  : `₹${firstOrderDiscount.amount.toFixed(2)} off`}
+                -₹{firstOrderDiscount.toFixed(2)}
               </p>
             </div>
           </div>
@@ -718,7 +692,7 @@ const CartPage: React.FC = () => {
       );
     }
 
-    // No first‑order discount in breakdown → use offer API data
+    // No first order discount in breakdown → use offer API data
     if (!offerData) return null;
 
     // Not eligible
@@ -736,7 +710,7 @@ const CartPage: React.FC = () => {
       );
     }
 
-    // Eligible but discount not yet applied? (should not happen if backend applies automatically)
+    // Eligible but discount not yet applied (should not happen, but keep for completeness)
     const eligibleOffer = offerData as NewCustomerOfferResponse;
     return (
       <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 mb-4">
@@ -1052,90 +1026,77 @@ const CartPage: React.FC = () => {
               )}
             </div>
 
-            {cart.map((item, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
-                      {item.menu_details?.images && item.menu_details.images.length > 0 ? (
-                        <MenuItemImage
-                          imagePath={item.menu_details.images[0]}
-                          alt={item.menu_details?.menuname || 'Item'}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                          <FaShoppingBag className="text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-gray-900 truncate">
-                          {item.menu_details?.menuname || 'Item not available'}
-                        </h3>
-                        {item.menu_details?.vegornonveg === "veg" ? (
-                          <FaLeaf className="text-green-600 text-xs flex-shrink-0" />
+            {cart.map((item, index) => {
+              // Note: menu_details no longer contains price info.
+              // We only display name, quantity, and veg/non‑veg icon.
+              const itemQty = parseInt(item.quantity);
+              return (
+                <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
+                        {item.menu_details?.images && item.menu_details.images.length > 0 ? (
+                          <MenuItemImage
+                            imagePath={item.menu_details.images[0]}
+                            alt={item.menu_details?.menuname || 'Item'}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <FaFire className="text-red-600 text-xs flex-shrink-0" />
+                          <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                            <FaShoppingBag className="text-gray-400" />
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-xs text-gray-600 mb-2 line-clamp-1">
-                      {item.menu_details?.menudescription || 'No description'}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-gray-900 truncate">
+                            {item.menu_details?.menuname || 'Item not available'}
+                          </h3>
+                          {item.menu_details?.vegornonveg === "veg" ? (
+                            <FaLeaf className="text-green-600 text-xs flex-shrink-0" />
+                          ) : (
+                            <FaFire className="text-red-600 text-xs flex-shrink-0" />
+                          )}
+                        </div>
+                      </div>
 
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-bold text-gray-900">
-                          ₹{item.menu_details?.menudiscountprice || '0'}
-                        </span>
-                        {item.menu_details?.menudiscountpercent !== "0" && item.menu_details?.menuprice && (
-                          <span className="text-xs text-gray-500 line-through">
-                            ₹{item.menu_details.menuprice}
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-1">
+                        {item.menu_details?.menudescription || 'No description'}
+                      </p>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Quantity: {item.quantity}</span>
+
+                        <div className="flex items-center bg-orange-50 rounded-lg border border-orange-100">
+                          <button
+                            onClick={() => handleQuantityChange(item, "dec")}
+                            disabled={loading || itemQty <= 1}
+                            className="px-3 py-1 text-gray-700 hover:text-orange-600 disabled:opacity-30"
+                          >
+                            <FaMinus />
+                          </button>
+                          <span className="px-2 font-medium text-sm text-gray-800 min-w-6 text-center">
+                            {item.quantity}
                           </span>
-                        )}
+                          <button
+                            onClick={() => handleQuantityChange(item, "inc")}
+                            disabled={loading}
+                            className="px-3 py-1 text-gray-700 hover:text-orange-600 disabled:opacity-50"
+                          >
+                            <FaPlus />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="flex items-center bg-orange-50 rounded-lg border border-orange-100">
-                        <button
-                          onClick={() => handleQuantityChange(item, "dec")}
-                          disabled={loading || parseInt(item.quantity) <= 1}
-                          className="px-3 py-1 text-gray-700 hover:text-orange-600 disabled:opacity-30"
-                        >
-                          <FaMinus />
-                        </button>
-                        <span className="px-2 font-medium text-sm text-gray-800 min-w-6 text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => handleQuantityChange(item, "inc")}
-                          disabled={loading}
-                          className="px-3 py-1 text-gray-700 hover:text-orange-600 disabled:opacity-50"
-                        >
-                          <FaPlus />
-                        </button>
-                      </div>
+                      {/* No per‑item price display because API doesn't provide it */}
                     </div>
-
-                    {item.menu_details?.menudiscountpercent !== "0" && item.menu_details && (
-                      <div className="mt-1 flex justify-between items-center">
-                        <span className="text-xs text-green-600 font-medium">
-                          Save ₹{getItemDiscountAmount(item).toFixed(2)}
-                        </span>
-                        <span className="text-xs font-semibold text-gray-900">
-                          ₹{(parseFloat(item.menu_details?.menudiscountprice || '0') * parseInt(item.quantity)).toFixed(2)}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -1189,24 +1150,50 @@ const CartPage: React.FC = () => {
           {showPriceBreakdown && priceBreakdown && (
             <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
               <div className="flex justify-between text-xs text-gray-600">
-                <span>Subtotal ({totalItems} items)</span>
+                <span>Subtotal</span>
                 <span>₹{subtotal.toFixed(2)}</span>
               </div>
 
-              {priceBreakdown.discounts && priceBreakdown.discounts.length > 0 && (
-                <>
-                  {priceBreakdown.discounts.map((discount, idx) => (
-                    <div key={idx} className="flex justify-between text-xs text-green-600">
-                      <span>{discount.label}</span>
-                      <span>-₹{discount.amount?.toFixed(2) || '0.00'}</span>
-                    </div>
-                  ))}
-                  {/* Optional total discount line */}
-                  <div className="flex justify-between text-xs text-green-600 font-medium">
-                    <span>Total Discount</span>
-                    <span>-₹{totalDiscount.toFixed(2)}</span>
-                  </div>
-                </>
+              {restaurantDiscount > 0 && (
+                <div className="flex justify-between text-xs text-green-600">
+                  <span>Restaurant Discount</span>
+                  <span>-₹{restaurantDiscount.toFixed(2)}</span>
+                </div>
+              )}
+
+              {orderValueDiscount > 0 && (
+                <div className="flex justify-between text-xs text-green-600">
+                  <span>Order Value Discount</span>
+                  <span>-₹{orderValueDiscount.toFixed(2)}</span>
+                </div>
+              )}
+
+              {firstOrderDiscount > 0 && (
+                <div className="flex justify-between text-xs text-green-600">
+                  <span>First Order Discount</span>
+                  <span>-₹{firstOrderDiscount.toFixed(2)}</span>
+                </div>
+              )}
+
+              {packagingCharge > 0 && (
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>Packaging Charge</span>
+                  <span>₹{packagingCharge.toFixed(2)}</span>
+                </div>
+              )}
+
+              {foodGst > 0 && (
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>Food GST (5%)</span>
+                  <span>₹{foodGst.toFixed(2)}</span>
+                </div>
+              )}
+
+              {packagingGst > 0 && (
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>Packaging GST (18%)</span>
+                  <span>₹{packagingGst.toFixed(2)}</span>
+                </div>
               )}
 
               {deliveryOption === "delivery" && (

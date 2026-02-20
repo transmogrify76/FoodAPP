@@ -27,10 +27,12 @@ const RestaurantMenuPage: React.FC = () => {
   const usercartid = decodedToken?.usercartid || '';
   const restaurantid = state?.restaurantid || '';
 
+  // Persist cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Load menu from route state and initialize favorites
   useEffect(() => {
     if (state && state.menu) {
       setMenu(state.menu);
@@ -43,6 +45,44 @@ const RestaurantMenuPage: React.FC = () => {
       setError('Failed to load menu.');
     }
   }, [state]);
+
+  // Fetch current cart from server once menu and userid are available
+  useEffect(() => {
+  if (!userid || menu.length === 0) return;
+
+  const fetchCart = async () => {
+    try {
+      const response = await axios.post(
+        'http://192.168.0.103:5020/cart/getcartbyuserid',
+        new URLSearchParams({ userid })
+      );
+
+      if (response.status === 200 && response.data.cart_items) {
+        const fetchedCart = response.data.cart_items
+          .map((cartItem: any) => {
+            const menuItem = menu.find(m => m.menuid === cartItem.menuid);
+            if (menuItem) {
+              return {
+                ...menuItem,
+                quantity: cartItem.quantity,
+              };
+            }
+            return null;
+          })
+          .filter((item: any) => item !== null);
+
+        setCart(fetchedCart);
+      } else {
+        setCart([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+      // Keep existing cart (from localStorage) as fallback
+    }
+  };
+
+  fetchCart();
+}, [userid, menu]);// Re-run when userid or menu changes
 
   const handleAddToCart = async (item: any) => {
     setLoadingItemId(item.menuid);
@@ -117,15 +157,21 @@ const RestaurantMenuPage: React.FC = () => {
       );
 
       if (response.status === 200) {
-        if (response.data.new_quantity !== undefined) {
-          const newQuantity = response.data.new_quantity;
+        const newQuantity = response.data.new_quantity;
+        if (newQuantity !== undefined && newQuantity > 0) {
+          // Update quantity if still > 0
           setCart((prevCart) =>
             prevCart.map((cartItem) =>
-              cartItem.menuid === item.menuid ? { ...cartItem, quantity: newQuantity } : cartItem
+              cartItem.menuid === item.menuid
+                ? { ...cartItem, quantity: newQuantity }
+                : cartItem
             )
           );
         } else {
-          setCart((prevCart) => prevCart.filter((cartItem) => cartItem.menuid !== item.menuid));
+          // Remove item if newQuantity is undefined or 0
+          setCart((prevCart) =>
+            prevCart.filter((cartItem) => cartItem.menuid !== item.menuid)
+          );
         }
       }
     } catch (error) {
@@ -160,11 +206,11 @@ const RestaurantMenuPage: React.FC = () => {
   const handleCheckout = () => {
     // Save cart to localStorage and navigate to cart page
     localStorage.setItem('cart', JSON.stringify(cart));
-    navigate('/cart', { 
-      state: { 
+    navigate('/cart', {
+      state: {
         restaurantid: restaurantid,
-        fromMenuPage: true 
-      } 
+        fromMenuPage: true
+      }
     });
   };
 
@@ -198,7 +244,7 @@ const RestaurantMenuPage: React.FC = () => {
             item.currentstatus === "instock"
               ? `In Stock${item.numberoffillups ? ` (${item.numberoffillups})` : ""}`
               : "Out of Stock";
-              
+
           return (
             <div
               key={item.menuid}
@@ -273,8 +319,8 @@ const RestaurantMenuPage: React.FC = () => {
                 <div className="mt-3">
                   <p className="text-sm text-gray-600">{item.menudescription}</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {item.servingtype === "1" 
-                      ? "Serves 1 person" 
+                    {item.servingtype === "1"
+                      ? "Serves 1 person"
                       : `Serves ${item.servingtype} people`}
                   </p>
                 </div>

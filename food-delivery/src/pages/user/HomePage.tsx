@@ -13,7 +13,7 @@ import {
   FaUtensils,FaSignOutAlt,
   FaChevronRight
 ,FaBell
-,FaUserAlt} from 'react-icons/fa';
+,FaUserAlt,FaWallet} from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 
@@ -358,10 +358,10 @@ const HomePage: React.FC = () => {
 
       <button
         className="text-gray-500 flex flex-col items-center"
-        onClick={() => navigate("/history")}
+        onClick={() => navigate("/wallet")}
       >
-        <FaHistory className="text-lg" />
-        <span className="text-xs mt-1">Orders</span>
+        <FaWallet className="text-lg" />
+        <span className="text-xs mt-1">Wallet</span>
       </button>
 
       <button

@@ -10,29 +10,25 @@ import {
   FaClock,
   FaMoneyBillAlt,
   FaUtensils,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
+  FaCreditCard,
+  FaArrowLeft
 } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 
 // ---------- Interfaces matching the actual API response ----------
-interface Menu {
-  _id: string;
-  menudiscountpercent: number;
-  menudiscountprice: number;
-  menuid: string;
-  menuitemtype: string;
-  menuname: string;
-  menuprice: number;
-  menutype: string;
-  restaurantid: string;
-}
-
 interface Restaurant {
   address: string | null;
   location: string | null;
   restaurant_name: string;
   restaurant_type: string | null;
+}
+
+interface User {
+  username: string;
+  user_phone_no: string | null;
+  useraddress: string | null;
 }
 
 // Raw order line item from the API
@@ -50,14 +46,17 @@ interface ApiOrderItem {
   updated_at: string;
   userid: string;
   restaurantid: string;
-  menu: Menu;
+  menu: string | null;          // Now a string (item name), can be null
   restaurant: Restaurant;
+  user?: User;                   // Optional user info
 }
 
 // Grouped order (one logical order containing one or more items)
 interface GroupedOrder {
   master_order_id: string;
   orderstatus: string;
+  payment_mode: string;
+  payment_status: string;
   created_at: string;
   updated_at: string;
   restaurant: Restaurant;
@@ -135,13 +134,15 @@ const OrderHistoryPage: React.FC = () => {
 
     const result: GroupedOrder[] = [];
     groups.forEach((groupItems, masterId) => {
-      // All items in the group share these common fields (take from first item)
+      // All items in the group share common fields (take from first item)
       const first = groupItems[0];
       const total = groupItems.reduce((sum, item) => sum + item.final_price, 0);
 
       result.push({
         master_order_id: masterId,
         orderstatus: first.orderstatus,
+        payment_mode: first.payment_mode,
+        payment_status: first.payment_status,
         created_at: first.created_at,
         updated_at: first.updated_at,
         restaurant: first.restaurant,
@@ -170,7 +171,8 @@ const OrderHistoryPage: React.FC = () => {
   }, [statusFilter, groupedOrders]);
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    const lower = status.toLowerCase();
+    switch (lower) {
       case 'completed':
       case 'delivered':
         return 'bg-green-100 text-green-800';
@@ -229,7 +231,7 @@ const OrderHistoryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-orange-50">
-      {/* Sidebar (unchanged) */}
+      {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 w-64 h-full bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -301,22 +303,22 @@ const OrderHistoryPage: React.FC = () => {
       {/* Main Content */}
       <div className="pb-20">
         {/* Header */}
-        <div className="bg-orange-500 text-white p-4 sticky top-0 z-30 shadow-md">
-          <div className="flex justify-between items-center">
-            <button onClick={toggleSidebar} className="text-xl">
-              <FaSearch /> {/* Consider replacing with FaBars for clarity */}
-            </button>
-            <div className="flex items-center">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
-                alt="Logo"
-                className="w-6 h-6 mr-2"
-              />
-              <h1 className="text-lg font-bold">Order History</h1>
-            </div>
-            <div className="w-6"></div>
-          </div>
-        </div>
+       <div className="bg-orange-500 text-white p-4 sticky top-0 z-30 shadow-md">
+  <div className="flex justify-between items-center">
+    <button onClick={() => navigate(-1)} className="text-xl">
+      <FaArrowLeft />
+    </button>
+    <div className="flex items-center">
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+        alt="Logo"
+        className="w-6 h-6 mr-2"
+      />
+      <h1 className="text-lg font-bold">Order History</h1>
+    </div>
+    <div className="w-6"></div>
+  </div>
+</div>
 
         {/* Filter */}
         <div className="p-4 bg-white">
@@ -381,36 +383,33 @@ const OrderHistoryPage: React.FC = () => {
 
                   {/* Order Items */}
                   <div className="p-4 space-y-4">
-                    {order.items.map((item) => (
-                      <div
-                        key={item.uid}
-                        className="flex justify-between items-start border-b border-gray-50 pb-3 last:border-0 last:pb-0"
-                      >
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">
-                            {item.menu?.menuname || 'Item not available'}
-                          </h4>
-                          <p className="text-xs text-gray-500 mt-1">
-                            ₹{item.menu?.menudiscountprice?.toFixed(2)} each
-                          </p>
-                          {item.menu?.menuprice &&
-                            item.menu.menuprice !==
-                              item.menu.menudiscountprice && (
-                              <p className="text-xs text-gray-400 line-through">
-                                ₹{item.menu.menuprice.toFixed(2)}
-                              </p>
-                            )}
+                    {order.items.map((item) => {
+                      // Calculate per‑unit price (if quantity > 0)
+                      const unitPrice = item.quantity > 0 ? item.final_price / item.quantity : 0;
+                      return (
+                        <div
+                          key={item.uid}
+                          className="flex justify-between items-start border-b border-gray-50 pb-3 last:border-0 last:pb-0"
+                        >
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">
+                              {item.menu || 'Item not available'}
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1">
+                              ₹{unitPrice.toFixed(2)} each
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900">
+                              ₹{item.final_price.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Qty: {item.quantity}
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900">
-                            ₹{item.final_price.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Qty: {item.quantity}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Order Footer */}
@@ -430,12 +429,20 @@ const OrderHistoryPage: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                    {order.restaurant?.location && (
-                      <div className="flex items-center mt-2 space-x-2 text-sm text-gray-500">
-                        <FaMapMarkerAlt className="text-orange-400" />
-                        <span>{order.restaurant.location}</span>
+                    <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                      <div className="flex items-center space-x-2">
+                        <FaCreditCard className="text-orange-400" />
+                        <span>
+                          {order.payment_mode} • {order.payment_status}
+                        </span>
                       </div>
-                    )}
+                      {order.restaurant?.location && (
+                        <div className="flex items-center space-x-2">
+                          <FaMapMarkerAlt className="text-orange-400" />
+                          <span>{order.restaurant.location}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -444,7 +451,7 @@ const OrderHistoryPage: React.FC = () => {
         </div>
       </div>
 
-      
+      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
         <button
           onClick={() => navigate('/home')}
