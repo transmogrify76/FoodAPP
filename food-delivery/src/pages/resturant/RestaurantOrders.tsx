@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
-import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import io from 'socket.io-client';
+import { FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
 
+// Status badge styling
 const badgeClasses: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200',
-  accepted: 'bg-green-100 text-green-700 ring-1 ring-green-200',
-  rejected: 'bg-red-100 text-red-700 ring-1 ring-red-200',
+  CREATED: 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200',
+  ACCEPTED: 'bg-green-100 text-green-700 ring-1 ring-green-200',
+  CONFIRMED: 'bg-green-100 text-green-700 ring-1 ring-green-200',
+  REJECTED: 'bg-red-100 text-red-700 ring-1 ring-red-200',
   default: 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
 };
 
 const RestaurantOrders: React.FC = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<any[]>([]);
-  const [message, setMessage] = useState<string>('');
-  const [restaurantIds, setRestaurantIds] = useState<string[]>([]);
   const [ownerId, setOwnerId] = useState<string>('');
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('');
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [riders, setRiders] = useState<any[]>([]);
   const [showRiderModal, setShowRiderModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string>('');
@@ -26,12 +30,15 @@ const RestaurantOrders: React.FC = () => {
   const [assigningRider, setAssigningRider] = useState(false);
   const [socket, setSocket] = useState<any>(null);
 
+  const API_BASE = 'http://192.168.0.103:5020';
+
+  // Socket connection
   useEffect(() => {
-    const newSocket = io('http://192.168.0.103:5020');
+    const newSocket = io(API_BASE);
     setSocket(newSocket);
 
     newSocket.on('message', (data: any) => {
-      setMessage(data.message);
+      setSuccessMessage(data.message);
     });
 
     return () => {
@@ -39,179 +46,179 @@ const RestaurantOrders: React.FC = () => {
     };
   }, []);
 
+  // Decode token and fetch restaurants
   useEffect(() => {
-    const storedRestaurantToken = localStorage.getItem('restaurant_token');
-    if (storedRestaurantToken) {
+    const token = localStorage.getItem('restaurant_token');
+    if (token) {
       try {
-        const decodedToken: any = jwtDecode(storedRestaurantToken);
-        setOwnerId(decodedToken.owenerid);
-        fetchRestaurantIds(decodedToken.owenerid);
-      } catch (error) {
-        console.error('Error decoding token:', error);
-        setMessage('Invalid token.');
+        const decoded: any = jwtDecode(token);
+        setOwnerId(decoded.owenerid || '');
+        fetchRestaurants(decoded.owenerid);
+      } catch (err) {
+        console.error('Token decoding failed', err);
+        setError('Invalid token.');
       }
     } else {
-      setMessage('Restaurant token not found in local storage.');
+      setError('Restaurant token not found.');
     }
   }, []);
 
-  const fetchRestaurantIds = async (ownerId: string) => {
-    try {
-      const formData = new FormData();
-      formData.append('ownerid', ownerId);
+  const fetchRestaurants = async (ownerId: string) => {
+    setLoading(true);
+    setError(null);
+    const formData = new FormData();
+    formData.append('ownerid', ownerId);
 
-      const response = await fetch('http://192.168.0.103:5020/owenerresturentfetch', {
+    try {
+      const response = await fetch(`${API_BASE}/owenerresturentfetch`, {
         method: 'POST',
         body: formData,
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to fetch restaurants');
+        return;
+      }
+      const data = await response.json();
+      setRestaurants(data.data || []);
+    } catch (err) {
+      setError('Something went wrong. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    if (!selectedRestaurantId) {
+      setError('Please select a restaurant first.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/order/resorderhistory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurantid: selectedRestaurantId }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        setMessage(errorData.error || 'Failed to fetch restaurant IDs');
+        setError(errorData.error || 'Failed to fetch orders');
+        setOrders([]);
         return;
       }
 
       const data = await response.json();
-      const restaurantIdsFromResponse = data.data.map((restaurant: any) => restaurant.restaurantid);
-      if (restaurantIdsFromResponse && restaurantIdsFromResponse.length > 0) {
-        setRestaurantIds(restaurantIdsFromResponse);
-      } else {
-        setMessage('No restaurants found for this owner.');
+      setOrders(data.order_list || []);
+      if (data.order_list?.length === 0) {
+        setSuccessMessage('No orders found for this restaurant.');
       }
-    } catch (error) {
-      console.error('Error fetching restaurant IDs:', error);
-      setMessage('Error fetching restaurant data.');
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setOrders([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (restaurantIds.length === 0) return;
-
-    const fetchOrders = async () => {
-      try {
-        // Fetch orders for all restaurants
-        const allOrders = [];
-
-        for (const restaurantId of restaurantIds) {
-          const formData = new FormData();
-          formData.append('restaurantid', restaurantId);
-
-          const response = await axios.post('http://192.168.0.103:5020/order/orderhistory', formData);
-
-          if (response.data && response.data.order_list) {
-            // Add restaurant ID to each order for reference
-            const ordersWithRestaurant = response.data.order_list.map((order: any) => ({
-              ...order,
-              restaurantId: restaurantId
-            }));
-
-            allOrders.push(...ordersWithRestaurant);
-          }
-        }
-
-        setOrders(allOrders);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          setMessage(error.response?.data?.error || 'Error fetching orders!');
-        } else {
-          setMessage('Unexpected error occurred!');
-        }
-      }
-    };
-
-    fetchOrders();
-  }, [restaurantIds]);
-
+  // Handlers for order actions (accept/reject)
   const handleOrderAction = async (orderId: string, action: 'accept' | 'reject') => {
     try {
       const formData = new FormData();
       formData.append('orderid', orderId);
       formData.append('updateorderstatus', action === 'accept' ? 'accepted' : 'rejected');
 
-      const response = await axios.post('http://192.168.0.103:5020/ops/updateorder', formData);
+      const response = await fetch(`${API_BASE}/ops/updateorder`, {
+        method: 'POST',
+        body: formData,
+      });
 
-      if (response.data.message === 'Data update success') {
-        setMessage(`Order #${orderId} has been ${action}ed.`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to update order status');
+        return;
+      }
+
+      const data = await response.json();
+      if (data.message === 'Data update success') {
+        setSuccessMessage(`Order #${orderId} has been ${action}ed.`);
         setOrders((prev) =>
           prev.map((order) =>
-            order.uid === orderId ? { ...order, orderstatus: action === 'accept' ? 'accepted' : 'rejected' } : order
+            order.master_order_id === orderId
+              ? { ...order, orderstatus: action === 'accept' ? 'ACCEPTED' : 'REJECTED' }
+              : order
           )
         );
       } else {
-        setMessage('Failed to update order status.');
+        setError('Failed to update order status.');
       }
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      setMessage('Error updating order status.');
+    } catch (err) {
+      setError('Error updating order status.');
     }
   };
 
-  const handlePreparationStatus = async (orderId: string, restaurantId: string, status: 'startedpreparing' | 'inprogress' | 'dispatch') => {
-  if (!socket) {
-    setMessage('Socket connection not established');
-    return;
-  }
+  const handlePreparationStatus = async (
+    orderId: string,
+    restaurantId: string,
+    status: 'startedpreparing' | 'inprogress' | 'dispatch'
+  ) => {
+    if (!socket) {
+      setError('Socket connection not established');
+      return;
+    }
 
- 
-  if (status === 'dispatch') {
-    try {
+    if (status === 'dispatch') {
+      try {
+        const data = {
+          orderid: orderId,
+          restaurantid: restaurantId,
+          tempstatus: status,
+          preptime: '',
+        };
+        socket.emit('temporderstatus', data);
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.master_order_id === orderId
+              ? { ...order, tempstatus: status, orderstatus: 'COMPLETED' }
+              : order
+          )
+        );
+        setSuccessMessage(`Order #${orderId} has been dispatched.`);
+      } catch (err) {
+        setError('Error updating preparation status.');
+      }
+    } else {
+      const preptime =
+        status === 'inprogress' ? prompt('Enter preparation time (in minutes):') || '' : '';
       const data = {
         orderid: orderId,
         restaurantid: restaurantId,
         tempstatus: status,
-        preptime: '' // No prep time needed for dispatch
+        preptime,
       };
-
       socket.emit('temporderstatus', data);
-
-      
       setOrders((prev) =>
-        prev.map((order) => 
-          order.uid === orderId ? { 
-            ...order, 
-            tempstatus: status,
-            orderstatus: 'completed' // Mark as completed
-          } : order
+        prev.map((order) =>
+          order.master_order_id === orderId ? { ...order, tempstatus: status } : order
         )
       );
-      
-      setMessage(`Order #${orderId} has been dispatched and marked as completed.`);
-    } catch (error) {
-      console.error('Error updating preparation status:', error);
-      setMessage('Error updating preparation status.');
+      setSuccessMessage(`Order #${orderId} status update to '${status}' requested.`);
     }
-  } else {
-    // For other statuses (startedpreparing, inprogress)
-    try {
-      const data = {
-        orderid: orderId,
-        restaurantid: restaurantId,
-        tempstatus: status,
-        preptime: status === 'inprogress' ? prompt('Enter preparation time (in minutes):') || '' : ''
-      };
+  };
 
-      socket.emit('temporderstatus', data);
-
-      setOrders((prev) =>
-        prev.map((order) => (order.uid === orderId ? { ...order, tempstatus: status } : order))
-      );
-      
-      setMessage(`Order #${orderId} status update requested to '${status}'.`);
-    } catch (error) {
-      console.error('Error updating preparation status:', error);
-      setMessage('Error updating preparation status.');
-    }
-  }
-};
-
+  // Rider handling
   const fetchAllRiders = async () => {
     try {
       setLoadingRiders(true);
-      const response = await axios.get('http://192.168.0.103:5020/ops/getallraiders');
-      setRiders(response.data.data);
-    } catch (error) {
-      console.error('Error fetching riders:', error);
-      setMessage('Error fetching available riders');
+      const response = await fetch(`${API_BASE}/ops/getallraiders`);
+      const data = await response.json();
+      setRiders(data.data || []);
+    } catch (err) {
+      setError('Error fetching riders');
     } finally {
       setLoadingRiders(false);
     }
@@ -219,7 +226,7 @@ const RestaurantOrders: React.FC = () => {
 
   const assignRiderToOrder = async (orderId: string) => {
     if (!selectedRiderId) {
-      setMessage('Please select a rider first');
+      setError('Please select a rider');
       return;
     }
 
@@ -229,23 +236,27 @@ const RestaurantOrders: React.FC = () => {
       formData.append('raiderid', selectedRiderId);
       formData.append('orderid', orderId);
 
-      const response = await axios.post(
-        'http://192.168.0.103:5020/order/assignorderraider',
-        formData
-      );
+      const response = await fetch(`${API_BASE}/order/assignorderraider`, {
+        method: 'POST',
+        body: formData,
+      });
 
-      if (response.status === 200) {
-        setMessage('Rider assigned successfully');
-        setOrders((prev) =>    
-          prev.map((order) =>
-            order.uid === orderId ? { ...order, assignedRaider: response.data.data } : order
-          )
-        );
-        setShowRiderModal(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Error assigning rider');
+        return;
       }
-    } catch (error: any) {
-      setMessage(error.response?.data?.error || 'Error assigning rider');
-      console.error('Assignment error:', error);
+
+      const data = await response.json();
+      setSuccessMessage('Rider assigned successfully');
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.master_order_id === orderId ? { ...order, assignedRaider: data.data } : order
+        )
+      );
+      setShowRiderModal(false);
+    } catch (err) {
+      setError('Error assigning rider');
     } finally {
       setAssigningRider(false);
     }
@@ -258,204 +269,295 @@ const RestaurantOrders: React.FC = () => {
   };
 
   const handleDeliveryOption = (orderId: string, option: 'self' | 'rider') => {
-    setMessage(`Delivery option '${option}' selected for order #${orderId}`);
+    setSuccessMessage(`Delivery option '${option}' selected for order #${orderId}`);
     setOrders((prev) =>
-      prev.map((order) => (order.uid === orderId ? { ...order, deliveryOption: option } : order))
+      prev.map((order) =>
+        order.master_order_id === orderId ? { ...order, deliveryOption: option } : order
+      )
     );
   };
 
-  const getBadgeClass = (status?: string) => {
-    if (!status) return badgeClasses.default;
-    return badgeClasses[status] || badgeClasses.default;
-  };
+  const getBadgeClass = (status?: string) => badgeClasses[status || 'default'] || badgeClasses.default;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-orange-50 via-white to-orange-100">
-      
-      <div className="sticky top-0 z-20 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center shadow-lg">
-        <button onClick={() => navigate(-1)} className="mr-3 rounded-full bg-white/20 p-2">
-          <FaArrowLeft size={18} />
+    <div className="bg-orange-50 min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 flex items-center rounded-b-2xl shadow-md">
+        <button onClick={() => navigate(-1)} className="mr-3">
+          <FaArrowLeft size={20} />
         </button>
-        <h1 className="text-lg font-bold flex-1 text-center">Orders</h1>
-        <div className="w-8"></div>
+        <h1 className="text-lg font-bold flex-1 text-center">Order History</h1>
+        <div className="w-6"></div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 w-full">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          {/* Toast */}
-          {message && (
-            <div className="mb-4 animate-fadeIn">
-              <div className="rounded-xl border border-orange-300 bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 px-4 py-3 shadow-md">
-                {message}
-              </div>
-            </div>
+      {/* Main Content */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        {/* Messages */}
+        {error && (
+          <div className="bg-red-100 text-red-700 p-3 rounded-xl mb-4 shadow-md">
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="bg-green-100 text-green-700 p-3 rounded-xl mb-4 shadow-md">
+            {successMessage}
+          </div>
+        )}
+        {loading && (
+          <div className="text-center text-gray-700 font-medium mb-4">Loading...</div>
+        )}
+
+        {/* Restaurant Selector Card */}
+        <div className="bg-white p-4 rounded-xl shadow-md mb-4">
+          <h2 className="text-lg font-bold text-gray-800 mb-3">Select Restaurant</h2>
+          {restaurants.length > 0 ? (
+            <select
+              className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500"
+              value={selectedRestaurantId}
+              onChange={(e) => setSelectedRestaurantId(e.target.value)}
+            >
+              <option value="">-- Choose a restaurant --</option>
+              {restaurants.map((restaurant) => (
+                <option key={restaurant.restaurantid} value={restaurant.restaurantid}>
+                  {restaurant.restaurantname}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-gray-600">No restaurants found.</p>
           )}
+          <button
+            onClick={fetchOrders}
+            className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow-md hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50"
+            disabled={!selectedRestaurantId || loading}
+          >
+            {loading ? 'Fetching Orders...' : 'Fetch Orders'}
+          </button>
+        </div>
 
-          {/* Orders */}
-          {orders.length > 0 ? (
-            <div className="space-y-5">
-              {orders.map((order) => (
-                <div
-                  key={order.uid}
-                  className="relative overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-100"
-                >
-                  <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-orange-500 to-orange-600" />
-
-                  <div className="p-5">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 ring-1 ring-orange-100">
-                          <FaShoppingCart className="text-orange-600" />
-                        </div>
-                        <div>
-                          <h2 className="text-base font-semibold text-gray-800">
-                            {order.items[0]?.menu?.menuname || 'N/A'}
-                          </h2>
-                          <p className="text-xs text-gray-500">#{order.uid}</p>
-                          <p className="text-xs text-gray-400">Restaurant ID: {order.restaurantId}</p>
-                        </div>
-                      </div>
-
-                      <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getBadgeClass(
-                          order.orderstatus
-                        )}`}
-                      >
-                        {order.orderstatus || 'N/A'}
-                      </span>
+        {/* Orders List */}
+        {orders.length > 0 ? (
+          <div className="space-y-4">
+            {orders.map((order) => (
+              <div
+                key={order.master_order_id}
+                className="bg-white p-4 rounded-xl shadow-md space-y-3"
+              >
+                {/* Order Header */}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-orange-100 p-2 rounded-full">
+                      <FaShoppingCart className="text-orange-600" />
                     </div>
-
-                    {/* Details */}
-                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
-                        <p className="text-xs text-gray-500">Quantity</p>
-                        <p className="font-medium text-black">{order.items[0]?.quantity || 0}</p>
-                      </div>
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
-                        <p className="text-xs text-gray-500">Total</p>
-                        <p className="font-semibold text-green-600">₹{order.totalprice || 0}</p>
-                      </div>
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100 col-span-2">
-                        <p className="text-xs text-gray-500">Address</p>
-                        <p className="text-black">{order.useraddress || 'No address provided'}</p>
-                      </div>
-
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100 col-span-2">
-                        <p className="text-xs text-gray-500">Contact</p>
-                        <p className="text-black">{order.usercontact || 'No contact provided'}</p>
-                      </div>
-                      <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-100">
-                        <p className="text-xs text-gray-500">Ordered On</p>
-                        <p className="text-gray-800" >{new Date(order.created_at).toLocaleString()}</p>
-                      </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{order.username || 'Guest'}</h3>
+                      <p className="text-xs text-gray-500">#{order.master_order_id.slice(0, 8)}</p>
                     </div>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${getBadgeClass(
+                      order.orderstatus
+                    )}`}
+                  >
+                    {order.orderstatus}
+                  </span>
+                </div>
 
-                    {order.orderstatus === 'pending' && (
-                      <div className="mt-5 flex gap-3">
-                        <button
-                          onClick={() => handleOrderAction(order.uid, 'accept')}
-                          className="flex-1 rounded-full bg-green-600 text-white px-4 py-2 text-sm font-medium shadow hover:brightness-110 transition"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleOrderAction(order.uid, 'reject')}
-                          className="flex-1 rounded-full bg-red-600 text-white px-4 py-2 text-sm font-medium shadow hover:brightness-110 transition"
-                        >
-                          Reject
-                        </button>
+                {/* Restaurant Info */}
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">{order.restaurant_name}</span> • {order.restaurant_address}
+                </p>
+
+                {/* Menu Items */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">Items:</p>
+                  {order.menu && order.menu.length > 0 ? (
+                    order.menu.map((item: any, idx: number) => (
+                      <div key={idx} className="flex justify-between text-sm bg-gray-50 p-2 rounded-lg">
+                        <span className="text-gray-800">
+                          {item.menuname} x {item.quantity}
+                        </span>
+                        <span className="font-medium text-green-600">
+                          ₹{item.menuprice * item.quantity}
+                        </span>
                       </div>
-                    )}
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">No item details</p>
+                  )}
+                </div>
 
-  
-                    {order.orderstatus === 'accepted' && (
-                      <div className="mt-6 space-y-5">
-                        {/* Delivery Options */}
-                        <div className="rounded-2xl bg-gradient-to-br from-orange-50 to-white p-4 ring-1 ring-orange-100">
-                          <h3 className="text-sm font-semibold text-gray-800 mb-3">Delivery Method</h3>
-                          <div className="flex gap-3">
-                            {order.assignedRaider ? (
-                              <div className="flex-1 rounded-xl bg-green-50 ring-1 ring-green-100 p-3">
-                                <p className="text-sm text-green-800">
-                                  Rider:&nbsp;
-                                  <span className="font-semibold">
-                                    {order.assignedRaider.raiderfullname}
-                                  </span>
-                                </p>
-                              </div>
-                            ) : (
-                              <>
-                                <button
-                                  onClick={() => handleDeliveryOption(order.uid, 'self')}
-                                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition shadow
-                                    ${order.deliveryOption === 'self'
-                                      ? 'bg-green-600 text-white'
-                                      : 'bg-green-500 text-white hover:brightness-110'
-                                    }`}
-                                >
-                                  Self Delivery
-                                </button>
-                                <button
-                                  onClick={() => handleRiderSelection(order.uid)}
-                                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition shadow
-                                    ${order.deliveryOption === 'rider'
-                                      ? 'bg-blue-600 text-white'
-                                      : 'bg-blue-500 text-white hover:brightness-110'
-                                    }`}
-                                >
-                                  {order.deliveryOption === 'rider' ? 'Change Rider' : 'Choose Rider'}
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Preparation Steps */}
-                        <div className="rounded-2xl bg-white p-4 ring-1 ring-gray-100 shadow">
-                          <h3 className="text-sm font-semibold text-gray-800 mb-3">Preparation</h3>
-                          <div className="grid grid-cols-3 gap-2">
-                            <button
-                              onClick={() => handlePreparationStatus(order.uid, order.restaurantId, 'startedpreparing')}
-                              className="rounded-full bg-orange-600 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
-                            >
-                              Started
-                            </button>
-                            <button
-                              onClick={() => handlePreparationStatus(order.uid, order.restaurantId, 'inprogress')}
-                              className="rounded-full bg-amber-500 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
-                            >
-                              In Progress
-                            </button>
-                            <button
-                              onClick={() => handlePreparationStatus(order.uid, order.restaurantId, 'dispatch')}
-                              className="rounded-full bg-purple-600 text-white px-4 py-2 text-xs font-medium hover:brightness-110 transition"
-                            >
-                              Dispatch
-                            </button>
-                          </div>
-
-                          {order.tempstatus && (
-                            <div className="mt-3">
-                              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200">
-                                Current: {order.tempstatus}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                {/* Payment & Contact */}
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <p className="text-xs text-gray-500">Total</p>
+                    <p className="font-semibold text-green-600">₹{order.totalprice}</p>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded-lg">
+                    <p className="text-xs text-gray-500">Payment</p>
+                    <p className="text-gray-700">
+                      {order.payment_mode} • {order.payment_status}
+                    </p>
+                  </div>
+                  <div className="col-span-2 bg-gray-50 p-2 rounded-lg">
+                    <p className="text-xs text-gray-500">Address</p>
+                    <p className="text-gray-700">{order.useraddress || 'Not provided'}</p>
+                  </div>
+                  <div className="col-span-2 bg-gray-50 p-2 rounded-lg">
+                    <p className="text-xs text-gray-500">Contact</p>
+                    <p className="text-gray-700">{order.user_phone_no || 'Not provided'}</p>
+                  </div>
+                  <div className="col-span-2 bg-gray-50 p-2 rounded-lg">
+                    <p className="text-xs text-gray-500">Ordered On</p>
+                    <p className="text-gray-700">{new Date(order.created_at).toLocaleString()}</p>
                   </div>
                 </div>
-              ))}
+
+                {/* Action Buttons */}
+                {order.orderstatus === 'CREATED' && (
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => handleOrderAction(order.master_order_id, 'accept')}
+                      className="flex-1 py-2 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleOrderAction(order.master_order_id, 'reject')}
+                      className="flex-1 py-2 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
+
+                {(order.orderstatus === 'ACCEPTED' || order.orderstatus === 'CONFIRMED') && (
+                  <div className="space-y-4 pt-2">
+                    {/* Delivery Options */}
+                    <div className="bg-orange-50 p-3 rounded-xl">
+                      <p className="text-sm font-medium text-gray-800 mb-2">Delivery Method</p>
+                      {order.assignedRaider ? (
+                        <p className="text-sm text-green-800">
+                          Rider: {order.assignedRaider.raiderfullname}
+                        </p>
+                      ) : (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleDeliveryOption(order.master_order_id, 'self')}
+                            className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
+                              order.deliveryOption === 'self'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-green-500 text-white hover:bg-green-600'
+                            }`}
+                          >
+                            Self Delivery
+                          </button>
+                          <button
+                            onClick={() => handleRiderSelection(order.master_order_id)}
+                            className={`flex-1 py-2 rounded-full text-sm font-medium transition ${
+                              order.deliveryOption === 'rider'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                            }`}
+                          >
+                            {order.deliveryOption === 'rider' ? 'Change Rider' : 'Choose Rider'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Preparation Steps */}
+                    <div className="bg-gray-50 p-3 rounded-xl">
+                      <p className="text-sm font-medium text-gray-800 mb-2">Preparation</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() =>
+                            handlePreparationStatus(
+                              order.master_order_id,
+                              order.restaurantid,
+                              'startedpreparing'
+                            )
+                          }
+                          className="py-2 rounded-full bg-orange-600 text-white text-xs hover:bg-orange-700"
+                        >
+                          Started
+                        </button>
+                        <button
+                          onClick={() =>
+                            handlePreparationStatus(order.master_order_id, order.restaurantid, 'inprogress')
+                          }
+                          className="py-2 rounded-full bg-amber-500 text-white text-xs hover:bg-amber-600"
+                        >
+                          In Progress
+                        </button>
+                        <button
+                          onClick={() =>
+                            handlePreparationStatus(order.master_order_id, order.restaurantid, 'dispatch')
+                          }
+                          className="py-2 rounded-full bg-purple-600 text-white text-xs hover:bg-purple-700"
+                        >
+                          Dispatch
+                        </button>
+                      </div>
+                      {order.tempstatus && (
+                        <p className="mt-2 text-xs text-gray-600">
+                          Current: <span className="font-medium">{order.tempstatus}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          !loading && (
+            <div className="bg-white p-8 rounded-xl shadow-md text-center text-gray-500">
+              No orders to display. Select a restaurant and click "Fetch Orders".
             </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-orange-300 bg-orange-50 text-center py-14 shadow-inner">
-              <p className="text-gray-600">No orders found</p>
-            </div>
-          )}
-        </div>
+          )
+        )}
       </div>
+
+      {/* Rider Selection Modal */}
+      {showRiderModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold mb-4">Select a Rider</h3>
+            {loadingRiders ? (
+              <p>Loading riders...</p>
+            ) : (
+              <select
+                value={selectedRiderId}
+                onChange={(e) => setSelectedRiderId(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-4"
+              >
+                <option value="">Choose a rider</option>
+                {riders.map((rider) => (
+                  <option key={rider.raiderid} value={rider.raiderid}>
+                    {rider.raiderfullname} ({rider.raidercontact})
+                  </option>
+                ))}
+              </select>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => assignRiderToOrder(selectedOrderId)}
+                disabled={assigningRider || !selectedRiderId}
+                className="flex-1 bg-blue-600 text-white rounded-full py-2 disabled:opacity-50"
+              >
+                {assigningRider ? 'Assigning...' : 'Assign'}
+              </button>
+              <button
+                onClick={() => setShowRiderModal(false)}
+                className="flex-1 bg-gray-200 rounded-full py-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

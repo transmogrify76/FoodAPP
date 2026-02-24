@@ -10,10 +10,14 @@ import {
   FaCog,
   FaFile,
   FaShoppingCart,
-  FaUtensils,FaSignOutAlt,
-  FaChevronRight
-,FaBell
-,FaUserAlt,FaWallet} from 'react-icons/fa';
+  FaUtensils,
+  FaSignOutAlt,
+  FaChevronRight,
+  FaBell,
+  FaUserAlt,
+  FaWallet,
+  FaCrown,                // <-- added for premium
+} from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,11 +28,11 @@ const HomePage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const handleLogout = () => {
-    localStorage.clear(); 
-    navigate('/login');   
-  };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -102,15 +106,14 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-orange-50">
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 w-64 h-full bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 w-64 h-full bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="flex justify-between items-center p-4 bg-orange-500 text-white">
           <div className="flex items-center">
-            <img 
-              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-              alt="Logo" 
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+              alt="Logo"
               className="w-8 h-8 mr-2"
             />
             <h3 className="text-lg font-bold">Foodie Heaven</h3>
@@ -192,25 +195,21 @@ const HomePage: React.FC = () => {
                 <FaShoppingCart className="text-orange-500 mr-3 text-lg" />
                 <span className="font-medium">View Cart</span>
               </button>
-                        <button
-            onClick={handleLogout}
-            className="flex items-center w-full p-3 rounded-lg hover:bg-red-100 text-red-600 mt-6"
-          >
-            <FaSignOutAlt className="mr-3 text-lg" />
-            <span className="font-medium">Logout</span>
-          </button>
-
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full p-3 rounded-lg hover:bg-red-100 text-red-600 mt-6"
+              >
+                <FaSignOutAlt className="mr-3 text-lg" />
+                <span className="font-medium">Logout</span>
+              </button>
             </li>
           </ul>
         </div>
       </div>
-      
+
       {/* Overlay */}
       {isSidebarOpen && (
-        <div 
-          onClick={toggleSidebar} 
-          className="fixed inset-0 bg-black opacity-50 z-40"
-        ></div>
+        <div onClick={toggleSidebar} className="fixed inset-0 bg-black opacity-50 z-40"></div>
       )}
 
       {/* Main Content */}
@@ -222,9 +221,9 @@ const HomePage: React.FC = () => {
               <FaBars />
             </button>
             <div className="flex items-center">
-              <img 
-                src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-                alt="Logo" 
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+                alt="Logo"
                 className="w-6 h-6 mr-2"
               />
               <h1 className="text-lg font-bold">Foodie Heaven</h1>
@@ -245,7 +244,7 @@ const HomePage: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-300 text-sm"
             />
           </div>
-          
+
           <div className="flex items-center mb-4">
             <FaMapMarkerAlt className="text-orange-500 mr-2" />
             <select
@@ -266,12 +265,30 @@ const HomePage: React.FC = () => {
           </div>
         )}
 
+        {/* Special Offer Banner */}
         <div className="px-4 mb-6">
           <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 text-white">
             <h2 className="font-bold text-lg mb-1">Special Offer!</h2>
             <p className="text-sm mb-3">Get 20% off on your first order</p>
             <button className="bg-white text-orange-500 px-3 py-1 rounded-full text-xs font-semibold">
               Order Now
+            </button>
+          </div>
+        </div>
+
+        {/* Premium Membership Banner - NEW */}
+        <div className="px-4 mb-6">
+          <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-2xl p-4 text-white">
+            <div className="flex items-center mb-2">
+              <FaCrown className="text-2xl mr-2" />
+              <h2 className="font-bold text-lg">Go Premium</h2>
+            </div>
+            <p className="text-sm mb-3">Unlock free delivery, exclusive offers & more!</p>
+            <button
+              onClick={() => navigate('/premium')}  // Make sure route is configured
+              className="bg-white text-yellow-500 px-3 py-1 rounded-full text-xs font-semibold"
+            >
+              Become a Premium Customer
             </button>
           </div>
         </div>
@@ -287,7 +304,7 @@ const HomePage: React.FC = () => {
 
           <div className="space-y-4">
             {filteredRestaurants.map((restaurant) => (
-              <div 
+              <div
                 key={restaurant.resturantid}
                 className="bg-white rounded-xl shadow-sm overflow-hidden"
                 onClick={() => handleViewMenu(restaurant.resturantid)}
@@ -330,51 +347,50 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-     
+      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-100 flex justify-around items-center p-3 z-20">
-<button
-        className="text-orange-500 flex flex-col items-center"
-        onClick={() => navigate("/home")}
-      >
-        <FaHome className="text-lg" />
-        <span className="text-xs mt-1">Home</span>
-      </button>
+        <button
+          className="text-orange-500 flex flex-col items-center"
+          onClick={() => navigate('/home')}
+        >
+          <FaHome className="text-lg" />
+          <span className="text-xs mt-1">Home</span>
+        </button>
 
-      <button
-        className="text-gray-500 flex flex-col items-center"
-        onClick={() => navigate("/notification-user")}
-      >
-        <FaBell className="text-lg" />
-        <span className="text-xs mt-1">Notifications</span>
-      </button>
+        <button
+          className="text-gray-500 flex flex-col items-center"
+          onClick={() => navigate('/notification-user')}
+        >
+          <FaBell className="text-lg" />
+          <span className="text-xs mt-1">Notifications</span>
+        </button>
 
-      <button
-        className="text-gray-500 flex flex-col items-center"
-        onClick={() => navigate("/cart")}
-      >
-        <FaShoppingCart className="text-lg" />
-        <span className="text-xs mt-1">Cart</span>
-      </button>
+        <button
+          className="text-gray-500 flex flex-col items-center"
+          onClick={() => navigate('/cart')}
+        >
+          <FaShoppingCart className="text-lg" />
+          <span className="text-xs mt-1">Cart</span>
+        </button>
 
-      <button
-        className="text-gray-500 flex flex-col items-center"
-        onClick={() => navigate("/wallet")}
-      >
-        <FaWallet className="text-lg" />
-        <span className="text-xs mt-1">Wallet</span>
-      </button>
+        <button
+          className="text-gray-500 flex flex-col items-center"
+          onClick={() => navigate('/wallet')}
+        >
+          <FaWallet className="text-lg" />
+          <span className="text-xs mt-1">Wallet</span>
+        </button>
 
-      <button
-        className="text-gray-500 flex flex-col items-center"
-        onClick={() => navigate("/profile")}
-      >
-        <FaUserAlt className="text-lg" />
-        <span className="text-xs mt-1">Profile</span>
-      </button>
-
+        <button
+          className="text-gray-500 flex flex-col items-center"
+          onClick={() => navigate('/profile')}
+        >
+          <FaUserAlt className="text-lg" />
+          <span className="text-xs mt-1">Profile</span>
+        </button>
       </div>
     </div>
   );
 };
 
-export default HomePage;  
+export default HomePage;
