@@ -171,7 +171,7 @@ const AnalyticsByOwnerId: React.FC = () => {
               Analytics Report
             </h2>
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="bg-orange-50 p-4 rounded-xl shadow-inner">
+              <div className="bg-orange-50 p-4 rounded-xl shadow-inner">  
                 <p className="text-gray-600 text-sm">Total Orders</p>
                 <p className="text-2xl font-bold text-orange-600">
                   {analyticsData.total_orders}

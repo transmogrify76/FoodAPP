@@ -25,8 +25,8 @@ const HomePage: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const handleLogout = () => {
-    localStorage.clear(); // Clear all stored data
-    navigate('/login');   // Redirect to login page
+    localStorage.clear(); 
+    navigate('/login');   
   };
 
 

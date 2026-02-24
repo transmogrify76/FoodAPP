@@ -14,7 +14,7 @@ const NotificationsPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [socket, setSocket] = useState<any>(null);
 
-  // Get user id
+  
   const getUserIdFromToken = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -32,7 +32,7 @@ const NotificationsPage: React.FC = () => {
       return;
     }
 
-    // Connect with userId in URL directly
+   
     const newSocket = io(`http://192.168.0.103:5020/notify.v1?userId=${userId}`, {
       transports: ["polling", "websocket"],
       withCredentials: true,
